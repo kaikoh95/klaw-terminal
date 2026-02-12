@@ -554,6 +554,136 @@ footer {
   }
 }
 
+/* Price Flash Animations */
+@keyframes flash-green {
+  0% {
+    background-color: rgba(34, 197, 94, 0.3);
+    transform: scale(1.02);
+  }
+  50% {
+    background-color: rgba(34, 197, 94, 0.15);
+  }
+  100% {
+    background-color: transparent;
+    transform: scale(1);
+  }
+}
+
+@keyframes flash-red {
+  0% {
+    background-color: rgba(239, 68, 68, 0.3);
+    transform: scale(1.02);
+  }
+  50% {
+    background-color: rgba(239, 68, 68, 0.15);
+  }
+  100% {
+    background-color: transparent;
+    transform: scale(1);
+  }
+}
+
+@keyframes price-up {
+  0%, 100% {
+    color: var(--green);
+  }
+  50% {
+    color: #4ade80;
+    text-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+  }
+}
+
+@keyframes price-down {
+  0%, 100% {
+    color: var(--red);
+  }
+  50% {
+    color: #f87171;
+    text-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+  }
+}
+
+.watchlist-item.flash-up {
+  animation: flash-green 800ms ease-out;
+}
+
+.watchlist-item.flash-down {
+  animation: flash-red 800ms ease-out;
+}
+
+.price.animate-up {
+  animation: price-up 600ms ease-in-out;
+}
+
+.price.animate-down {
+  animation: price-down 600ms ease-in-out;
+}
+
+/* Smooth transitions for all price elements */
+.watchlist-item {
+  transition: all 0.3s ease;
+}
+
+.price {
+  transition: color 0.3s ease;
+}
+
+.change {
+  transition: color 0.3s ease;
+}
+
+/* Volume pulse for high activity */
+@keyframes volume-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+.ticker-volume.high-volume {
+  animation: volume-pulse 1.5s ease-in-out infinite;
+  color: var(--yellow);
+  font-weight: 600;
+}
+
+/* Enhanced connection status with better visibility */
+.connection-status {
+  display: inline-block;
+  margin-left: 15px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.connection-status.connected {
+  background: var(--green-bg);
+  color: var(--green);
+  border: 1px solid var(--green);
+  animation: none;
+}
+
+.connection-status.disconnected {
+  background: rgba(234, 179, 8, 0.1);
+  color: var(--yellow);
+  border: 1px solid var(--yellow);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.connection-status.error {
+  background: var(--red-bg);
+  color: var(--red);
+  border: 1px solid var(--red);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   header h1 {

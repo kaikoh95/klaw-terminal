@@ -6,6 +6,9 @@ let reconnectAttempts = 0;
 const MAX_RECONNECT_ATTEMPTS = 5;
 const RECONNECT_DELAY = 3000;
 
+// Price tracking for animations
+const previousPrices = {};
+
 // Initialize WebSocket connection
 function initWebSocket() {
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -73,16 +76,36 @@ function handleMarketUpdate(marketData, timestamp) {
     const changeSymbol = data.change >= 0 ? '+' : '';
     const volumeIndicator = data.volumeRatio >= 1.5 ? ' 📊' : '';
     
+    // Determine if price increased or decreased for animation
+    let flashClass = '';
+    let priceAnimClass = '';
+    
+    if (previousPrices[ticker] !== undefined && previousPrices[ticker] !== data.price) {
+      if (data.price > previousPrices[ticker]) {
+        flashClass = 'flash-up';
+        priceAnimClass = 'animate-up';
+      } else {
+        flashClass = 'flash-down';
+        priceAnimClass = 'animate-down';
+      }
+    }
+    
+    // Store current price for next comparison
+    previousPrices[ticker] = data.price;
+    
+    // Add high-volume class if volume is elevated
+    const volumeClass = data.volumeRatio >= 1.5 ? 'high-volume' : '';
+    
     html += `
-      <div class="watchlist-item">
+      <div class="watchlist-item ${flashClass}" data-ticker="${ticker}">
         <div class="ticker-info">
           <h3>${ticker}</h3>
-          <div class="ticker-volume">
+          <div class="ticker-volume ${volumeClass}">
             Vol: ${formatVolume(data.volume)}${volumeIndicator}
           </div>
         </div>
         <div class="ticker-price ${changeClass}">
-          <div class="price">$${data.price.toFixed(2)}</div>
+          <div class="price ${priceAnimClass}">$${data.price.toFixed(2)}</div>
           <div class="change">${changeSymbol}${data.changePercent.toFixed(2)}%</div>
         </div>
       </div>
@@ -90,6 +113,18 @@ function handleMarketUpdate(marketData, timestamp) {
   }
   
   container.innerHTML = html;
+  
+  // Clean up animation classes after animation completes
+  setTimeout(() => {
+    const items = container.querySelectorAll('.watchlist-item');
+    items.forEach(item => {
+      item.classList.remove('flash-up', 'flash-down');
+      const priceEl = item.querySelector('.price');
+      if (priceEl) {
+        priceEl.classList.remove('animate-up', 'animate-down');
+      }
+    });
+  }, 1000);
   
   // Update timestamp
   const timestampEl = document.getElementById('lastUpdate');
@@ -218,15 +253,21 @@ async function loadWatchlist() {
       for (const [ticker, data] of Object.entries(marketData)) {
         if (!data) continue;
         
+        // Store initial prices (no animation on first load)
+        if (previousPrices[ticker] === undefined) {
+          previousPrices[ticker] = data.price;
+        }
+        
         const changeClass = data.change >= 0 ? 'positive' : 'negative';
         const changeSymbol = data.change >= 0 ? '+' : '';
         const volumeIndicator = data.volumeRatio >= 1.5 ? ' 📊' : '';
+        const volumeClass = data.volumeRatio >= 1.5 ? 'high-volume' : '';
         
         html += `
-          <div class="watchlist-item">
+          <div class="watchlist-item" data-ticker="${ticker}">
             <div class="ticker-info">
               <h3>${ticker}</h3>
-              <div class="ticker-volume">
+              <div class="ticker-volume ${volumeClass}">
                 Vol: ${formatVolume(data.volume)}${volumeIndicator}
               </div>
             </div>
