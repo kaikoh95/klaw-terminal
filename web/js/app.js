@@ -414,7 +414,306 @@ function formatVolume(volume) {
   return volume.toString();
 }
 
+// Chart instance
+let priceChart = null;
+
+// Load price chart for ticker
+async function loadChart(ticker) {
+  if (!ticker) return;
+  
+  try {
+    // Fetch market data and technicals for the selected ticker
+    const [marketRes, techRes] = await Promise.all([
+      fetch('/api/market-data'),
+      fetch('/api/technicals')
+    ]);
+    
+    const marketData = await marketRes.json();
+    const techData = await techRes.json();
+    
+    if (!marketData.success || !techData.success) {
+      console.error('Failed to load chart data');
+      return;
+    }
+    
+    const tickerMarketData = marketData.data[ticker];
+    const tickerTechData = techData.data[ticker];
+    
+    if (!tickerMarketData || !tickerTechData || !tickerMarketData.historicalData) {
+      console.error('No data available for', ticker);
+      return;
+    }
+    
+    // Prepare chart data
+    const historicalData = tickerMarketData.historicalData;
+    const dates = historicalData.map(d => new Date(d.date));
+    const closes = historicalData.map(d => d.close);
+    const highs = historicalData.map(d => d.high);
+    const lows = historicalData.map(d => d.low);
+    
+    // Calculate moving averages for display
+    const ma20 = historicalData.map((d, i) => {
+      if (i < 19) return null;
+      const slice = closes.slice(i - 19, i + 1);
+      return slice.reduce((a, b) => a + b, 0) / 20;
+    });
+    
+    const ma50 = historicalData.map((d, i) => {
+      if (i < 49) return null;
+      const slice = closes.slice(i - 49, i + 1);
+      return slice.reduce((a, b) => a + b, 0) / 50;
+    });
+    
+    // Bollinger Bands
+    const bbUpper = historicalData.map(d => tickerTechData.bollingerBands?.upper);
+    const bbLower = historicalData.map(d => tickerTechData.bollingerBands?.lower);
+    
+    // VWAP
+    const vwap = historicalData.map(d => tickerTechData.vwap);
+    
+    // Destroy existing chart if any
+    if (priceChart) {
+      priceChart.destroy();
+    }
+    
+    // Create new chart
+    const ctx = document.getElementById('priceChart').getContext('2d');
+    priceChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: dates,
+        datasets: [
+          {
+            label: 'Price',
+            data: closes,
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.1,
+            pointRadius: 0,
+            pointHoverRadius: 4,
+            order: 1
+          },
+          {
+            label: 'MA(20)',
+            data: ma20,
+            borderColor: '#22c55e',
+            borderWidth: 1.5,
+            borderDash: [5, 5],
+            fill: false,
+            tension: 0.1,
+            pointRadius: 0,
+            order: 2
+          },
+          {
+            label: 'MA(50)',
+            data: ma50,
+            borderColor: '#a855f7',
+            borderWidth: 1.5,
+            borderDash: [5, 5],
+            fill: false,
+            tension: 0.1,
+            pointRadius: 0,
+            order: 3
+          },
+          {
+            label: 'BB Upper',
+            data: Array(closes.length).fill(tickerTechData.bollingerBands?.upper),
+            borderColor: 'rgba(239, 68, 68, 0.5)',
+            borderWidth: 1,
+            borderDash: [2, 2],
+            fill: false,
+            pointRadius: 0,
+            order: 4
+          },
+          {
+            label: 'BB Lower',
+            data: Array(closes.length).fill(tickerTechData.bollingerBands?.lower),
+            borderColor: 'rgba(239, 68, 68, 0.5)',
+            borderWidth: 1,
+            borderDash: [2, 2],
+            fill: false,
+            pointRadius: 0,
+            order: 5
+          },
+          {
+            label: 'VWAP',
+            data: Array(closes.length).fill(tickerTechData.vwap),
+            borderColor: '#eab308',
+            borderWidth: 1.5,
+            fill: false,
+            pointRadius: 0,
+            order: 6
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            backgroundColor: 'rgba(26, 31, 58, 0.95)',
+            titleColor: '#e8eaf0',
+            bodyColor: '#9ca3af',
+            borderColor: '#2a3150',
+            borderWidth: 1,
+            padding: 12,
+            displayColors: true,
+            callbacks: {
+              title: function(context) {
+                const date = new Date(context[0].parsed.x);
+                return date.toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric'
+                });
+              },
+              label: function(context) {
+                let label = context.dataset.label || '';
+                if (label) {
+                  label += ': ';
+                }
+                if (context.parsed.y !== null) {
+                  label += '$' + context.parsed.y.toFixed(2);
+                }
+                return label;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            type: 'time',
+            time: {
+              unit: 'day',
+              displayFormats: {
+                day: 'MMM dd'
+              }
+            },
+            grid: {
+              color: 'rgba(42, 49, 80, 0.3)'
+            },
+            ticks: {
+              color: '#6b7280'
+            }
+          },
+          y: {
+            grid: {
+              color: 'rgba(42, 49, 80, 0.3)'
+            },
+            ticks: {
+              color: '#6b7280',
+              callback: function(value) {
+                return '$' + value.toFixed(2);
+              }
+            }
+          }
+        }
+      }
+    });
+    
+    // Update legend
+    updateChartLegend(ticker, tickerMarketData, tickerTechData);
+    
+  } catch (error) {
+    console.error('Failed to load chart:', error);
+  }
+}
+
+// Update chart legend with key metrics
+function updateChartLegend(ticker, marketData, techData) {
+  const legendEl = document.getElementById('chartLegend');
+  if (!legendEl) return;
+  
+  const currentPrice = marketData.price;
+  const ma20 = techData.movingAverages?.sma20;
+  const ma50 = techData.movingAverages?.sma50;
+  const vwap = techData.vwap;
+  const rsi = techData.rsi;
+  const bbUpper = techData.bollingerBands?.upper;
+  const bbLower = techData.bollingerBands?.lower;
+  
+  legendEl.innerHTML = `
+    <div class="legend-item">
+      <div class="legend-color" style="background: #3b82f6;"></div>
+      <span class="legend-label">Price:</span>
+      <span class="legend-value">$${currentPrice.toFixed(2)}</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background: #22c55e;"></div>
+      <span class="legend-label">MA(20):</span>
+      <span class="legend-value">$${ma20?.toFixed(2) || 'N/A'}</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background: #a855f7;"></div>
+      <span class="legend-label">MA(50):</span>
+      <span class="legend-value">$${ma50?.toFixed(2) || 'N/A'}</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background: #eab308;"></div>
+      <span class="legend-label">VWAP:</span>
+      <span class="legend-value">$${vwap?.toFixed(2) || 'N/A'}</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background: #ef4444;"></div>
+      <span class="legend-label">BB:</span>
+      <span class="legend-value">$${bbUpper?.toFixed(2) || 'N/A'} / $${bbLower?.toFixed(2) || 'N/A'}</span>
+    </div>
+    <div class="legend-item">
+      <span class="legend-label">RSI(14):</span>
+      <span class="legend-value ${rsi > 70 ? 'negative' : rsi < 30 ? 'positive' : ''}">${rsi?.toFixed(2) || 'N/A'}</span>
+    </div>
+    <div class="legend-item">
+      <span class="legend-label">Trend:</span>
+      <span class="legend-value">${techData.trend?.replace('_', ' ').toUpperCase() || 'N/A'}</span>
+    </div>
+  `;
+}
+
+// Populate chart ticker dropdown
+async function populateChartTickers() {
+  try {
+    const response = await fetch('/api/market-data');
+    const result = await response.json();
+    
+    if (result.success && result.data) {
+      const select = document.getElementById('chartTicker');
+      if (!select) return;
+      
+      // Clear existing options except the first placeholder
+      while (select.options.length > 1) {
+        select.remove(1);
+      }
+      
+      // Add ticker options
+      for (const ticker of Object.keys(result.data)) {
+        const option = document.createElement('option');
+        option.value = ticker;
+        option.textContent = ticker;
+        select.appendChild(option);
+      }
+      
+      // Auto-select first ticker
+      if (select.options.length > 1) {
+        select.selectedIndex = 1;
+        loadChart(select.options[1].value);
+      }
+    }
+  } catch (error) {
+    console.error('Failed to populate chart tickers:', error);
+  }
+}
+
 // Export functions for use in HTML
 window.loadDashboard = loadDashboard;
 window.refreshMarket = refreshMarket;
 window.updateTimestamp = updateTimestamp;
+window.loadChart = loadChart;

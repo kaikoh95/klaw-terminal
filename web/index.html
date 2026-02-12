@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Klaw Terminal 🐾 - Dashboard</title>
   <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 </head>
 <body>
   <div class="container">
@@ -37,6 +39,20 @@
           <div class="stat-label">Win Streak</div>
           <div class="stat-value" id="winStreak">--</div>
         </div>
+      </div>
+
+      <!-- Price Chart -->
+      <div class="card chart-card">
+        <h2>
+          Price Chart
+          <select id="chartTicker" onchange="loadChart(this.value)">
+            <option value="">Select ticker...</option>
+          </select>
+        </h2>
+        <div class="chart-container">
+          <canvas id="priceChart"></canvas>
+        </div>
+        <div id="chartLegend" class="chart-legend"></div>
       </div>
 
       <!-- Watchlist -->
@@ -78,12 +94,23 @@
     // Initial load (signals and performance still need HTTP)
     loadDashboard();
     
+    // Populate and load chart
+    populateChartTickers();
+    
     // Refresh signals and performance every 30 seconds (market data comes via WebSocket)
     setInterval(() => {
       loadPerformance();
       loadActiveSignals();
       loadRecentSignals();
     }, 30000);
+    
+    // Refresh chart every minute
+    setInterval(() => {
+      const select = document.getElementById('chartTicker');
+      if (select && select.value) {
+        loadChart(select.value);
+      }
+    }, 60000);
   </script>
 </body>
 </html>
