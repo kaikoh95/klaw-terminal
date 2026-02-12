@@ -72,13 +72,18 @@
 
   <script src="/js/app.js"></script>
   <script>
-    // Auto-refresh every 30 seconds
-    setInterval(() => {
-      loadDashboard();
-    }, 30000);
+    // Initialize WebSocket for real-time updates
+    initWebSocket();
 
-    // Initial load
+    // Initial load (signals and performance still need HTTP)
     loadDashboard();
+    
+    // Refresh signals and performance every 30 seconds (market data comes via WebSocket)
+    setInterval(() => {
+      loadPerformance();
+      loadActiveSignals();
+      loadRecentSignals();
+    }, 30000);
   </script>
 </body>
 </html>

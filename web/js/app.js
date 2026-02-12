@@ -1,5 +1,145 @@
 // Klaw Terminal - Frontend JavaScript
 
+// WebSocket connection for real-time updates
+let ws = null;
+let reconnectAttempts = 0;
+const MAX_RECONNECT_ATTEMPTS = 5;
+const RECONNECT_DELAY = 3000;
+
+// Initialize WebSocket connection
+function initWebSocket() {
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const wsUrl = `${protocol}//${window.location.host}`;
+  
+  try {
+    ws = new WebSocket(wsUrl);
+    
+    ws.onopen = () => {
+      console.log('WebSocket connected');
+      reconnectAttempts = 0;
+      updateConnectionStatus('connected');
+    };
+    
+    ws.onmessage = (event) => {
+      try {
+        const message = JSON.parse(event.data);
+        
+        if (message.type === 'market-update') {
+          handleMarketUpdate(message.data, message.timestamp);
+        }
+      } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
+      }
+    };
+    
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+      updateConnectionStatus('error');
+    };
+    
+    ws.onclose = () => {
+      console.log('WebSocket disconnected');
+      updateConnectionStatus('disconnected');
+      
+      // Attempt reconnection
+      if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+        reconnectAttempts++;
+        console.log(`Reconnecting... (attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`);
+        setTimeout(initWebSocket, RECONNECT_DELAY);
+      } else {
+        console.log('Max reconnection attempts reached. Falling back to polling.');
+        // Fall back to polling
+        setInterval(loadWatchlist, 30000);
+      }
+    };
+  } catch (error) {
+    console.error('Failed to initialize WebSocket:', error);
+    updateConnectionStatus('error');
+  }
+}
+
+// Handle real-time market data update
+function handleMarketUpdate(marketData, timestamp) {
+  // Update watchlist with new data
+  const container = document.getElementById('watchlist');
+  if (!container || !marketData) return;
+  
+  let html = '';
+  
+  for (const [ticker, data] of Object.entries(marketData)) {
+    if (!data) continue;
+    
+    const changeClass = data.change >= 0 ? 'positive' : 'negative';
+    const changeSymbol = data.change >= 0 ? '+' : '';
+    const volumeIndicator = data.volumeRatio >= 1.5 ? ' 📊' : '';
+    
+    html += `
+      <div class="watchlist-item">
+        <div class="ticker-info">
+          <h3>${ticker}</h3>
+          <div class="ticker-volume">
+            Vol: ${formatVolume(data.volume)}${volumeIndicator}
+          </div>
+        </div>
+        <div class="ticker-price ${changeClass}">
+          <div class="price">$${data.price.toFixed(2)}</div>
+          <div class="change">${changeSymbol}${data.changePercent.toFixed(2)}%</div>
+        </div>
+      </div>
+    `;
+  }
+  
+  container.innerHTML = html;
+  
+  // Update timestamp
+  const timestampEl = document.getElementById('lastUpdate');
+  if (timestampEl) {
+    const date = new Date(timestamp);
+    timestampEl.textContent = date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  }
+}
+
+// Update connection status indicator
+function updateConnectionStatus(status) {
+  let statusIndicator = document.getElementById('connectionStatus');
+  
+  // Create status indicator if it doesn't exist
+  if (!statusIndicator) {
+    const header = document.querySelector('header h1');
+    if (header) {
+      statusIndicator = document.createElement('span');
+      statusIndicator.id = 'connectionStatus';
+      statusIndicator.className = 'connection-status';
+      header.appendChild(statusIndicator);
+    } else {
+      return;
+    }
+  }
+  
+  statusIndicator.className = `connection-status ${status}`;
+  
+  switch (status) {
+    case 'connected':
+      statusIndicator.textContent = '🟢 LIVE';
+      statusIndicator.title = 'Real-time updates active';
+      break;
+    case 'disconnected':
+      statusIndicator.textContent = '🟡 RECONNECTING';
+      statusIndicator.title = 'Attempting to reconnect...';
+      break;
+    case 'error':
+      statusIndicator.textContent = '🔴 OFFLINE';
+      statusIndicator.title = 'Connection error';
+      break;
+  }
+}
+
 // Update timestamp display
 function updateTimestamp() {
   const now = new Date();
