@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Klaw Terminal 🐾 - Market Heatmap</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .heatmap-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+    
+    .heatmap-tile {
+      border-radius: 8px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      min-height: 140px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    
+    .heatmap-tile:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    }
+    
+    .heatmap-tile::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      opacity: 0.1;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+      pointer-events: none;
+    }
+    
+    .heatmap-tile.extreme-bullish {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+    }
+    
+    .heatmap-tile.strong-bullish {
+      background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+      color: white;
+    }
+    
+    .heatmap-tile.bullish {
+      background: linear-gradient(135deg, #6ee7b7 0%, #34d399 100%);
+      color: #064e3b;
+    }
+    
+    .heatmap-tile.neutral {
+      background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+      color: white;
+    }
+    
+    .heatmap-tile.bearish {
+      background: linear-gradient(135deg, #fca5a5 0%, #f87171 100%);
+      color: #7f1d1d;
+    }
+    
+    .heatmap-tile.strong-bearish {
+      background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+      color: white;
+    }
+    
+    .heatmap-tile.extreme-bearish {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: white;
+    }
+    
+    .heatmap-ticker {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    
+    .heatmap-change {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    }
+    
+    .heatmap-price {
+      font-size: 16px;
+      opacity: 0.9;
+      margin-bottom: 8px;
+    }
+    
+    .heatmap-indicators {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 11px;
+      margin-top: auto;
+    }
+    
+    .heatmap-badge {
+      background: rgba(255,255,255,0.2);
+      padding: 3px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      backdrop-filter: blur(4px);
+    }
+    
+    .heatmap-controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    
+    .heatmap-controls label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #9ca3af;
+      font-size: 14px;
+    }
+    
+    .heatmap-controls select {
+      background: #1a1f3a;
+      color: #e8eaf0;
+      border: 1px solid #2a3150;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    
+    .heatmap-legend {
+      display: flex;
+      gap: 16px;
+      padding: 16px;
+      background: rgba(26, 31, 58, 0.5);
+      border-radius: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+    
+    .legend-color {
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+    }
+    
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(13, 17, 35, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      backdrop-filter: blur(4px);
+    }
+    
+    .loading-overlay.hidden {
+      display: none;
+    }
+    
+    .loading-spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid rgba(255,255,255,0.1);
+      border-top-color: #3b82f6;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🐾 KLAW TERMINAL</h1>
+      <p class="subtitle">AI-Powered Trading Intelligence</p>
+      <nav>
+        <a href="/">Dashboard</a>
+        <a href="/signals.html">Signals</a>
+        <a href="/analysis.html">Analysis</a>
+        <a href="/heatmap.html" class="active">Heatmap</a>
+      </nav>
+    </header>
+
+    <div class="card">
+      <h2>Market Heatmap <button class="btn-small" onclick="loadHeatmap()">↻ Refresh</button></h2>
+      
+      <div class="heatmap-legend">
+        <div class="legend-item">
+          <div class="legend-color" style="background: linear-gradient(135deg, #10b981, #059669);"></div>
+          <span>Extreme Bullish (>+5%)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background: linear-gradient(135deg, #34d399, #10b981);"></div>
+          <span>Strong Bullish (+3% to +5%)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background: linear-gradient(135deg, #6ee7b7, #34d399);"></div>
+          <span>Bullish (+1% to +3%)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background: linear-gradient(135deg, #6b7280, #4b5563);"></div>
+          <span>Neutral (-1% to +1%)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background: linear-gradient(135deg, #fca5a5, #f87171);"></div>
+          <span>Bearish (-3% to -1%)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background: linear-gradient(135deg, #f87171, #ef4444);"></div>
+          <span>Strong Bearish (-5% to -3%)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background: linear-gradient(135deg, #ef4444, #dc2626);"></div>
+          <span>Extreme Bearish (<-5%)</span>
+        </div>
+      </div>
+      
+      <div class="heatmap-controls">
+        <label>
+          Sort by:
+          <select id="sortBy" onchange="loadHeatmap()">
+            <option value="change">Performance</option>
+            <option value="volume">Volume</option>
+            <option value="rsi">RSI</option>
+            <option value="ticker">Ticker (A-Z)</option>
+          </select>
+        </label>
+        <label>
+          <input type="checkbox" id="showRSI" checked onchange="loadHeatmap()">
+          Show RSI
+        </label>
+        <label>
+          <input type="checkbox" id="showVolume" checked onchange="loadHeatmap()">
+          Show Volume
+        </label>
+        <label>
+          <input type="checkbox" id="showTrend" checked onchange="loadHeatmap()">
+          Show Trend
+        </label>
+      </div>
+      
+      <div id="heatmapContainer" class="heatmap-container">
+        <div class="loading">Loading heatmap...</div>
+      </div>
+    </div>
+
+    <footer>
+      <p>Last updated: <span id="lastUpdate">--</span></p>
+      <p>🐾 Maine Klaw Terminal v1.0</p>
+    </footer>
+  </div>
+
+  <div id="loadingOverlay" class="loading-overlay hidden">
+    <div class="loading-spinner"></div>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    async function loadHeatmap() {
+      const container = document.getElementById('heatmapContainer');
+      const sortBy = document.getElementById('sortBy').value;
+      const showRSI = document.getElementById('showRSI').checked;
+      const showVolume = document.getElementById('showVolume').checked;
+      const showTrend = document.getElementById('showTrend').checked;
+      
+      try {
+        // Show loading overlay
+        document.getElementById('loadingOverlay').classList.remove('hidden');
+        
+        // Fetch market data and technicals
+        const [marketRes, techRes] = await Promise.all([
+          fetch('/api/market-data'),
+          fetch('/api/technicals')
+        ]);
+        
+        const marketData = await marketRes.json();
+        const techData = await techRes.json();
+        
+        if (!marketData.success || !techData.success) {
+          container.innerHTML = '<div class="empty-state">Failed to load heatmap data</div>';
+          return;
+        }
+        
+        // Combine data
+        const combined = [];
+        
+        for (const [ticker, market] of Object.entries(marketData.data)) {
+          const tech = techData.data[ticker];
+          if (!market || !tech) continue;
+          
+          combined.push({
+            ticker,
+            price: market.price,
+            change: market.change,
+            changePercent: market.changePercent,
+            volume: market.volume,
+            volumeRatio: market.volumeRatio,
+            rsi: tech.rsi,
+            trend: tech.trend,
+            macd: tech.macd
+          });
+        }
+        
+        // Sort data
+        if (sortBy === 'change') {
+          combined.sort((a, b) => b.changePercent - a.changePercent);
+        } else if (sortBy === 'volume') {
+          combined.sort((a, b) => b.volumeRatio - a.volumeRatio);
+        } else if (sortBy === 'rsi') {
+          combined.sort((a, b) => (b.rsi || 50) - (a.rsi || 50));
+        } else if (sortBy === 'ticker') {
+          combined.sort((a, b) => a.ticker.localeCompare(b.ticker));
+        }
+        
+        // Generate HTML
+        let html = '';
+        
+        for (const item of combined) {
+          const tileClass = getHeatmapClass(item.changePercent);
+          const changeSymbol = item.changePercent >= 0 ? '+' : '';
+          
+          // Build indicator badges
+          const badges = [];
+          
+          if (showRSI && item.rsi !== null) {
+            const rsiClass = item.rsi > 70 ? '🔴' : item.rsi < 30 ? '🟢' : '⚪';
+            badges.push(`<span class="heatmap-badge">${rsiClass} RSI ${item.rsi.toFixed(0)}</span>`);
+          }
+          
+          if (showVolume) {
+            const volIcon = item.volumeRatio >= 2 ? '📊' : '📉';
+            badges.push(`<span class="heatmap-badge">${volIcon} ${item.volumeRatio.toFixed(1)}x</span>`);
+          }
+          
+          if (showTrend && item.trend) {
+            const trendIcon = item.trend.includes('uptrend') ? '📈' : 
+                            item.trend.includes('downtrend') ? '📉' : '➡️';
+            badges.push(`<span class="heatmap-badge">${trendIcon}</span>`);
+          }
+          
+          html += `
+            <div class="heatmap-tile ${tileClass}" onclick="window.open('/','_self')">
+              <div>
+                <div class="heatmap-ticker">${item.ticker}</div>
+                <div class="heatmap-change">${changeSymbol}${item.changePercent.toFixed(2)}%</div>
+                <div class="heatmap-price">$${item.price.toFixed(2)}</div>
+              </div>
+              <div class="heatmap-indicators">
+                ${badges.join('')}
+              </div>
+            </div>
+          `;
+        }
+        
+        container.innerHTML = html;
+        
+        // Update timestamp
+        const now = new Date();
+        document.getElementById('lastUpdate').textContent = now.toLocaleString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+        
+      } catch (error) {
+        console.error('Failed to load heatmap:', error);
+        container.innerHTML = '<div class="empty-state">Failed to load heatmap</div>';
+      } finally {
+        // Hide loading overlay
+        document.getElementById('loadingOverlay').classList.add('hidden');
+      }
+    }
+    
+    function getHeatmapClass(changePercent) {
+      if (changePercent >= 5) return 'extreme-bullish';
+      if (changePercent >= 3) return 'strong-bullish';
+      if (changePercent >= 1) return 'bullish';
+      if (changePercent >= -1) return 'neutral';
+      if (changePercent >= -3) return 'bearish';
+      if (changePercent >= -5) return 'strong-bearish';
+      return 'extreme-bearish';
+    }
+    
+    // Initial load
+    loadHeatmap();
+    
+    // Auto-refresh every 10 seconds
+    setInterval(loadHeatmap, 10000);
+  </script>
+</body>
+</html>

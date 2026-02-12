@@ -12,6 +12,7 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
 - **Signal Tracking** - Complete trade history with P&L tracking
 - **Performance Analytics** - Hit rate, win streaks, profit factor, expectancy
 - **Web Dashboard** - Clean, dark-themed trading terminal interface
+- **Market Heatmap** - Visual color-coded grid showing relative strength across all tickers
 
 ## Supported Tickers
 
@@ -64,6 +65,7 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
 - **Dashboard** (`/`) - Watchlist, active signals, performance stats
 - **Signals** (`/signals.html`) - Complete signal history with filtering
 - **Analysis** (`/analysis.html`) - Detailed technical analysis for all tickers
+- **Heatmap** (`/heatmap.html`) - Visual market heatmap with color-coded performance
 
 ## Project Structure
 
