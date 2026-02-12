@@ -1,0 +1,20 @@
+{
+  "name": "klaw-terminal",
+  "version": "1.0.0",
+  "description": "AI-powered trading terminal by Maine Klaw 🐾",
+  "main": "bin/server.js",
+  "type": "module",
+  "scripts": {
+    "scan": "node bin/scan.js",
+    "analyze": "node bin/analyze.js",
+    "start": "node bin/server.js",
+    "dev": "node --watch bin/server.js"
+  },
+  "keywords": ["trading", "AI", "technical-analysis", "gemini"],
+  "author": "Maine Klaw",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cheerio": "^1.0.0-rc.12"
+  }
+}

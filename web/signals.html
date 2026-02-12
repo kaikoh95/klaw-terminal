@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Klaw Terminal 🐾 - Signals</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🐾 KLAW TERMINAL</h1>
+      <p class="subtitle">AI-Powered Trading Intelligence</p>
+      <nav>
+        <a href="/">Dashboard</a>
+        <a href="/signals.html" class="active">Signals</a>
+        <a href="/analysis.html">Analysis</a>
+      </nav>
+    </header>
+
+    <div class="filters">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="OPEN">Open</button>
+      <button class="filter-btn" data-filter="CLOSED">Closed</button>
+      <button class="filter-btn" data-filter="LONG">Long</button>
+      <button class="filter-btn" data-filter="SHORT">Short</button>
+    </div>
+
+    <div class="card">
+      <h2>Signal History</h2>
+      <div id="signalsTable" class="signals-table">
+        <div class="loading">Loading signals...</div>
+      </div>
+    </div>
+
+    <footer>
+      <p>Last updated: <span id="lastUpdate">--</span></p>
+      <p>🐾 Maine Klaw Terminal v1.0</p>
+    </footer>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    let allSignals = [];
+    let currentFilter = 'all';
+
+    // Filter buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        renderSignalsTable();
+      });
+    });
+
+    async function loadSignals() {
+      try {
+        const response = await fetch('/api/signals/recent?count=100');
+        const result = await response.json();
+        
+        if (result.success) {
+          allSignals = result.data;
+          renderSignalsTable();
+          updateTimestamp();
+        }
+      } catch (error) {
+        console.error('Failed to load signals:', error);
+      }
+    }
+
+    function renderSignalsTable() {
+      const container = document.getElementById('signalsTable');
+      
+      let filtered = allSignals;
+      if (currentFilter !== 'all') {
+        filtered = allSignals.filter(s => 
+          s.status === currentFilter || s.direction === currentFilter
+        );
+      }
+      
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="empty-state">No signals found</div>';
+        return;
+      }
+      
+      let html = `
+        <table>
+          <thead>
+            <tr>
+              <th>Ticker</th>
+              <th>Direction</th>
+              <th>Entry</th>
+              <th>Targets</th>
+              <th>Stop Loss</th>
+              <th>Confidence</th>
+              <th>Status</th>
+              <th>P&L</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+      
+      filtered.forEach(signal => {
+        const directionClass = signal.direction === 'LONG' ? 'long' : 'short';
+        const statusClass = signal.status === 'OPEN' ? 'open' : 'closed';
+        const pnlClass = signal.pnlPercent > 0 ? 'positive' : signal.pnlPercent < 0 ? 'negative' : '';
+        const pnlText = signal.pnlPercent !== null ? 
+          `${signal.pnlPercent > 0 ? '+' : ''}${signal.pnlPercent.toFixed(2)}%` : 
+          '--';
+        
+        html += `
+          <tr>
+            <td><strong>${signal.ticker}</strong></td>
+            <td><span class="badge ${directionClass}">${signal.direction}</span></td>
+            <td>$${signal.entry.toFixed(2)}</td>
+            <td class="targets">
+              T1: $${signal.targets.t1.toFixed(2)}<br>
+              T2: $${signal.targets.t2.toFixed(2)}<br>
+              T3: $${signal.targets.t3.toFixed(2)}
+            </td>
+            <td>$${signal.stopLoss.toFixed(2)}</td>
+            <td>
+              <div class="confidence-bar">
+                <div class="confidence-fill" style="width: ${signal.confidence * 10}%"></div>
+                <span>${signal.confidence}/10</span>
+              </div>
+            </td>
+            <td><span class="badge ${statusClass}">${signal.status}</span></td>
+            <td class="${pnlClass}"><strong>${pnlText}</strong></td>
+          </tr>
+          <tr class="signal-details">
+            <td colspan="8">
+              <div class="details-content">
+                <strong>Pattern:</strong> ${signal.pattern} | 
+                <strong>Timeframe:</strong> ${signal.timeframe} | 
+                <strong>R/R:</strong> 1:${signal.riskReward.toFixed(2)}<br>
+                <strong>Reasoning:</strong> ${signal.reasoning}
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+      
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    // Initial load
+    loadSignals();
+    
+    // Auto-refresh every 30 seconds
+    setInterval(loadSignals, 30000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Klaw Terminal 🐾 - Dashboard</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🐾 KLAW TERMINAL</h1>
+      <p class="subtitle">AI-Powered Trading Intelligence</p>
+      <nav>
+        <a href="/" class="active">Dashboard</a>
+        <a href="/signals.html">Signals</a>
+        <a href="/analysis.html">Analysis</a>
+      </nav>
+    </header>
+
+    <div class="grid">
+      <!-- Performance Stats -->
+      <div class="card stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Hit Rate</div>
+          <div class="stat-value" id="hitRate">--</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Return</div>
+          <div class="stat-value" id="totalReturn">--</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Avg Return</div>
+          <div class="stat-value" id="avgReturn">--</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Win Streak</div>
+          <div class="stat-value" id="winStreak">--</div>
+        </div>
+      </div>
+
+      <!-- Watchlist -->
+      <div class="card">
+        <h2>Watchlist <button class="btn-small" onclick="refreshMarket()">↻ Refresh</button></h2>
+        <div id="watchlist" class="watchlist">
+          <div class="loading">Loading market data...</div>
+        </div>
+      </div>
+
+      <!-- Active Signals -->
+      <div class="card">
+        <h2>Active Signals <span class="badge" id="activeCount">0</span></h2>
+        <div id="activeSignals" class="signals-list">
+          <div class="empty-state">No active signals</div>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="card">
+        <h2>Recent Signals</h2>
+        <div id="recentSignals" class="signals-list">
+          <div class="loading">Loading...</div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p>Last updated: <span id="lastUpdate">--</span></p>
+      <p>🐾 Maine Klaw Terminal v1.0</p>
+    </footer>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    // Auto-refresh every 30 seconds
+    setInterval(() => {
+      loadDashboard();
+    }, 30000);
+
+    // Initial load
+    loadDashboard();
+  </script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "totalTrades": 0,
+  "wins": 0,
+  "losses": 0,
+  "hitRate": 0,
+  "avgReturn": 0,
+  "totalReturn": 0,
+  "bestTrade": null,
+  "worstTrade": null,
+  "winStreak": 0,
+  "lossStreak": 0,
+  "currentStreak": 0,
+  "timestamp": 0
+}
