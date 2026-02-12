@@ -22,6 +22,39 @@
     </header>
 
     <div class="grid">
+      <!-- Market Sentiment -->
+      <div class="card sentiment-card">
+        <h2>🎯 Market Sentiment</h2>
+        <div class="sentiment-display">
+          <div class="sentiment-gauge">
+            <div id="sentimentEmoji" class="sentiment-emoji">😐</div>
+            <div id="sentimentScore" class="sentiment-score">0</div>
+            <div id="sentimentLabel" class="sentiment-label">NEUTRAL</div>
+          </div>
+          <div class="sentiment-breakdown">
+            <div class="sentiment-stat">
+              <span class="sentiment-stat-label">Confidence</span>
+              <span id="sentimentConfidence" class="sentiment-stat-value">--</span>
+            </div>
+            <div id="sentimentSummary" class="sentiment-summary">Loading sentiment data...</div>
+            <div id="sentimentBreakdown" class="sentiment-tickers">
+              <div class="ticker-group">
+                <span class="ticker-label">🟢 Bullish:</span>
+                <span id="bullishTickers">--</span>
+              </div>
+              <div class="ticker-group">
+                <span class="ticker-label">🔴 Bearish:</span>
+                <span id="bearishTickers">--</span>
+              </div>
+              <div class="ticker-group">
+                <span class="ticker-label">⚪ Neutral:</span>
+                <span id="neutralTickers">--</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Performance Stats -->
       <div class="card stats-grid">
         <div class="stat-card">

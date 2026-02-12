@@ -2,6 +2,7 @@
 // Market Scanner CLI
 import { fetchAllTickers, TICKERS } from '../lib/market-data.js';
 import { analyzeMarketData } from '../lib/technicals.js';
+import { calculateMarketSentiment, getSentimentColor } from '../lib/sentiment.js';
 
 console.log('🐾 Klaw Terminal - Market Scanner\n');
 console.log('═══════════════════════════════════════');
@@ -93,6 +94,29 @@ for (const [ticker, data] of Object.entries(marketData)) {
   console.log('');
 }
 
+console.log('═══════════════════════════════════════');
+console.log('MARKET SENTIMENT');
+console.log('═══════════════════════════════════════\n');
+
+// Calculate overall market sentiment
+const sentiment = calculateMarketSentiment(technicals);
+
+console.log(`${sentiment.emoji} Overall: ${sentiment.sentiment} (${sentiment.score > 0 ? '+' : ''}${sentiment.score}/100)`);
+console.log(`   Confidence: ${sentiment.confidence}%`);
+console.log(`   ${sentiment.summary}`);
+
+if (sentiment.breakdown.bullish.length > 0) {
+  console.log(`\n   🟢 Bullish: ${sentiment.breakdown.bullish.map(t => t.ticker).join(', ')}`);
+}
+if (sentiment.breakdown.bearish.length > 0) {
+  console.log(`   🔴 Bearish: ${sentiment.breakdown.bearish.map(t => t.ticker).join(', ')}`);
+}
+if (sentiment.breakdown.neutral.length > 0) {
+  console.log(`   ⚪ Neutral: ${sentiment.breakdown.neutral.map(t => t.ticker).join(', ')}`);
+}
+
+console.log('');
+
 // Save results to temp file for analysis step
 import { writeFileSync } from 'fs';
 import { join, dirname } from 'path';
@@ -104,6 +128,7 @@ const dataDir = join(__dirname, '..', 'data');
 writeFileSync(join(dataDir, 'latest-scan.json'), JSON.stringify({
   marketData,
   technicals,
+  sentiment,
   timestamp: Date.now()
 }, null, 2));
 

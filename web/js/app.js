@@ -195,6 +195,7 @@ function updateTimestamp() {
 // Load dashboard data
 async function loadDashboard() {
   await Promise.all([
+    loadSentiment(),
     loadPerformance(),
     loadWatchlist(),
     loadActiveSignals(),
@@ -234,6 +235,50 @@ async function loadPerformance() {
     }
   } catch (error) {
     console.error('Failed to load performance:', error);
+  }
+}
+
+// Load market sentiment
+async function loadSentiment() {
+  try {
+    const response = await fetch('/api/latest-scan');
+    const result = await response.json();
+    
+    if (result.success && result.data.sentiment) {
+      const sentiment = result.data.sentiment;
+      
+      // Update sentiment display
+      document.getElementById('sentimentEmoji').textContent = sentiment.emoji;
+      document.getElementById('sentimentScore').textContent = sentiment.score > 0 ? `+${sentiment.score}` : sentiment.score;
+      document.getElementById('sentimentLabel').textContent = sentiment.sentiment;
+      document.getElementById('sentimentConfidence').textContent = `${sentiment.confidence}%`;
+      document.getElementById('sentimentSummary').textContent = sentiment.summary;
+      
+      // Color code the score
+      const scoreEl = document.getElementById('sentimentScore');
+      let color = '#fbbf24'; // Yellow/neutral
+      
+      if (sentiment.score >= 60) color = '#00ff88';
+      else if (sentiment.score >= 30) color = '#4ade80';
+      else if (sentiment.score >= 10) color = '#86efac';
+      else if (sentiment.score <= -60) color = '#ff4444';
+      else if (sentiment.score <= -30) color = '#ef4444';
+      else if (sentiment.score <= -10) color = '#fca5a5';
+      
+      scoreEl.style.color = color;
+      
+      // Update ticker breakdown
+      const bullishTickers = sentiment.breakdown.bullish.map(t => t.ticker).join(', ') || 'None';
+      const bearishTickers = sentiment.breakdown.bearish.map(t => t.ticker).join(', ') || 'None';
+      const neutralTickers = sentiment.breakdown.neutral.map(t => t.ticker).join(', ') || 'None';
+      
+      document.getElementById('bullishTickers').textContent = bullishTickers;
+      document.getElementById('bearishTickers').textContent = bearishTickers;
+      document.getElementById('neutralTickers').textContent = neutralTickers;
+    }
+  } catch (error) {
+    console.error('Failed to load sentiment:', error);
+    document.getElementById('sentimentSummary').textContent = 'Failed to load sentiment data. Run a market scan first.';
   }
 }
 
