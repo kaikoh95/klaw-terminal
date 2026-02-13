@@ -236,6 +236,7 @@ klaw-terminal/
 - **Stochastic** - Stochastic Oscillator
 - **Fibonacci** - Retracement and extension levels
 - **Candlestick Patterns** - 12+ pattern recognition
+- **Parabolic SAR** - Stop and Reverse indicator for trend following with dynamic trailing stops
 - **Ichimoku Cloud** - Japanese trend system with Tenkan/Kijun lines, cloud (Kumo), and TK cross signals
 
 ## Signal Generation
