@@ -91,6 +91,12 @@ for (const [ticker, data] of Object.entries(marketData)) {
     console.log(`  📊 Volume: ${analysis.volume.ratio.toFixed(2)}x (${analysis.volume.level.toUpperCase()})`);
   }
   
+  if (analysis.candlestickPatterns && analysis.candlestickPatterns.primary) {
+    const pattern = analysis.candlestickPatterns.primary;
+    const signalIcon = pattern.signal === 'bullish' ? '🟢' : pattern.signal === 'bearish' ? '🔴' : '⚪';
+    console.log(`  🕯️  Candlestick: ${signalIcon} ${pattern.pattern} (${pattern.strength.toUpperCase().replace('_', ' ')})`);
+  }
+  
   console.log('');
 }
 
