@@ -50,6 +50,10 @@ import {
   batchFetchNews,
   getNewsSummary
 } from '../lib/news.js';
+import {
+  analyzeOptionsChain,
+  batchAnalyzeOptions
+} from '../lib/options.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -660,6 +664,88 @@ app.post('/api/news/refresh', async (req, res) => {
     res.json({ success: true, data });
   } catch (error) {
     console.error('Error fetching news:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Options Chain Analysis Endpoints
+
+// Get options analysis for a specific ticker
+app.get('/api/options/:ticker', async (req, res) => {
+  try {
+    const ticker = req.params.ticker.toUpperCase();
+    
+    // Need current price
+    const marketData = await fetchAllTickers();
+    const tickerData = marketData[ticker];
+    
+    if (!tickerData || !tickerData.price) {
+      return res.status(404).json({ 
+        success: false, 
+        error: `No market data for ${ticker}` 
+      });
+    }
+    
+    const analysis = await analyzeOptionsChain(ticker, tickerData.price);
+    res.json({ success: true, data: analysis });
+  } catch (error) {
+    console.error(`Options analysis error for ${req.params.ticker}:`, error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Batch analyze options for all watchlist tickers
+app.post('/api/options/refresh', async (req, res) => {
+  try {
+    const tickers = req.body.tickers || ['SPY', 'QQQ', 'ONDS', 'USAR', 'RDDT', 'UUUU'];
+    
+    console.log(`Analyzing options for: ${tickers.join(', ')}`);
+    
+    // Get current prices
+    const marketData = await fetchAllTickers();
+    const priceMap = {};
+    
+    for (const ticker of tickers) {
+      if (marketData[ticker] && marketData[ticker].price) {
+        priceMap[ticker] = marketData[ticker].price;
+      }
+    }
+    
+    const optionsData = await batchAnalyzeOptions(Object.keys(priceMap), priceMap);
+    
+    // Save to file
+    const outputPath = join(__dirname, '..', 'data', 'options.json');
+    const data = {
+      timestamp: Date.now(),
+      tickers: optionsData
+    };
+    
+    writeFileSync(outputPath, JSON.stringify(data, null, 2));
+    
+    console.log(`✅ Options data analyzed and saved`);
+    
+    res.json({ success: true, data });
+  } catch (error) {
+    console.error('Error analyzing options:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get cached options data
+app.get('/api/options', (req, res) => {
+  try {
+    const optionsFile = join(__dirname, '..', 'data', 'options.json');
+    
+    if (!existsSync(optionsFile)) {
+      return res.json({ 
+        success: false, 
+        error: 'No options data available. Use POST /api/options/refresh to fetch.' 
+      });
+    }
+    
+    const data = JSON.parse(readFileSync(optionsFile, 'utf8'));
+    res.json({ success: true, data });
+  } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });

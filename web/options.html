@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Options Chain Analysis - Klaw Terminal</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .options-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+    
+    .ticker-options {
+      background: var(--card-bg);
+      border-radius: 8px;
+      padding: 20px;
+      border: 1px solid var(--border-color);
+    }
+    
+    .ticker-options h2 {
+      margin: 0 0 15px 0;
+      font-size: 1.5rem;
+      color: var(--text-primary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .expiry-info {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 15px;
+      padding: 8px;
+      background: var(--bg-dark);
+      border-radius: 4px;
+    }
+    
+    .max-pain-section {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: var(--bg-dark);
+      border-radius: 6px;
+      border-left: 4px solid var(--blue);
+    }
+    
+    .max-pain-section h3 {
+      margin: 0 0 10px 0;
+      font-size: 1rem;
+      color: var(--blue);
+    }
+    
+    .max-pain-value {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: var(--text-primary);
+      margin: 5px 0;
+    }
+    
+    .distance-indicator {
+      font-size: 0.9rem;
+      margin-top: 5px;
+    }
+    
+    .pc-ratios {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .pc-card {
+      padding: 12px;
+      background: var(--bg-dark);
+      border-radius: 6px;
+      text-align: center;
+    }
+    
+    .pc-card h4 {
+      margin: 0 0 8px 0;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+    }
+    
+    .pc-ratio-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    .pc-sentiment {
+      font-size: 0.8rem;
+      padding: 4px 8px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    
+    .sentiment-badge {
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      display: inline-block;
+      margin-bottom: 10px;
+    }
+    
+    .gamma-walls {
+      margin-bottom: 20px;
+    }
+    
+    .gamma-walls h3 {
+      margin: 0 0 12px 0;
+      font-size: 1rem;
+      color: var(--text-primary);
+    }
+    
+    .gamma-wall-item {
+      padding: 10px;
+      background: var(--bg-dark);
+      border-radius: 4px;
+      margin-bottom: 8px;
+      border-left: 3px solid var(--gray);
+    }
+    
+    .gamma-wall-item.resistance {
+      border-left-color: var(--red);
+    }
+    
+    .gamma-wall-item.support {
+      border-left-color: var(--green);
+    }
+    
+    .gamma-wall-item.pinning {
+      border-left-color: var(--yellow);
+    }
+    
+    .wall-strike {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--text-primary);
+    }
+    
+    .wall-details {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+    
+    .unusual-activity {
+      margin-bottom: 20px;
+    }
+    
+    .unusual-item {
+      padding: 10px;
+      background: var(--bg-dark);
+      border-radius: 4px;
+      margin-bottom: 8px;
+      border-left: 3px solid var(--yellow);
+    }
+    
+    .unusual-item.call {
+      border-left-color: var(--green);
+    }
+    
+    .unusual-item.put {
+      border-left-color: var(--red);
+    }
+    
+    .key-levels {
+      margin-top: 20px;
+      padding: 15px;
+      background: var(--bg-dark);
+      border-radius: 6px;
+    }
+    
+    .key-levels h3 {
+      margin: 0 0 12px 0;
+      font-size: 1rem;
+    }
+    
+    .level-item {
+      padding: 8px;
+      margin-bottom: 6px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.03);
+    }
+    
+    .refresh-section {
+      padding: 20px;
+      text-align: center;
+    }
+    
+    .refresh-btn {
+      padding: 12px 24px;
+      font-size: 1rem;
+      background: var(--blue);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .refresh-btn:hover {
+      background: var(--blue-dark);
+      transform: translateY(-1px);
+    }
+    
+    .refresh-btn:disabled {
+      background: var(--gray);
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-secondary);
+    }
+    
+    .error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--red);
+      padding: 15px;
+      border-radius: 6px;
+      color: var(--red);
+      margin: 20px;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand">🐾 Klaw Terminal</div>
+    <div class="nav-links">
+      <a href="/">Dashboard</a>
+      <a href="/signals.html">Signals</a>
+      <a href="/analysis.html">Analysis</a>
+      <a href="/screener.html">Screener</a>
+      <a href="/heatmap.html">Heatmap</a>
+      <a href="/performance.html">Performance</a>
+      <a href="/risk.html">Risk</a>
+      <a href="/alerts.html">Alerts</a>
+      <a href="/options.html" class="active">Options</a>
+      <a href="/sentiment.html">Sentiment</a>
+      <a href="/news.html">News</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header">
+      <h1>⚡ Options Chain Analysis</h1>
+      <p class="subtitle">Max Pain, P/C Ratios, Gamma Walls, Unusual Activity</p>
+    </div>
+
+    <div class="refresh-section">
+      <button class="refresh-btn" onclick="refreshOptions()">🔄 Refresh Options Data</button>
+      <p class="last-update" id="lastUpdate">Loading...</p>
+    </div>
+
+    <div id="loading" class="loading">
+      <p>Loading options data...</p>
+    </div>
+
+    <div id="error" class="error" style="display: none;"></div>
+
+    <div id="optionsContainer" class="options-container"></div>
+  </div>
+
+  <script>
+    let refreshing = false;
+
+    async function loadOptions() {
+      try {
+        const response = await fetch('/api/options');
+        const result = await response.json();
+
+        document.getElementById('loading').style.display = 'none';
+
+        if (!result.success) {
+          showError(result.error || 'Failed to load options data');
+          return;
+        }
+
+        renderOptions(result.data);
+      } catch (error) {
+        document.getElementById('loading').style.display = 'none';
+        showError('Error loading options: ' + error.message);
+      }
+    }
+
+    function renderOptions(data) {
+      const container = document.getElementById('optionsContainer');
+      container.innerHTML = '';
+
+      // Update last update time
+      const lastUpdate = new Date(data.timestamp);
+      document.getElementById('lastUpdate').textContent = 
+        `Last updated: ${lastUpdate.toLocaleString()}`;
+
+      // Render each ticker
+      Object.entries(data.tickers).forEach(([ticker, analysis]) => {
+        if (analysis.error) {
+          container.innerHTML += renderErrorCard(ticker, analysis.error);
+          return;
+        }
+
+        container.innerHTML += renderTickerOptions(ticker, analysis);
+      });
+    }
+
+    function renderErrorCard(ticker, error) {
+      return `
+        <div class="ticker-options">
+          <h2>${ticker}</h2>
+          <p style="color: var(--text-secondary); font-style: italic;">${error}</p>
+        </div>
+      `;
+    }
+
+    function renderTickerOptions(ticker, data) {
+      const sentimentColor = getSentimentColor(data.sentiment.sentiment);
+      const maxPainColor = data.maxPain.signal.includes('BULLISH') ? 'var(--green)' :
+                           data.maxPain.signal.includes('BEARISH') ? 'var(--red)' : 'var(--gray)';
+
+      return `
+        <div class="ticker-options">
+          <h2>
+            ${ticker}
+            <span style="font-size: 1rem; color: var(--text-secondary);">
+              $${data.currentPrice.toFixed(2)}
+            </span>
+          </h2>
+
+          <div class="expiry-info">
+            📅 Nearest Expiry: ${data.expirationDate} (${data.daysToExpiry} days)
+          </div>
+
+          <div class="sentiment-badge" style="background: ${sentimentColor};">
+            ${data.sentiment.sentiment.replace(/_/g, ' ')} 
+            (Conf: ${data.sentiment.confidence}/10)
+          </div>
+
+          <div class="max-pain-section">
+            <h3>💀 Max Pain</h3>
+            <div class="max-pain-value" style="color: ${maxPainColor};">
+              $${data.maxPain.strike.toFixed(2)}
+            </div>
+            <div class="distance-indicator" style="color: ${maxPainColor};">
+              ${data.maxPain.distance >= 0 ? '+' : ''}${data.maxPain.distance.toFixed(2)}% 
+              ${data.maxPain.signal.replace(/_/g, ' ')}
+            </div>
+          </div>
+
+          <div class="pc-ratios">
+            <div class="pc-card">
+              <h4>P/C Volume</h4>
+              <div class="pc-ratio-value" style="color: ${getPCColor(data.putCallRatios.volume.ratio)};">
+                ${data.putCallRatios.volume.ratio.toFixed(2)}
+              </div>
+              <div class="pc-sentiment" style="background: ${getSentimentColor(data.putCallRatios.volume.sentiment)};">
+                ${data.putCallRatios.volume.sentiment.replace(/_/g, ' ')}
+              </div>
+              <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px;">
+                C: ${data.putCallRatios.volume.calls.toLocaleString()} | 
+                P: ${data.putCallRatios.volume.puts.toLocaleString()}
+              </div>
+            </div>
+
+            <div class="pc-card">
+              <h4>P/C Open Int</h4>
+              <div class="pc-ratio-value" style="color: ${getPCColor(data.putCallRatios.openInterest.ratio)};">
+                ${data.putCallRatios.openInterest.ratio.toFixed(2)}
+              </div>
+              <div class="pc-sentiment" style="background: ${getSentimentColor(data.putCallRatios.openInterest.sentiment)};">
+                ${data.putCallRatios.openInterest.sentiment.replace(/_/g, ' ')}
+              </div>
+              <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px;">
+                C: ${data.putCallRatios.openInterest.calls.toLocaleString()} | 
+                P: ${data.putCallRatios.openInterest.puts.toLocaleString()}
+              </div>
+            </div>
+          </div>
+
+          ${renderGammaWalls(data.gammaWalls)}
+          ${renderUnusualActivity(data.unusualActivity)}
+          ${renderKeyLevels(data.keyLevels)}
+          ${renderSentimentSignals(data.sentiment.signals)}
+        </div>
+      `;
+    }
+
+    function renderGammaWalls(walls) {
+      if (!walls || walls.length === 0) return '';
+
+      return `
+        <div class="gamma-walls">
+          <h3>🏛️ Gamma Walls (Top ${walls.length})</h3>
+          ${walls.map(wall => `
+            <div class="gamma-wall-item ${getWallClass(wall.type)}">
+              <div class="wall-strike">
+                $${wall.strike.toFixed(2)} 
+                <span style="font-size: 0.85rem; color: var(--text-secondary);">
+                  ${wall.distance >= 0 ? '+' : ''}${wall.distance.toFixed(2)}%
+                </span>
+              </div>
+              <div class="wall-details">
+                ${wall.type.replace(/_/g, ' ')} | 
+                ${wall.strength} | 
+                Calls: ${wall.callOI.toLocaleString()} | 
+                Puts: ${wall.putOI.toLocaleString()}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderUnusualActivity(activity) {
+      if (!activity || activity.length === 0) {
+        return `<div class="unusual-activity"><p style="color: var(--text-secondary); font-style: italic;">No unusual activity detected</p></div>`;
+      }
+
+      return `
+        <div class="unusual-activity">
+          <h3>🔥 Unusual Activity (Top ${activity.length})</h3>
+          ${activity.slice(0, 5).map(item => `
+            <div class="unusual-item ${item.type.toLowerCase()}">
+              <div style="font-weight: bold; margin-bottom: 4px;">
+                ${item.type} $${item.strike.toFixed(2)} 
+                <span style="color: var(--text-secondary); font-size: 0.85rem;">
+                  ${item.distance >= 0 ? '+' : ''}${item.distance.toFixed(2)}%
+                </span>
+              </div>
+              <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                Vol: ${item.volume.toLocaleString()} | 
+                OI: ${item.openInterest.toLocaleString()} | 
+                Ratio: ${item.volumeOIRatio.toFixed(2)}x | 
+                ${item.signal}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderKeyLevels(levels) {
+      if (!levels) return '';
+
+      return `
+        <div class="key-levels">
+          <h3>🎯 Key Levels from Options</h3>
+          
+          ${levels.resistance.length > 0 ? `
+            <div style="margin-bottom: 12px;">
+              <div style="color: var(--red); font-weight: bold; margin-bottom: 6px;">Resistance:</div>
+              ${levels.resistance.slice(0, 3).map(r => `
+                <div class="level-item" style="border-left: 3px solid var(--red);">
+                  $${r.price.toFixed(2)} 
+                  <span style="color: var(--text-secondary); font-size: 0.85rem;">
+                    (+${r.distance.toFixed(2)}% | ${r.strength})
+                  </span>
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
+
+          <div style="margin-bottom: 12px;">
+            <div style="color: var(--blue); font-weight: bold; margin-bottom: 6px;">Max Pain:</div>
+            <div class="level-item" style="border-left: 3px solid var(--blue);">
+              $${levels.maxPain.toFixed(2)}
+            </div>
+          </div>
+
+          ${levels.support.length > 0 ? `
+            <div>
+              <div style="color: var(--green); font-weight: bold; margin-bottom: 6px;">Support:</div>
+              ${levels.support.slice(0, 3).map(s => `
+                <div class="level-item" style="border-left: 3px solid var(--green);">
+                  $${s.price.toFixed(2)} 
+                  <span style="color: var(--text-secondary); font-size: 0.85rem;">
+                    (${s.distance.toFixed(2)}% | ${s.strength})
+                  </span>
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    function renderSentimentSignals(signals) {
+      if (!signals || signals.length === 0) return '';
+
+      return `
+        <div style="margin-top: 15px; padding: 12px; background: var(--bg-dark); border-radius: 6px;">
+          <h4 style="margin: 0 0 8px 0; font-size: 0.9rem; color: var(--text-secondary);">
+            SENTIMENT SIGNALS:
+          </h4>
+          ${signals.map(sig => `
+            <div style="font-size: 0.85rem; color: var(--text-primary); margin-bottom: 4px;">
+              • ${sig}
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function getWallClass(type) {
+      if (type.includes('RESISTANCE')) return 'resistance';
+      if (type.includes('SUPPORT')) return 'support';
+      if (type === 'PINNING_ZONE') return 'pinning';
+      return '';
+    }
+
+    function getSentimentColor(sentiment) {
+      if (sentiment.includes('VERY_BULLISH')) return 'var(--green)';
+      if (sentiment.includes('BULLISH')) return 'rgba(34, 197, 94, 0.7)';
+      if (sentiment.includes('VERY_BEARISH')) return 'var(--red)';
+      if (sentiment.includes('BEARISH')) return 'rgba(239, 68, 68, 0.7)';
+      return 'var(--gray)';
+    }
+
+    function getPCColor(ratio) {
+      if (ratio < 0.7) return 'var(--green)';
+      if (ratio < 1.0) return 'rgba(34, 197, 94, 0.7)';
+      if (ratio < 1.5) return 'var(--text-secondary)';
+      if (ratio < 2.0) return 'rgba(239, 68, 68, 0.7)';
+      return 'var(--red)';
+    }
+
+    async function refreshOptions() {
+      if (refreshing) return;
+
+      refreshing = true;
+      const btn = document.querySelector('.refresh-btn');
+      btn.disabled = true;
+      btn.textContent = '⏳ Refreshing...';
+
+      try {
+        const response = await fetch('/api/options/refresh', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          renderOptions(result.data);
+          showSuccess('Options data refreshed successfully!');
+        } else {
+          showError(result.error || 'Failed to refresh options data');
+        }
+      } catch (error) {
+        showError('Error refreshing options: ' + error.message);
+      } finally {
+        refreshing = false;
+        btn.disabled = false;
+        btn.textContent = '🔄 Refresh Options Data';
+      }
+    }
+
+    function showError(message) {
+      const errorEl = document.getElementById('error');
+      errorEl.textContent = message;
+      errorEl.style.display = 'block';
+      setTimeout(() => errorEl.style.display = 'none', 5000);
+    }
+
+    function showSuccess(message) {
+      const errorEl = document.getElementById('error');
+      errorEl.textContent = message;
+      errorEl.style.background = 'rgba(34, 197, 94, 0.1)';
+      errorEl.style.borderColor = 'var(--green)';
+      errorEl.style.color = 'var(--green)';
+      errorEl.style.display = 'block';
+      setTimeout(() => {
+        errorEl.style.display = 'none';
+        errorEl.style.background = 'rgba(239, 68, 68, 0.1)';
+        errorEl.style.borderColor = 'var(--red)';
+        errorEl.style.color = 'var(--red)';
+      }, 3000);
+    }
+
+    // Load options data on page load
+    loadOptions();
+  </script>
+</body>
+</html>
