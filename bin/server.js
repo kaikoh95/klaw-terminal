@@ -102,6 +102,10 @@ import {
   detectMarketRegime,
   applyRegimeFilter
 } from '../lib/market-regime.js';
+import {
+  scanAllDivergences,
+  getDivergenceSummary
+} from '../lib/divergence-scanner.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -287,6 +291,31 @@ app.get('/api/signal-performance/best-patterns', (req, res) => {
     const minSampleSize = parseInt(req.query.minSampleSize) || 3;
     const patterns = getBestPatterns(minSampleSize);
     res.json({ success: true, data: patterns });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// RSI Divergence Scanner Endpoints
+
+// Scan all tickers for RSI divergences
+app.get('/api/divergences/scan', async (req, res) => {
+  try {
+    const marketData = await fetchAllTickers();
+    const scanResult = scanAllDivergences(marketData);
+    res.json({ success: true, data: scanResult });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get divergence summary
+app.get('/api/divergences/summary', async (req, res) => {
+  try {
+    const marketData = await fetchAllTickers();
+    const scanResult = scanAllDivergences(marketData);
+    const summary = getDivergenceSummary(scanResult);
+    res.json({ success: true, data: summary });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }

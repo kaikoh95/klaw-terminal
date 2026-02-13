@@ -9,6 +9,7 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
 - **Market Scanner** - Real-time data from Yahoo Finance + Google Finance
 - **Technical Analysis** - RSI, MACD, Bollinger Bands, VWAP, Support/Resistance
 - **AI Analysis** - Gemini 2.5 Pro for trade setup detection and pattern recognition
+- **RSI Divergence Scanner** - Automated detection of bullish/bearish RSI divergences across all tickers with confidence scoring and filtering
 - **Market Regime Detection** - Professional-grade regime analysis across 6 dimensions (trend, volatility, momentum, volume, risk appetite, market phase) with automated signal filtering and strategy recommendations
 - **Signal Tracking** - Complete trade history with P&L tracking
 - **Performance Analytics** - Hit rate, win streaks, profit factor, expectancy
@@ -124,6 +125,13 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
   - Kelly Criterion for optimal position sizing
   - Correlation matrix to identify concentration risk
   - Real-time risk status monitoring (SAFE/HEALTHY/ELEVATED/WARNING/DANGER)
+- **RSI Divergence Scanner** (`/divergences.html`) - Automated divergence detection
+  - Scans all tickers for bullish and bearish RSI divergences
+  - Confidence scoring (1-10) based on divergence strength
+  - Filter by type (bullish/bearish), confidence level, and recency
+  - Detailed divergence information with price/RSI comparisons
+  - Identifies high-probability reversal setups
+  - Shows days since divergence formation for timing
 - **Market Regime** (`/regime.html`) - Professional market environment detection
   - 6-dimensional regime analysis: Trend, Volatility, Momentum, Volume, Risk Appetite, Market Phase
   - Overall regime classification with confidence scoring
@@ -280,6 +288,8 @@ Automatic tracking of:
 - `GET /api/signal-performance/active` - Active tracked signals
 - `GET /api/signal-performance/closed?limit=N` - Recently closed signals
 - `GET /api/signal-performance/best-patterns` - Highest win-rate patterns
+- `GET /api/divergences/scan` - Scan all tickers for RSI divergences
+- `GET /api/divergences/summary` - Get divergence summary statistics
 - `POST /api/risk/position-size` - Calculate position size (params: accountSize, riskPercent, entryPrice, stopLoss)
 - `POST /api/risk/portfolio-heat` - Calculate total portfolio risk (params: positions, accountSize)
 - `POST /api/risk/kelly` - Calculate Kelly Criterion (params: winRate, avgWin, avgLoss)

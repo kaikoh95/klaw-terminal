@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RSI Divergence Scanner 🐾 - Klaw Terminal</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🐾 KLAW TERMINAL</h1>
+      <p class="subtitle">RSI Divergence Scanner</p>
+      <nav>
+        <a href="/">Dashboard</a>
+        <a href="/signals.html">Signals</a>
+        <a href="/analysis.html">Analysis</a>
+        <a href="/screener.html">Screener</a>
+        <a href="/heatmap.html">Heatmap</a>
+        <a href="/performance.html">Performance</a>
+        <a href="/risk.html">Risk</a>
+        <a href="/divergences.html" class="active">Divergences</a>
+        <a href="/alerts.html">Alerts</a>
+        <a href="/sentiment.html">Sentiment</a>
+        <a href="/news.html">News</a>
+        <a href="/options.html">Options</a>
+        <a href="/earnings.html">Earnings</a>
+        <a href="/watchlist.html">Watchlist</a>
+        <a href="/journal.html">Journal</a>
+      </nav>
+    </header>
+
+    <div class="content">
+      <!-- Summary Stats -->
+      <div class="card">
+        <div class="card-header">
+          <h2>📊 Divergence Summary</h2>
+          <button id="refreshBtn" class="btn btn-primary">🔄 Refresh</button>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="totalDivergences">--</div>
+            <div class="stat-label">Total Divergences</div>
+          </div>
+          <div class="stat-card positive">
+            <div class="stat-value" id="bullishCount">--</div>
+            <div class="stat-label">🟢 Bullish</div>
+          </div>
+          <div class="stat-card negative">
+            <div class="stat-value" id="bearishCount">--</div>
+            <div class="stat-label">🔴 Bearish</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="highConfidenceCount">--</div>
+            <div class="stat-label">⭐ High Confidence (≥7)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="recentCount">--</div>
+            <div class="stat-label">🔥 Recent (≤3 days)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter Controls -->
+      <div class="card">
+        <h3>🎛️ Filters</h3>
+        <div class="filter-controls">
+          <label>
+            Type:
+            <select id="filterType">
+              <option value="all">All</option>
+              <option value="bullish">Bullish</option>
+              <option value="bearish">Bearish</option>
+            </select>
+          </label>
+          <label>
+            Min Confidence:
+            <input type="number" id="filterConfidence" min="1" max="10" value="5">
+          </label>
+          <label>
+            Max Days Ago:
+            <input type="number" id="filterDays" min="1" max="20" value="10">
+          </label>
+          <button id="applyFiltersBtn" class="btn btn-secondary">Apply Filters</button>
+        </div>
+      </div>
+
+      <!-- Divergences List -->
+      <div class="card">
+        <h2>🔍 Detected Divergences</h2>
+        <div id="divergencesList">
+          <div class="loading">Loading divergences...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let allDivergences = [];
+    let filteredDivergences = [];
+
+    // Load divergences on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      loadDivergences();
+      
+      document.getElementById('refreshBtn').addEventListener('click', loadDivergences);
+      document.getElementById('applyFiltersBtn').addEventListener('click', applyFilters);
+    });
+
+    async function loadDivergences() {
+      try {
+        const response = await fetch('/api/divergences/scan');
+        const result = await response.json();
+
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to load divergences');
+        }
+
+        allDivergences = result.data.divergences || [];
+        updateSummary(result.data);
+        applyFilters();
+      } catch (error) {
+        console.error('Error loading divergences:', error);
+        document.getElementById('divergencesList').innerHTML = `
+          <div class="error">
+            ❌ Error loading divergences: ${error.message}
+          </div>
+        `;
+      }
+    }
+
+    function updateSummary(data) {
+      document.getElementById('totalDivergences').textContent = data.total || 0;
+      document.getElementById('bullishCount').textContent = data.bullish || 0;
+      document.getElementById('bearishCount').textContent = data.bearish || 0;
+
+      const highConf = allDivergences.filter(d => d.confidence >= 7).length;
+      const recent = allDivergences.filter(d => d.daysAgo <= 3).length;
+
+      document.getElementById('highConfidenceCount').textContent = highConf;
+      document.getElementById('recentCount').textContent = recent;
+    }
+
+    function applyFilters() {
+      const type = document.getElementById('filterType').value;
+      const minConf = parseInt(document.getElementById('filterConfidence').value);
+      const maxDays = parseInt(document.getElementById('filterDays').value);
+
+      filteredDivergences = allDivergences.filter(d => {
+        if (type !== 'all' && d.type !== type) return false;
+        if (d.confidence < minConf) return false;
+        if (d.daysAgo > maxDays) return false;
+        return true;
+      });
+
+      renderDivergences();
+    }
+
+    function renderDivergences() {
+      const container = document.getElementById('divergencesList');
+
+      if (filteredDivergences.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <p>No divergences found matching your filters.</p>
+            <p style="opacity: 0.6; margin-top: 8px;">Try adjusting the filter criteria or refresh the scan.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const html = filteredDivergences.map(div => {
+        const isBullish = div.type === 'bullish';
+        const typeClass = isBullish ? 'positive' : 'negative';
+        const icon = isBullish ? '🟢' : '🔴';
+        const typeLabel = isBullish ? 'BULLISH' : 'BEARISH';
+        const confClass = div.confidence >= 7 ? 'high-conf' : div.confidence >= 5 ? 'med-conf' : 'low-conf';
+
+        const changeClass = div.changePercent >= 0 ? 'positive' : 'negative';
+        const changeSign = div.changePercent >= 0 ? '+' : '';
+
+        return `
+          <div class="divergence-card ${typeClass}">
+            <div class="divergence-header">
+              <div class="divergence-ticker">
+                <span class="ticker-symbol">${div.ticker}</span>
+                <span class="ticker-price">$${div.price.toFixed(2)}</span>
+                <span class="ticker-change ${changeClass}">${changeSign}${div.changePercent.toFixed(2)}%</span>
+              </div>
+              <div class="divergence-meta">
+                <span class="divergence-type ${typeClass}">${icon} ${typeLabel}</span>
+                <span class="divergence-confidence ${confClass}">
+                  ${div.confidence}/10 ${div.confidence >= 7 ? '⭐' : ''}
+                </span>
+                <span class="divergence-timing">${div.daysAgo} period(s) ago</span>
+              </div>
+            </div>
+            
+            <div class="divergence-body">
+              <div class="divergence-signal">
+                <strong>${div.signal}</strong>
+              </div>
+              <p class="divergence-description">${div.description}</p>
+              
+              <div class="divergence-details">
+                ${isBullish ? `
+                  <div class="detail-row">
+                    <span class="detail-label">Older Low:</span>
+                    <span>$${div.olderLow.price} (RSI ${div.olderLow.rsi})</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="detail-label">Newer Low:</span>
+                    <span>$${div.newerLow.price} (RSI ${div.newerLow.rsi})</span>
+                  </div>
+                ` : `
+                  <div class="detail-row">
+                    <span class="detail-label">Older High:</span>
+                    <span>$${div.olderHigh.price} (RSI ${div.olderHigh.rsi})</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="detail-label">Newer High:</span>
+                    <span>$${div.newerHigh.price} (RSI ${div.newerHigh.rsi})</span>
+                  </div>
+                `}
+                <div class="detail-row">
+                  <span class="detail-label">Price Change:</span>
+                  <span>${div.priceDiff}%</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">RSI Change:</span>
+                  <span>${div.rsiDiff}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Current RSI:</span>
+                  <span>${div.currentRSI}</span>
+                </div>
+              </div>
+
+              <div class="divergence-volume">
+                Volume: ${div.volumeRatio.toFixed(2)}x average ${div.volumeRatio >= 1.5 ? '📈' : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = html;
+    }
+  </script>
+
+  <style>
+    .filter-controls {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-controls label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.9rem;
+    }
+
+    .filter-controls select,
+    .filter-controls input {
+      padding: 6px 12px;
+      border-radius: 4px;
+      border: 1px solid #444;
+      background: #1e1e1e;
+      color: #fff;
+      font-size: 0.9rem;
+    }
+
+    .divergence-card {
+      background: #1a1a1a;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+      border-left: 4px solid;
+    }
+
+    .divergence-card.positive {
+      border-left-color: #10b981;
+    }
+
+    .divergence-card.negative {
+      border-left-color: #ef4444;
+    }
+
+    .divergence-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .divergence-ticker {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .ticker-symbol {
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+
+    .ticker-price {
+      font-size: 1rem;
+      opacity: 0.8;
+    }
+
+    .ticker-change {
+      font-size: 0.9rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .divergence-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .divergence-type {
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+    }
+
+    .divergence-type.positive {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+    }
+
+    .divergence-type.negative {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+    }
+
+    .divergence-confidence {
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 0.85rem;
+    }
+
+    .divergence-confidence.high-conf {
+      background: rgba(16, 185, 129, 0.3);
+      color: #10b981;
+    }
+
+    .divergence-confidence.med-conf {
+      background: rgba(251, 191, 36, 0.3);
+      color: #fbbf24;
+    }
+
+    .divergence-confidence.low-conf {
+      background: rgba(156, 163, 175, 0.3);
+      color: #9ca3af;
+    }
+
+    .divergence-timing {
+      opacity: 0.7;
+      font-size: 0.85rem;
+    }
+
+    .divergence-body {
+      border-top: 1px solid #333;
+      padding-top: 12px;
+    }
+
+    .divergence-signal {
+      font-size: 1rem;
+      margin-bottom: 8px;
+      color: #fbbf24;
+    }
+
+    .divergence-description {
+      margin-bottom: 12px;
+      opacity: 0.9;
+      line-height: 1.5;
+    }
+
+    .divergence-details {
+      background: #0f0f0f;
+      padding: 12px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      border-bottom: 1px solid #222;
+    }
+
+    .detail-row:last-child {
+      border-bottom: none;
+    }
+
+    .detail-label {
+      opacity: 0.7;
+    }
+
+    .divergence-volume {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      margin-top: 8px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      opacity: 0.6;
+    }
+  </style>
+</body>
+</html>
