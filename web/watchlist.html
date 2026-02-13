@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Klaw Terminal 🐾 - Watchlist Manager</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .watchlist-manager {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .add-ticker-form {
+      background: var(--bg-card);
+      padding: 2rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      margin-bottom: 2rem;
+    }
+    
+    .form-grid {
+      display: grid;
+      grid-template-columns: 2fr 2fr 3fr 2fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .form-group label {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .form-group input,
+    .form-group select {
+      padding: 0.75rem;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-primary);
+      font-size: 0.95rem;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--blue);
+    }
+    
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+    }
+    
+    .btn {
+      padding: 0.75rem 1.5rem;
+      background: var(--blue);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+    
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .btn-danger {
+      background: var(--red);
+    }
+    
+    .ticker-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+    
+    .ticker-card {
+      background: var(--bg-card);
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      position: relative;
+      transition: all 0.2s;
+    }
+    
+    .ticker-card:hover {
+      border-color: var(--blue);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    .ticker-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .ticker-symbol {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--blue);
+    }
+    
+    .ticker-remove {
+      background: var(--red);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    
+    .ticker-remove:hover {
+      background: #dc2626;
+      transform: scale(1.05);
+    }
+    
+    .ticker-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+    }
+    
+    .ticker-info-row {
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-secondary);
+    }
+    
+    .ticker-info-label {
+      font-weight: 600;
+    }
+    
+    .ticker-info-value {
+      color: var(--text-primary);
+    }
+    
+    .status-message {
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+    
+    .status-success {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid var(--green);
+      color: var(--green);
+    }
+    
+    .status-error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--red);
+      color: var(--red);
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: var(--text-secondary);
+    }
+    
+    .quick-add {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+    
+    .quick-add-label {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      width: 100%;
+      margin-bottom: 0.5rem;
+    }
+    
+    .quick-add-btn {
+      padding: 0.5rem 1rem;
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid var(--blue);
+      color: var(--blue);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    
+    .quick-add-btn:hover {
+      background: var(--blue);
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🐾 KLAW TERMINAL</h1>
+      <p class="subtitle">Watchlist Manager</p>
+      <nav>
+        <a href="/">Dashboard</a>
+        <a href="/signals.html">Signals</a>
+        <a href="/analysis.html">Analysis</a>
+        <a href="/screener.html">Screener</a>
+        <a href="/heatmap.html">Heatmap</a>
+        <a href="/performance.html">Performance</a>
+        <a href="/risk.html">Risk</a>
+        <a href="/alerts.html">Alerts</a>
+        <a href="/sentiment.html">Sentiment</a>
+        <a href="/news.html">News</a>
+        <a href="/options.html">Options</a>
+        <a href="/earnings.html">Earnings</a>
+        <a href="/watchlist.html" class="active">Watchlist</a>
+      </nav>
+    </header>
+
+    <div class="watchlist-manager">
+      <div id="statusMessage"></div>
+
+      <!-- Add Ticker Form -->
+      <div class="card add-ticker-form">
+        <h2>➕ Add New Ticker</h2>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="symbolInput">Symbol *</label>
+            <input type="text" id="symbolInput" placeholder="AAPL" required>
+          </div>
+          <div class="form-group">
+            <label for="exchangeInput">Exchange</label>
+            <select id="exchangeInput">
+              <option value="NASDAQ">NASDAQ</option>
+              <option value="NYSE">NYSE</option>
+              <option value="NYSEARCA">NYSEARCA (ETF)</option>
+              <option value="NYSEAMERICAN">AMEX</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="nameInput">Name (optional)</label>
+            <input type="text" id="nameInput" placeholder="Apple Inc">
+          </div>
+          <div class="form-group" style="align-self: end;">
+            <button class="btn" onclick="addTicker()">Add Ticker</button>
+          </div>
+        </div>
+        
+        <div class="quick-add">
+          <div class="quick-add-label">📌 Quick Add Popular Tickers:</div>
+          <button class="quick-add-btn" onclick="quickAdd('AAPL', 'Apple Inc', 'NASDAQ')">AAPL</button>
+          <button class="quick-add-btn" onclick="quickAdd('TSLA', 'Tesla Inc', 'NASDAQ')">TSLA</button>
+          <button class="quick-add-btn" onclick="quickAdd('NVDA', 'NVIDIA Corp', 'NASDAQ')">NVDA</button>
+          <button class="quick-add-btn" onclick="quickAdd('MSFT', 'Microsoft Corp', 'NASDAQ')">MSFT</button>
+          <button class="quick-add-btn" onclick="quickAdd('AMZN', 'Amazon.com Inc', 'NASDAQ')">AMZN</button>
+          <button class="quick-add-btn" onclick="quickAdd('GOOGL', 'Alphabet Inc', 'NASDAQ')">GOOGL</button>
+          <button class="quick-add-btn" onclick="quickAdd('META', 'Meta Platforms Inc', 'NASDAQ')">META</button>
+          <button class="quick-add-btn" onclick="quickAdd('BTC-USD', 'Bitcoin USD', 'CRYPTO')">BTC-USD</button>
+          <button class="quick-add-btn" onclick="quickAdd('ETH-USD', 'Ethereum USD', 'CRYPTO')">ETH-USD</button>
+        </div>
+      </div>
+
+      <!-- Current Watchlist -->
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+          <h2>📋 Current Watchlist (<span id="tickerCount">0</span>)</h2>
+          <button class="btn btn-danger" onclick="resetWatchlist()">Reset to Defaults</button>
+        </div>
+        
+        <div id="tickerList" class="ticker-list">
+          <div class="loading">Loading watchlist...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentWatchlist = {};
+
+    // Load watchlist on page load
+    window.addEventListener('DOMContentLoaded', loadWatchlist);
+
+    async function loadWatchlist() {
+      try {
+        const response = await fetch('/api/watchlist');
+        const result = await response.json();
+        
+        if (result.success) {
+          currentWatchlist = result.data;
+          renderWatchlist();
+        } else {
+          showMessage('error', 'Failed to load watchlist');
+        }
+      } catch (error) {
+        showMessage('error', 'Error loading watchlist: ' + error.message);
+      }
+    }
+
+    function renderWatchlist() {
+      const container = document.getElementById('tickerList');
+      const countEl = document.getElementById('tickerCount');
+      
+      const tickers = Object.entries(currentWatchlist);
+      countEl.textContent = tickers.length;
+      
+      if (tickers.length === 0) {
+        container.innerHTML = '<div class="empty-state">No tickers in watchlist. Add one above!</div>';
+        return;
+      }
+      
+      container.innerHTML = tickers.map(([symbol, config]) => `
+        <div class="ticker-card">
+          <div class="ticker-header">
+            <div class="ticker-symbol">${symbol}</div>
+            <button class="ticker-remove" onclick="removeTicker('${symbol}')">Remove</button>
+          </div>
+          <div class="ticker-info">
+            <div class="ticker-info-row">
+              <span class="ticker-info-label">Name:</span>
+              <span class="ticker-info-value">${config.name || symbol}</span>
+            </div>
+            <div class="ticker-info-row">
+              <span class="ticker-info-label">Exchange:</span>
+              <span class="ticker-info-value">${config.exchange || 'N/A'}</span>
+            </div>
+            <div class="ticker-info-row">
+              <span class="ticker-info-label">Yahoo:</span>
+              <span class="ticker-info-value">${config.yahoo}</span>
+            </div>
+            <div class="ticker-info-row">
+              <span class="ticker-info-label">Google:</span>
+              <span class="ticker-info-value">${config.google}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function addTicker() {
+      const symbol = document.getElementById('symbolInput').value.trim().toUpperCase();
+      const exchange = document.getElementById('exchangeInput').value;
+      const name = document.getElementById('nameInput').value.trim();
+      
+      if (!symbol) {
+        showMessage('error', 'Please enter a ticker symbol');
+        return;
+      }
+      
+      try {
+        const response = await fetch('/api/watchlist/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ symbol, exchange, name })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          showMessage('success', `✅ Added ${symbol} to watchlist`);
+          // Clear form
+          document.getElementById('symbolInput').value = '';
+          document.getElementById('nameInput').value = '';
+          // Reload
+          await loadWatchlist();
+        } else {
+          showMessage('error', result.error);
+        }
+      } catch (error) {
+        showMessage('error', 'Error adding ticker: ' + error.message);
+      }
+    }
+
+    async function removeTicker(symbol) {
+      if (!confirm(`Remove ${symbol} from watchlist?`)) return;
+      
+      try {
+        const response = await fetch(`/api/watchlist/remove/${symbol}`, {
+          method: 'DELETE'
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          showMessage('success', `✅ Removed ${symbol} from watchlist`);
+          await loadWatchlist();
+        } else {
+          showMessage('error', result.error);
+        }
+      } catch (error) {
+        showMessage('error', 'Error removing ticker: ' + error.message);
+      }
+    }
+
+    async function resetWatchlist() {
+      if (!confirm('Reset watchlist to default tickers? This will remove all custom tickers.')) return;
+      
+      try {
+        const response = await fetch('/api/watchlist/reset', {
+          method: 'POST'
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          showMessage('success', '✅ Watchlist reset to defaults');
+          await loadWatchlist();
+        } else {
+          showMessage('error', result.error);
+        }
+      } catch (error) {
+        showMessage('error', 'Error resetting watchlist: ' + error.message);
+      }
+    }
+
+    async function quickAdd(symbol, name, exchange) {
+      document.getElementById('symbolInput').value = symbol;
+      document.getElementById('nameInput').value = name;
+      document.getElementById('exchangeInput').value = exchange;
+      await addTicker();
+    }
+
+    function showMessage(type, message) {
+      const container = document.getElementById('statusMessage');
+      container.className = `status-message status-${type}`;
+      container.textContent = message;
+      container.style.display = 'block';
+      
+      setTimeout(() => {
+        container.style.display = 'none';
+      }, 5000);
+    }
+
+    // Allow Enter key to submit
+    document.getElementById('symbolInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') addTicker();
+    });
+  </script>
+</body>
+</html>

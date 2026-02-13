@@ -16,6 +16,7 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
 - **News Feed** - Real-time market news and sentiment analysis from Alpha Vantage
 - **Options Chain Analysis** - Max pain calculation, put/call ratios, gamma walls, unusual options activity detection
 - **Earnings Calendar** - Upcoming earnings dates with alerts for imminent reports, automatic tracking across all watchlist tickers
+- **Dynamic Watchlist** - Add/remove custom tickers on the fly with persistent storage, quick-add popular stocks
 - **Web Dashboard** - Clean, dark-themed trading terminal interface
 - **Market Heatmap** - Visual color-coded grid showing relative strength across all tickers
 - **Multi-Panel Charts** - Professional 4-panel layout with Price, RSI, MACD, and Volume charts
@@ -25,10 +26,13 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
 - **Price Alerts** - Set custom price alerts with real-time notifications when levels are breached
 - **Smart Caching** - Intelligent Gemini analysis caching with 5-min TTL to reduce API costs and improve speed
 
-## Supported Tickers
+## Dynamic Watchlist
 
-- SPY, SPX, QQQ, ONDS, USAR, HOVR, RDDT
-- Easy to add more in `lib/market-data.js`
+- **Default tickers**: SPY, QQQ, ONDS, USAR, RDDT, UUUU, HOVR
+- **Add any ticker** via the Watchlist Manager UI (`/watchlist.html`)
+- **Quick-add popular stocks**: AAPL, TSLA, NVDA, MSFT, AMZN, GOOGL, META, and more
+- **Persistent storage**: Custom watchlist saved to `data/watchlist.json`
+- **Reset anytime**: Restore default tickers with one click
 
 ## Setup
 
@@ -156,6 +160,12 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
   - Manual cache clearing for troubleshooting
   - Auto-refresh every 10 seconds
   - Monitor API cost savings from cache hits
+- **Watchlist Manager** (`/watchlist.html`) - Dynamic ticker watchlist management
+  - Add/remove custom tickers with auto-detection of exchange
+  - Quick-add buttons for popular stocks (AAPL, TSLA, NVDA, etc.)
+  - View full ticker configurations (Yahoo/Google symbols)
+  - Reset to default watchlist
+  - Changes persist across restarts
 
 ## Project Structure
 
@@ -271,6 +281,11 @@ Automatic tracking of:
 - `POST /api/earnings/refresh` - Fetch earnings for all watchlist tickers (params: tickers)
 - `GET /api/cache/stats` - Get Gemini analysis cache statistics (size, fresh/stale, entries)
 - `POST /api/cache/clear` - Clear all cached Gemini analyses
+- `GET /api/watchlist` - Get full watchlist with ticker configs
+- `GET /api/watchlist/symbols` - Get ticker symbols only (array)
+- `POST /api/watchlist/add` - Add ticker to watchlist (params: symbol, exchange, name)
+- `DELETE /api/watchlist/remove/:symbol` - Remove ticker from watchlist
+- `POST /api/watchlist/reset` - Reset watchlist to defaults
 
 ## Development
 

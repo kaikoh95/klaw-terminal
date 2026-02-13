@@ -64,6 +64,14 @@ import {
   batchFetchEarnings,
   getEarningsSummary
 } from '../lib/earnings.js';
+import {
+  getWatchlist,
+  getTickerSymbols,
+  addTicker,
+  removeTicker,
+  resetWatchlist,
+  detectTickerConfig
+} from '../lib/watchlist.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -923,6 +931,73 @@ app.post('/api/cache/clear', (req, res) => {
   try {
     const result = clearCache();
     res.json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Watchlist Management Endpoints
+
+// Get full watchlist
+app.get('/api/watchlist', (req, res) => {
+  try {
+    const watchlist = getWatchlist();
+    res.json({ success: true, data: watchlist });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get ticker symbols only
+app.get('/api/watchlist/symbols', (req, res) => {
+  try {
+    const symbols = getTickerSymbols();
+    res.json({ success: true, data: symbols });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Add ticker to watchlist
+app.post('/api/watchlist/add', (req, res) => {
+  try {
+    const { symbol, yahoo, google, name, exchange } = req.body;
+    
+    if (!symbol) {
+      return res.status(400).json({ success: false, error: 'Symbol is required' });
+    }
+    
+    // Auto-detect config if not fully provided
+    let config;
+    if (yahoo && google) {
+      config = { yahoo, google, name: name || symbol, exchange: exchange || 'UNKNOWN' };
+    } else {
+      config = detectTickerConfig(symbol, exchange);
+    }
+    
+    const ticker = addTicker(symbol, config);
+    res.json({ success: true, data: ticker });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+// Remove ticker from watchlist
+app.delete('/api/watchlist/remove/:symbol', (req, res) => {
+  try {
+    const { symbol } = req.params;
+    removeTicker(symbol);
+    res.json({ success: true, message: `Removed ${symbol} from watchlist` });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+// Reset watchlist to defaults
+app.post('/api/watchlist/reset', (req, res) => {
+  try {
+    const watchlist = resetWatchlist();
+    res.json({ success: true, data: watchlist, message: 'Watchlist reset to defaults' });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
