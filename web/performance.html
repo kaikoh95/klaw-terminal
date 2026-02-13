@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Klaw Terminal 🐾 - Signal Performance</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .perf-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    
+    .perf-card {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(99, 102, 241, 0.05));
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+    
+    .perf-card.positive {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05));
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+    
+    .perf-card.negative {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.05));
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+    
+    .perf-label {
+      font-size: 14px;
+      color: #9ca3af;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .perf-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: #e8eaf0;
+    }
+    
+    .perf-value.positive {
+      color: #10b981;
+    }
+    
+    .perf-value.negative {
+      color: #ef4444;
+    }
+    
+    .perf-subtitle {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+    
+    .pattern-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .pattern-item {
+      background: rgba(26, 31, 58, 0.6);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+    
+    .pattern-item:hover {
+      border-color: rgba(59, 130, 246, 0.4);
+      background: rgba(26, 31, 58, 0.8);
+      transform: translateX(4px);
+    }
+    
+    .pattern-name {
+      font-weight: 600;
+      color: #e8eaf0;
+      font-size: 16px;
+    }
+    
+    .pattern-stats {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+    
+    .pattern-stat {
+      text-align: center;
+    }
+    
+    .pattern-stat-label {
+      font-size: 11px;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .pattern-stat-value {
+      font-size: 18px;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+    
+    .pattern-stat-value.win-rate {
+      color: #10b981;
+    }
+    
+    .signal-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    
+    .signal-table th {
+      background: rgba(26, 31, 58, 0.8);
+      padding: 12px;
+      text-align: left;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #9ca3af;
+      border-bottom: 2px solid rgba(59, 130, 246, 0.3);
+    }
+    
+    .signal-table td {
+      padding: 12px;
+      border-bottom: 1px solid rgba(42, 49, 80, 0.5);
+      font-size: 14px;
+    }
+    
+    .signal-table tr:hover {
+      background: rgba(26, 31, 58, 0.4);
+    }
+    
+    .outcome-badge {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .outcome-badge.target {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    
+    .outcome-badge.stop {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    
+    .outcome-badge.expired {
+      background: rgba(251, 191, 36, 0.2);
+      color: #fbbf24;
+      border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+    
+    .outcome-badge.manual {
+      background: rgba(107, 114, 128, 0.2);
+      color: #9ca3af;
+      border: 1px solid rgba(107, 114, 128, 0.3);
+    }
+    
+    .return-value {
+      font-weight: 700;
+    }
+    
+    .return-value.positive {
+      color: #10b981;
+    }
+    
+    .return-value.negative {
+      color: #ef4444;
+    }
+    
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      border-bottom: 2px solid rgba(42, 49, 80, 0.5);
+    }
+    
+    .tab {
+      padding: 12px 24px;
+      background: transparent;
+      border: none;
+      color: #9ca3af;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s ease;
+    }
+    
+    .tab:hover {
+      color: #e8eaf0;
+      background: rgba(59, 130, 246, 0.1);
+    }
+    
+    .tab.active {
+      color: #3b82f6;
+      border-bottom-color: #3b82f6;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🐾 KLAW TERMINAL</h1>
+      <p class="subtitle">AI-Powered Trading Intelligence</p>
+      <nav>
+        <a href="/">Dashboard</a>
+        <a href="/signals.html">Signals</a>
+        <a href="/analysis.html">Analysis</a>
+        <a href="/heatmap.html">Heatmap</a>
+        <a href="/performance.html" class="active">Performance</a>
+      </nav>
+    </header>
+
+    <div class="card">
+      <h2>📊 Signal Performance Tracker <button class="btn-small" onclick="loadPerformance()">↻ Refresh</button></h2>
+      <p style="color: #6b7280; margin-bottom: 24px;">Track how accurate your AI signals are and identify the best-performing setups</p>
+      
+      <!-- Overview Stats -->
+      <div class="perf-grid" id="overviewStats">
+        <div class="perf-card">
+          <div class="perf-label">Total Signals</div>
+          <div class="perf-value" id="totalSignals">--</div>
+        </div>
+        <div class="perf-card positive">
+          <div class="perf-label">Win Rate</div>
+          <div class="perf-value positive" id="winRate">--</div>
+        </div>
+        <div class="perf-card">
+          <div class="perf-label">Avg Return</div>
+          <div class="perf-value" id="avgReturn">--</div>
+        </div>
+        <div class="perf-card">
+          <div class="perf-label">Profit Factor</div>
+          <div class="perf-value" id="profitFactor">--</div>
+          <div class="perf-subtitle">Avg Win / Avg Loss</div>
+        </div>
+        <div class="perf-card">
+          <div class="perf-label">Avg Win</div>
+          <div class="perf-value positive" id="avgWin">--</div>
+        </div>
+        <div class="perf-card">
+          <div class="perf-label">Avg Loss</div>
+          <div class="perf-value negative" id="avgLoss">--</div>
+        </div>
+        <div class="perf-card">
+          <div class="perf-label">Avg Duration</div>
+          <div class="perf-value" id="avgDuration">--</div>
+          <div class="perf-subtitle">hours</div>
+        </div>
+        <div class="perf-card">
+          <div class="perf-label">Active Signals</div>
+          <div class="perf-value" id="activeCount">--</div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('patterns')">Best Patterns</button>
+        <button class="tab" onclick="switchTab('timeframes')">By Timeframe</button>
+        <button class="tab" onclick="switchTab('tickers')">By Ticker</button>
+        <button class="tab" onclick="switchTab('confidence')">By Confidence</button>
+        <button class="tab" onclick="switchTab('recent')">Recent Closed</button>
+      </div>
+
+      <!-- Tab Contents -->
+      <div id="patternsTab" class="tab-content active">
+        <h3>🎯 Best Performing Patterns</h3>
+        <p style="color: #6b7280; margin-bottom: 16px;">Patterns with highest win rates (minimum 3 signals)</p>
+        <div class="pattern-list" id="bestPatterns">
+          <div class="loading">Loading patterns...</div>
+        </div>
+      </div>
+
+      <div id="timeframesTab" class="tab-content">
+        <h3>⏱️ Performance by Timeframe</h3>
+        <div class="pattern-list" id="timeframeStats">
+          <div class="loading">Loading timeframe stats...</div>
+        </div>
+      </div>
+
+      <div id="tickersTab" class="tab-content">
+        <h3>📈 Performance by Ticker</h3>
+        <div class="pattern-list" id="tickerStats">
+          <div class="loading">Loading ticker stats...</div>
+        </div>
+      </div>
+
+      <div id="confidenceTab" class="tab-content">
+        <h3>🎲 Performance by Confidence Level</h3>
+        <p style="color: #6b7280; margin-bottom: 16px;">Does higher confidence = better results?</p>
+        <div class="pattern-list" id="confidenceStats">
+          <div class="loading">Loading confidence stats...</div>
+        </div>
+      </div>
+
+      <div id="recentTab" class="tab-content">
+        <h3>📋 Recently Closed Signals</h3>
+        <table class="signal-table" id="recentSignalsTable">
+          <thead>
+            <tr>
+              <th>Ticker</th>
+              <th>Pattern</th>
+              <th>Direction</th>
+              <th>Timeframe</th>
+              <th>Confidence</th>
+              <th>Entry</th>
+              <th>Exit</th>
+              <th>Return</th>
+              <th>Duration</th>
+              <th>Outcome</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="10" class="loading">Loading recent signals...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <footer>
+      <p>Last updated: <span id="lastUpdate">--</span></p>
+      <p>🐾 Maine Klaw Terminal v1.0</p>
+    </footer>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    let currentTab = 'patterns';
+    
+    function switchTab(tabName) {
+      // Update tab buttons
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      
+      // Update tab content
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      document.getElementById(tabName + 'Tab').classList.add('active');
+      
+      currentTab = tabName;
+    }
+    
+    async function loadPerformance() {
+      try {
+        const response = await fetch('/api/signal-performance/summary');
+        const result = await response.json();
+        
+        if (!result.success) {
+          console.error('Failed to load performance:', result.error);
+          return;
+        }
+        
+        const data = result.data;
+        
+        // Update overview stats
+        document.getElementById('totalSignals').textContent = data.overview.totalSignals || 0;
+        document.getElementById('winRate').textContent = (data.overview.winRate || 0).toFixed(1) + '%';
+        
+        const avgReturn = data.overview.avgReturn || 0;
+        const avgReturnEl = document.getElementById('avgReturn');
+        avgReturnEl.textContent = (avgReturn >= 0 ? '+' : '') + avgReturn.toFixed(2) + '%';
+        avgReturnEl.className = 'perf-value ' + (avgReturn >= 0 ? 'positive' : 'negative');
+        
+        document.getElementById('profitFactor').textContent = (data.overview.profitFactor || 0).toFixed(2);
+        document.getElementById('avgWin').textContent = '+' + (data.overview.avgWin || 0).toFixed(2) + '%';
+        document.getElementById('avgLoss').textContent = (data.overview.avgLoss || 0).toFixed(2) + '%';
+        document.getElementById('avgDuration').textContent = (data.overview.avgDuration || 0).toFixed(1);
+        document.getElementById('activeCount').textContent = data.active || 0;
+        
+        // Load best patterns
+        loadBestPatterns(data.bestPatterns || []);
+        
+        // Load timeframe stats
+        loadTimeframeStats(data.byTimeframe || {});
+        
+        // Load ticker stats
+        loadTickerStats(data.byTicker || {});
+        
+        // Load confidence stats
+        loadConfidenceStats(data.byConfidence || {});
+        
+        // Load recent closed signals
+        loadRecentSignals(data.recentClosed || []);
+        
+        // Update timestamp
+        updateTimestamp();
+        
+      } catch (error) {
+        console.error('Error loading performance:', error);
+      }
+    }
+    
+    function loadBestPatterns(patterns) {
+      const container = document.getElementById('bestPatterns');
+      
+      if (patterns.length === 0) {
+        container.innerHTML = '<div class="empty-state">No pattern data yet. Run some signals first!</div>';
+        return;
+      }
+      
+      let html = '';
+      
+      for (const pattern of patterns) {
+        html += `
+          <div class="pattern-item">
+            <div class="pattern-name">${pattern.pattern}</div>
+            <div class="pattern-stats">
+              <div class="pattern-stat">
+                <div class="pattern-stat-label">Signals</div>
+                <div class="pattern-stat-value">${pattern.total}</div>
+              </div>
+              <div class="pattern-stat">
+                <div class="pattern-stat-label">Win Rate</div>
+                <div class="pattern-stat-value win-rate">${pattern.winRate.toFixed(1)}%</div>
+              </div>
+              <div class="pattern-stat">
+                <div class="pattern-stat-label">Avg Return</div>
+                <div class="pattern-stat-value ${pattern.avgReturn >= 0 ? 'positive' : 'negative'}">
+                  ${pattern.avgReturn >= 0 ? '+' : ''}${pattern.avgReturn.toFixed(2)}%
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      
+      container.innerHTML = html;
+    }
+    
+    function loadTimeframeStats(stats) {
+      const container = document.getElementById('timeframeStats');
+      
+      if (Object.keys(stats).length === 0) {
+        container.innerHTML = '<div class="empty-state">No timeframe data yet.</div>';
+        return;
+      }
+      
+      let html = '';
+      
+      for (const [timeframe, data] of Object.entries(stats)) {
+        html += `
+          <div class="pattern-item">
+            <div class="pattern-name">${timeframe}</div>
+            <div class="pattern-stats">
+              <div class="pattern-stat">
+                <div class="pattern-stat-label">Signals</div>
+                <div class="pattern-stat-value">${data.total}</div>
+              </div>
+              <div class="pattern-stat">
+                <div class="pattern-stat-label">Win Rate</div>
+                <div class="pattern-stat-value win-rate">${data.winRate.toFixed(1)}%</div>
+              </div>
+              <div class="pattern-stat">
+                <div class="pattern-stat-label">Avg Return</div>
+                <div class="pattern-stat-value ${data.avgReturn >= 0 ? 'positive' : 'negative'}">
+                  ${data.avgReturn >= 0 ? '+' : ''}${data.avgReturn.toFixed(2)}%
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      
+      container.innerHTML = html;
+    }
+    
+    function loadTickerStats(stats) {
+      const container = document.getElementById('tickerStats');
+      
+      if (Object.keys(stats).length === 0) {
+        container.innerHTML = '<div class="empty-state">No ticker data yet.</div>';
+        return;
+      }
+      
+      // Sort by win rate
+      const sorted = Object.entries(stats).sort((a, b) => b[1].winRate - a[1].winRate);
+      
+      let html = '';
+      
+      for (const [ticker, data] of sorted) {
+        html += `
+          <div class="pattern-item">
+            <div class="pattern-name">${ticker}</div>
+            <div class="pattern-stats">
+              <div class="pattern-stat">
+                <div class="pattern-stat-label">Signals</div>
+                <div class="pattern-stat-value">${data.total}</div>
+              </div>
+              <div class="pattern-stat">
+                <div class="pattern-stat-label">Win Rate</div>
+                <div class="pattern-stat-value win-rate">${data.winRate.toFixed(1)}%</div>
+              </div>
+              <div class="pattern-stat">
+                <div class="pattern-stat-label">Avg Return</div>
+                <div class="pattern-stat-value ${data.avgReturn >= 0 ? 'positive' : 'negative'}">
+                  ${data.avgReturn >= 0 ? '+' : ''}${data.avgReturn.toFixed(2)}%
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      
+      container.innerHTML = html;
+    }
+    
+    function loadConfidenceStats(stats) {
+      const container = document.getElementById('confidenceStats');
+      
+      if (Object.keys(stats).length === 0) {
+        container.innerHTML = '<div class="empty-state">No confidence data yet.</div>';
+        return;
+      }
+      
+      let html = '';
+      
+      for (const [level, data] of Object.entries(stats)) {
+        html += `
+          <div class="pattern-item">
+            <div class="pattern-name">${level}</div>
+            <div class="pattern-stats">
+              <div class="pattern-stat">
+                <div class="pattern-stat-label">Signals</div>
+                <div class="pattern-stat-value">${data.total}</div>
+              </div>
+              <div class="pattern-stat">
+                <div class="pattern-stat-label">Win Rate</div>
+                <div class="pattern-stat-value win-rate">${data.winRate.toFixed(1)}%</div>
+              </div>
+              <div class="pattern-stat">
+                <div class="pattern-stat-label">Avg Return</div>
+                <div class="pattern-stat-value ${data.avgReturn >= 0 ? 'positive' : 'negative'}">
+                  ${data.avgReturn >= 0 ? '+' : ''}${data.avgReturn.toFixed(2)}%
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      
+      container.innerHTML = html;
+    }
+    
+    function loadRecentSignals(signals) {
+      const tbody = document.querySelector('#recentSignalsTable tbody');
+      
+      if (signals.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" class="empty-state">No closed signals yet.</td></tr>';
+        return;
+      }
+      
+      let html = '';
+      
+      for (const signal of signals) {
+        const returnClass = signal.actualReturn >= 0 ? 'positive' : 'negative';
+        const outcomeClass = signal.outcome === 'TARGET_HIT' ? 'target' :
+                            signal.outcome === 'STOP_LOSS' ? 'stop' :
+                            signal.outcome === 'EXPIRED' ? 'expired' : 'manual';
+        
+        html += `
+          <tr>
+            <td><strong>${signal.ticker}</strong></td>
+            <td>${signal.pattern}</td>
+            <td>${signal.direction}</td>
+            <td>${signal.timeframe}</td>
+            <td>${signal.confidence}/10</td>
+            <td>$${signal.entryPrice.toFixed(2)}</td>
+            <td>$${signal.exitPrice.toFixed(2)}</td>
+            <td class="return-value ${returnClass}">
+              ${signal.actualReturn >= 0 ? '+' : ''}${signal.actualReturn.toFixed(2)}%
+            </td>
+            <td>${signal.durationHours.toFixed(1)}h</td>
+            <td><span class="outcome-badge ${outcomeClass}">${signal.outcome.replace('_', ' ')}</span></td>
+          </tr>
+        `;
+      }
+      
+      tbody.innerHTML = html;
+    }
+    
+    function updateTimestamp() {
+      const now = new Date();
+      document.getElementById('lastUpdate').textContent = now.toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+    }
+    
+    // Initial load
+    loadPerformance();
+    
+    // Auto-refresh every 30 seconds
+    setInterval(loadPerformance, 30000);
+  </script>
+</body>
+</html>

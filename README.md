@@ -15,6 +15,7 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
 - **Market Heatmap** - Visual color-coded grid showing relative strength across all tickers
 - **Multi-Panel Charts** - Professional 4-panel layout with Price, RSI, MACD, and Volume charts
 - **Live WebSocket Updates** - Real-time price updates with visual flash animations
+- **Signal Performance Tracker** - Track actual vs predicted outcomes, identify best-performing patterns
 
 ## Supported Tickers
 
@@ -73,6 +74,11 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
 - **Signals** (`/signals.html`) - Complete signal history with filtering
 - **Analysis** (`/analysis.html`) - Detailed technical analysis for all tickers
 - **Heatmap** (`/heatmap.html`) - Visual market heatmap with color-coded performance
+- **Performance** (`/performance.html`) - Signal performance tracking & pattern analysis
+  - Win rate, profit factor, average returns
+  - Best performing patterns, timeframes, and tickers
+  - Confidence level correlation analysis
+  - Recent closed signal outcomes
 
 ## Project Structure
 
@@ -152,6 +158,10 @@ Automatic tracking of:
 - `GET /api/signals/recent?count=N` - Recent signals
 - `GET /api/performance` - Performance metrics
 - `GET /api/performance/summary` - Performance summary
+- `GET /api/signal-performance/summary` - Signal accuracy & pattern performance
+- `GET /api/signal-performance/active` - Active tracked signals
+- `GET /api/signal-performance/closed?limit=N` - Recently closed signals
+- `GET /api/signal-performance/best-patterns` - Highest win-rate patterns
 
 ## Development
 

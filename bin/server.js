@@ -11,6 +11,7 @@ import { analyzeMarketData } from '../lib/technicals.js';
 import { exportSignalsSummary, getRecentSignals } from '../lib/signals.js';
 import { loadPerformance, getPerformanceSummary } from '../lib/performance.js';
 import { calculateMarketSentiment } from '../lib/sentiment.js';
+import { getPerformanceSummary, getActiveSignals, getClosedSignals, getBestPatterns } from '../lib/signal-performance.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -132,6 +133,45 @@ app.get('/api/sentiment', (req, res) => {
     
     const sentiment = calculateMarketSentiment(data.technicals);
     res.json({ success: true, data: sentiment });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Signal performance tracking
+app.get('/api/signal-performance/summary', (req, res) => {
+  try {
+    const summary = getPerformanceSummary();
+    res.json({ success: true, data: summary });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.get('/api/signal-performance/active', (req, res) => {
+  try {
+    const active = getActiveSignals();
+    res.json({ success: true, data: active });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.get('/api/signal-performance/closed', (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 50;
+    const closed = getClosedSignals(limit);
+    res.json({ success: true, data: closed });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.get('/api/signal-performance/best-patterns', (req, res) => {
+  try {
+    const minSampleSize = parseInt(req.query.minSampleSize) || 3;
+    const patterns = getBestPatterns(minSampleSize);
+    res.json({ success: true, data: patterns });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }

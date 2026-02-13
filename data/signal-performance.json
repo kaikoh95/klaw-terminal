@@ -1,0 +1,13 @@
+{
+  "signals": [],
+  "stats": {
+    "total": 0,
+    "profitable": 0,
+    "unprofitable": 0,
+    "breakeven": 0,
+    "avgAccuracy": 0,
+    "byPattern": {},
+    "byTimeframe": {},
+    "byTicker": {}
+  }
+}
