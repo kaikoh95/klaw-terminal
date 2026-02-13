@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Klaw Terminal 🐾 - Advanced Charts</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+  <style>
+    .chart-container {
+      margin: 20px 0;
+      background: linear-gradient(135deg, rgba(30, 30, 50, 0.95), rgba(20, 20, 40, 0.95));
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    
+    .chart-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .ticker-selector {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    .ticker-selector select {
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .ticker-selector select:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+    
+    .timeframe-buttons {
+      display: flex;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 4px;
+      border-radius: 8px;
+    }
+    
+    .timeframe-btn {
+      padding: 6px 12px;
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.3s;
+    }
+    
+    .timeframe-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.8);
+    }
+    
+    .timeframe-btn.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+    }
+    
+    .indicator-toggles {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .indicator-toggle {
+      padding: 6px 12px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .indicator-toggle:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.8);
+    }
+    
+    .indicator-toggle.active {
+      background: rgba(102, 126, 234, 0.3);
+      border-color: #667eea;
+      color: #667eea;
+    }
+    
+    #priceChart {
+      height: 500px;
+      margin-bottom: 10px;
+    }
+    
+    #volumeChart {
+      height: 120px;
+      margin-bottom: 10px;
+    }
+    
+    #rsiChart {
+      height: 120px;
+      margin-bottom: 10px;
+    }
+    
+    #macdChart {
+      height: 120px;
+    }
+    
+    .chart-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    .info-card {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .info-card h4 {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.6);
+      margin: 0 0 8px 0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .info-card .value {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+    }
+    
+    .info-card .value.positive {
+      color: #10b981;
+    }
+    
+    .info-card .value.negative {
+      color: #ef4444;
+    }
+    
+    .loading-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      z-index: 100;
+    }
+    
+    .loading-spinner {
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🐾 KLAW TERMINAL</h1>
+      <p class="subtitle">Advanced Professional Charts</p>
+      <nav>
+        <a href="/">Dashboard</a>
+        <a href="/signals.html">Signals</a>
+        <a href="/analysis.html">Analysis</a>
+        <a href="/screener.html">Screener</a>
+        <a href="/heatmap.html">Heatmap</a>
+        <a href="/performance.html">Performance</a>
+        <a href="/risk.html">Risk</a>
+        <a href="/divergences.html">Divergences</a>
+        <a href="/alerts.html">Alerts</a>
+        <a href="/sentiment.html">Sentiment</a>
+        <a href="/news.html">News</a>
+        <a href="/options.html">Options</a>
+        <a href="/earnings.html">Earnings</a>
+        <a href="/watchlist.html">Watchlist</a>
+        <a href="/journal.html">Journal</a>
+        <a href="/chart.html" class="active">Charts</a>
+      </nav>
+    </header>
+
+    <div class="chart-container" style="position: relative;">
+      <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+      </div>
+      
+      <div class="chart-header">
+        <div class="chart-title">
+          <span id="chartTickerSymbol">--</span>
+          <span id="chartPrice" style="font-size: 20px; color: #10b981;">$0.00</span>
+          <span id="chartChange" style="font-size: 14px; color: #10b981;">+0.00%</span>
+        </div>
+        
+        <div class="ticker-selector">
+          <select id="tickerSelect">
+            <option value="">Select ticker...</option>
+          </select>
+        </div>
+        
+        <div class="timeframe-buttons">
+          <button class="timeframe-btn" data-period="10">10D</button>
+          <button class="timeframe-btn" data-period="20">20D</button>
+          <button class="timeframe-btn active" data-period="50">50D</button>
+          <button class="timeframe-btn" data-period="100">100D</button>
+          <button class="timeframe-btn" data-period="200">200D</button>
+        </div>
+        
+        <div class="indicator-toggles">
+          <button class="indicator-toggle active" data-indicator="sma20">SMA20</button>
+          <button class="indicator-toggle active" data-indicator="sma50">SMA50</button>
+          <button class="indicator-toggle" data-indicator="ema9">EMA9</button>
+          <button class="indicator-toggle" data-indicator="ema21">EMA21</button>
+          <button class="indicator-toggle" data-indicator="vwap">VWAP</button>
+          <button class="indicator-toggle" data-indicator="bb">Bollinger</button>
+        </div>
+      </div>
+      
+      <div id="priceChart"></div>
+      <div id="volumeChart"></div>
+      <div id="rsiChart"></div>
+      <div id="macdChart"></div>
+      
+      <div class="chart-info">
+        <div class="info-card">
+          <h4>Current Price</h4>
+          <div class="value" id="infoPrice">--</div>
+        </div>
+        <div class="info-card">
+          <h4>Day Change</h4>
+          <div class="value" id="infoChange">--</div>
+        </div>
+        <div class="info-card">
+          <h4>Volume</h4>
+          <div class="value" id="infoVolume">--</div>
+        </div>
+        <div class="info-card">
+          <h4>RSI (14)</h4>
+          <div class="value" id="infoRSI">--</div>
+        </div>
+        <div class="info-card">
+          <h4>MACD</h4>
+          <div class="value" id="infoMACD">--</div>
+        </div>
+        <div class="info-card">
+          <h4>ATR</h4>
+          <div class="value" id="infoATR">--</div>
+        </div>
+        <div class="info-card">
+          <h4>ADX</h4>
+          <div class="value" id="infoADX">--</div>
+        </div>
+        <div class="info-card">
+          <h4>Trend</h4>
+          <div class="value" id="infoTrend">--</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/chart-advanced.js"></script>
+</body>
+</html>
