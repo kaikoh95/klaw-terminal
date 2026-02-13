@@ -234,6 +234,7 @@ klaw-terminal/
 - **ADX** - Average Directional Index (trend strength)
 - **ATR** - Average True Range (volatility)
 - **Stochastic** - Stochastic Oscillator
+- **Elder-Ray Index** - Bull Power and Bear Power indicators measuring buying/selling pressure relative to EMA(13), with divergence detection
 - **Fibonacci** - Retracement and extension levels
 - **Candlestick Patterns** - 12+ pattern recognition
 - **Parabolic SAR** - Stop and Reverse indicator for trend following with dynamic trailing stops
