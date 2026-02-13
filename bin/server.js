@@ -29,6 +29,16 @@ import {
   exportPerformanceToCSV,
   exportAnalysisToCSV
 } from '../lib/export.js';
+import {
+  loadAlerts,
+  addAlert,
+  removeAlert,
+  getActiveAlerts,
+  getTriggeredAlerts,
+  checkAlerts,
+  clearOldTriggeredAlerts,
+  getAlertsForTicker
+} from '../lib/alerts.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -410,6 +420,103 @@ app.get('/api/export/analysis', (req, res) => {
   }
 });
 
+// Price Alert Endpoints
+
+// Get all alerts
+app.get('/api/alerts', (req, res) => {
+  try {
+    const alerts = loadAlerts();
+    res.json({ success: true, data: alerts });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get active alerts
+app.get('/api/alerts/active', (req, res) => {
+  try {
+    const alerts = getActiveAlerts();
+    res.json({ success: true, data: alerts });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get triggered alerts
+app.get('/api/alerts/triggered', (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 50;
+    const alerts = getTriggeredAlerts(limit);
+    res.json({ success: true, data: alerts });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get alerts for specific ticker
+app.get('/api/alerts/:ticker', (req, res) => {
+  try {
+    const ticker = req.params.ticker;
+    const alerts = getAlertsForTicker(ticker);
+    res.json({ success: true, data: alerts });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Add new alert
+app.post('/api/alerts', (req, res) => {
+  try {
+    const { ticker, price, condition, note } = req.body;
+    
+    if (!ticker || !price || !condition) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Missing required fields: ticker, price, condition' 
+      });
+    }
+    
+    if (!['above', 'below'].includes(condition)) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Condition must be "above" or "below"' 
+      });
+    }
+    
+    const alert = addAlert(ticker, price, condition, note || '');
+    res.json({ success: true, data: alert });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+// Delete alert
+app.delete('/api/alerts/:id', (req, res) => {
+  try {
+    const alertId = req.params.id;
+    const success = removeAlert(alertId);
+    
+    if (success) {
+      res.json({ success: true, message: 'Alert removed' });
+    } else {
+      res.status(404).json({ success: false, error: 'Alert not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Clear old triggered alerts
+app.post('/api/alerts/cleanup', (req, res) => {
+  try {
+    const daysOld = parseInt(req.body.daysOld) || 7;
+    const removed = clearOldTriggeredAlerts(daysOld);
+    res.json({ success: true, data: { removed } });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // WebSocket connection handling
 wss.on('connection', (ws) => {
   console.log('WebSocket client connected');
@@ -451,6 +558,11 @@ setInterval(async () => {
   
   try {
     const marketData = await fetchAllTickers();
+    
+    // Check for triggered alerts
+    const triggeredAlerts = checkAlerts(marketData);
+    
+    // Prepare market update message
     const message = JSON.stringify({
       type: 'market-update',
       data: marketData,
@@ -463,6 +575,24 @@ setInterval(async () => {
         client.send(message);
       }
     });
+    
+    // Send alert notifications if any triggered
+    if (triggeredAlerts.length > 0) {
+      const alertMessage = JSON.stringify({
+        type: 'alert-triggered',
+        data: triggeredAlerts,
+        timestamp: now
+      });
+      
+      wss.clients.forEach((client) => {
+        if (client.readyState === 1) {
+          client.send(alertMessage);
+        }
+      });
+      
+      console.log(`🔔 ${triggeredAlerts.length} alert(s) triggered:`, 
+        triggeredAlerts.map(a => `${a.ticker} ${a.condition} $${a.price}`).join(', '));
+    }
     
     lastBroadcast = now;
     console.log(`Broadcast market update to ${wss.clients.size} client(s)`);

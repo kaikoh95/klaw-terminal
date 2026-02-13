@@ -18,6 +18,7 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
 - **Live WebSocket Updates** - Real-time price updates with visual flash animations
 - **Signal Performance Tracker** - Track actual vs predicted outcomes, identify best-performing patterns
 - **CSV Export** - Export signals, performance data, and technical analysis to CSV for Excel/external analysis
+- **Price Alerts** - Set custom price alerts with real-time notifications when levels are breached
 
 ## Supported Tickers
 
@@ -87,6 +88,11 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
   - Kelly Criterion for optimal position sizing
   - Correlation matrix to identify concentration risk
   - Real-time risk status monitoring (SAFE/HEALTHY/ELEVATED/WARNING/DANGER)
+- **Price Alerts** (`/alerts.html`) - Custom price level monitoring
+  - Set alerts for any ticker above/below specific prices
+  - Real-time WebSocket notifications when alerts trigger
+  - Track triggered alerts history
+  - Optional notes for each alert
 
 ## Project Structure
 
@@ -179,6 +185,13 @@ Automatic tracking of:
 - `GET /api/export/signals` - Export signals to CSV
 - `GET /api/export/performance` - Export performance data to CSV
 - `GET /api/export/analysis` - Export technical analysis to CSV
+- `GET /api/alerts` - Get all price alerts
+- `GET /api/alerts/active` - Get active (non-triggered) alerts
+- `GET /api/alerts/triggered?limit=N` - Get recently triggered alerts
+- `GET /api/alerts/:ticker` - Get alerts for specific ticker
+- `POST /api/alerts` - Create new alert (params: ticker, price, condition, note)
+- `DELETE /api/alerts/:id` - Delete an alert
+- `POST /api/alerts/cleanup` - Clear old triggered alerts (params: daysOld)
 
 ## Development
 
