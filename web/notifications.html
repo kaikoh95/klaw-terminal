@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Klaw Terminal 🐾 - Notifications</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .notifications-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+    
+    .notifications-actions {
+      display: flex;
+      gap: 1rem;
+    }
+    
+    .btn {
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+    }
+    
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #00d4ff, #0099cc);
+      color: #0a0e1a;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 1.5rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .stat-label {
+      color: #888;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #00d4ff;
+    }
+    
+    .notifications-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .notification-card {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 1.5rem;
+      border-radius: 8px;
+      border-left: 4px solid;
+      transition: all 0.2s;
+      position: relative;
+    }
+    
+    .notification-card.unread {
+      background: rgba(0, 212, 255, 0.05);
+      border-left-color: #00d4ff;
+    }
+    
+    .notification-card.read {
+      opacity: 0.6;
+      border-left-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .notification-card:hover {
+      transform: translateX(4px);
+      background: rgba(255, 255, 255, 0.05);
+    }
+    
+    .notification-card.priority-critical {
+      border-left-color: #ff5050;
+      background: rgba(255, 80, 80, 0.05);
+    }
+    
+    .notification-card.priority-high {
+      border-left-color: #ffc800;
+      background: rgba(255, 200, 0, 0.05);
+    }
+    
+    .notification-card.priority-medium {
+      border-left-color: #00d4ff;
+    }
+    
+    .notification-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+    }
+    
+    .notification-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #fff;
+      margin: 0;
+    }
+    
+    .notification-time {
+      font-size: 0.85rem;
+      color: #888;
+      white-space: nowrap;
+    }
+    
+    .notification-message {
+      color: #ccc;
+      margin: 0.5rem 0;
+      line-height: 1.6;
+    }
+    
+    .notification-meta {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 0.85rem;
+    }
+    
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .meta-label {
+      color: #888;
+    }
+    
+    .meta-value {
+      font-weight: 600;
+      color: #00d4ff;
+    }
+    
+    .confidence-bar {
+      display: inline-flex;
+      gap: 2px;
+      margin-left: 0.5rem;
+    }
+    
+    .confidence-bar span {
+      width: 8px;
+      height: 12px;
+      background: rgba(0, 212, 255, 0.3);
+      border-radius: 2px;
+    }
+    
+    .confidence-bar span.filled {
+      background: #00d4ff;
+    }
+    
+    .priority-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .priority-critical {
+      background: rgba(255, 80, 80, 0.2);
+      color: #ff5050;
+    }
+    
+    .priority-high {
+      background: rgba(255, 200, 0, 0.2);
+      color: #ffc800;
+    }
+    
+    .priority-medium {
+      background: rgba(0, 212, 255, 0.2);
+      color: #00d4ff;
+    }
+    
+    .priority-low {
+      background: rgba(255, 255, 255, 0.1);
+      color: #888;
+    }
+    
+    .signal-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+      padding: 1rem;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 6px;
+    }
+    
+    .signal-detail {
+      text-align: center;
+    }
+    
+    .signal-detail-label {
+      font-size: 0.75rem;
+      color: #888;
+      margin-bottom: 0.25rem;
+    }
+    
+    .signal-detail-value {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #fff;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #888;
+    }
+    
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+    
+    .empty-state-text {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🐾 KLAW TERMINAL</h1>
+      <p class="subtitle">AI-Powered Trading Intelligence</p>
+      <nav>
+        <a href="/">Dashboard</a>
+        <a href="/signals.html">Signals</a>
+        <a href="/analysis.html">Analysis</a>
+        <a href="/screener.html">Screener</a>
+        <a href="/heatmap.html">Heatmap</a>
+        <a href="/performance.html">Performance</a>
+        <a href="/risk.html">Risk</a>
+        <a href="/alerts.html">Alerts</a>
+        <a href="/sentiment.html">Sentiment</a>
+        <a href="/news.html">News</a>
+        <a href="/options.html">Options</a>
+        <a href="/earnings.html">Earnings</a>
+        <a href="/notifications.html" class="active">Notifications</a>
+        <a href="/watchlist.html">Watchlist</a>
+      </nav>
+    </header>
+
+    <div class="card">
+      <div class="notifications-header">
+        <h2>🔔 Notifications</h2>
+        <div class="notifications-actions">
+          <button class="btn" onclick="markAllRead()">Mark All Read</button>
+          <button class="btn" onclick="clearOld()">Clear Old</button>
+          <button class="btn btn-primary" onclick="loadNotifications()">Refresh</button>
+        </div>
+      </div>
+      
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total</div>
+          <div class="stat-value" id="total-count">--</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Unread</div>
+          <div class="stat-value" id="unread-count">--</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Critical</div>
+          <div class="stat-value" id="critical-count">--</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Connected Clients</div>
+          <div class="stat-value" id="clients-count">--</div>
+        </div>
+      </div>
+      
+      <div id="notifications-list" class="notifications-list">
+        <div class="empty-state">
+          <div class="empty-state-icon">🔔</div>
+          <div class="empty-state-text">Loading notifications...</div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p>Real-time notifications via WebSocket</p>
+      <p>🐾 Maine Klaw Terminal v1.0</p>
+    </footer>
+  </div>
+
+  <script>
+    // WebSocket connection for real-time notifications
+    let ws;
+    let reconnectInterval;
+    
+    function connectWebSocket() {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      ws = new WebSocket(`${protocol}//${window.location.host}`);
+      
+      ws.onopen = () => {
+        console.log('✅ WebSocket connected for real-time notifications');
+        if (reconnectInterval) {
+          clearInterval(reconnectInterval);
+          reconnectInterval = null;
+        }
+      };
+      
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        
+        if (data.type === 'signal-notification') {
+          // New notification received
+          console.log('🔔 New notification:', data.data);
+          showBrowserNotification(data.data);
+          loadNotifications(); // Refresh list
+        } else if (data.type === 'notifications-init') {
+          // Initial notifications on connect
+          console.log('📦 Initial notifications loaded');
+        }
+      };
+      
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+      
+      ws.onclose = () => {
+        console.log('❌ WebSocket disconnected. Reconnecting...');
+        if (!reconnectInterval) {
+          reconnectInterval = setInterval(() => {
+            console.log('🔄 Attempting to reconnect...');
+            connectWebSocket();
+          }, 5000);
+        }
+      };
+    }
+    
+    // Request browser notification permission
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+    
+    function showBrowserNotification(notification) {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        const icon = notification.priority === 'critical' ? '🚨' : notification.priority === 'high' ? '⚠️' : '🔔';
+        new Notification(notification.title, {
+          body: notification.message,
+          icon: '/favicon.ico',
+          tag: notification.id
+        });
+        
+        // Play sound for critical alerts
+        if (notification.priority === 'critical') {
+          const audio = new Audio('/audio/alert.mp3');
+          audio.play().catch(() => {}); // Ignore if no audio file
+        }
+      }
+    }
+    
+    async function loadNotifications() {
+      try {
+        const response = await fetch('/api/notifications');
+        const result = await response.json();
+        
+        if (result.success) {
+          displayNotifications(result.data);
+        }
+        
+        // Load stats
+        const statsResponse = await fetch('/api/notifications/stats');
+        const statsResult = await statsResponse.json();
+        
+        if (statsResult.success) {
+          updateStats(statsResult.data);
+        }
+      } catch (error) {
+        console.error('Failed to load notifications:', error);
+      }
+    }
+    
+    function updateStats(stats) {
+      document.getElementById('total-count').textContent = stats.total;
+      document.getElementById('unread-count').textContent = stats.unread;
+      document.getElementById('critical-count').textContent = stats.byPriority.critical || 0;
+      document.getElementById('clients-count').textContent = stats.connectedClients;
+    }
+    
+    function displayNotifications(notifications) {
+      const listEl = document.getElementById('notifications-list');
+      
+      if (notifications.length === 0) {
+        listEl.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">🔕</div>
+            <div class="empty-state-text">No notifications yet</div>
+            <p style="color: #666; font-size: 0.9rem;">High-confidence AI signals (7+) will appear here</p>
+          </div>
+        `;
+        return;
+      }
+      
+      // Sort by timestamp descending (newest first)
+      notifications.sort((a, b) => b.timestamp - a.timestamp);
+      
+      let html = '';
+      
+      notifications.forEach(notif => {
+        const readClass = notif.read ? 'read' : 'unread';
+        const priorityClass = `priority-${notif.priority}`;
+        const timeAgo = formatTimeAgo(notif.timestamp);
+        
+        html += `
+          <div class="notification-card ${readClass} ${priorityClass}" onclick="markRead('${notif.id}')">
+            <div class="notification-header">
+              <h3 class="notification-title">${notif.title}</h3>
+              <span class="notification-time">${timeAgo}</span>
+            </div>
+            <p class="notification-message">${notif.message}</p>
+        `;
+        
+        // Show signal details if it's a signal notification
+        if (notif.type === 'signal' && notif.entry) {
+          const confidenceBar = generateConfidenceBar(notif.confidence);
+          
+          html += `
+            <div class="signal-details">
+              <div class="signal-detail">
+                <div class="signal-detail-label">Entry</div>
+                <div class="signal-detail-value">$${notif.entry.toFixed(2)}</div>
+              </div>
+              <div class="signal-detail">
+                <div class="signal-detail-label">Target 1</div>
+                <div class="signal-detail-value">$${notif.targets.t1.toFixed(2)}</div>
+              </div>
+              <div class="signal-detail">
+                <div class="signal-detail-label">Target 2</div>
+                <div class="signal-detail-value">$${notif.targets.t2.toFixed(2)}</div>
+              </div>
+              <div class="signal-detail">
+                <div class="signal-detail-label">Stop Loss</div>
+                <div class="signal-detail-value">$${notif.stopLoss.toFixed(2)}</div>
+              </div>
+            </div>
+            <div class="notification-meta">
+              <div class="meta-item">
+                <span class="meta-label">Pattern:</span>
+                <span class="meta-value">${notif.pattern}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Timeframe:</span>
+                <span class="meta-value">${notif.timeframe}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Confidence:</span>
+                <span class="meta-value">${notif.confidence}/10 ${confidenceBar}</span>
+              </div>
+            </div>
+          `;
+        }
+        
+        html += '</div>';
+      });
+      
+      listEl.innerHTML = html;
+    }
+    
+    function generateConfidenceBar(confidence) {
+      let html = '<span class="confidence-bar">';
+      for (let i = 1; i <= 10; i++) {
+        html += `<span class="${i <= confidence ? 'filled' : ''}"></span>`;
+      }
+      html += '</span>';
+      return html;
+    }
+    
+    function formatTimeAgo(timestamp) {
+      const seconds = Math.floor((Date.now() - timestamp) / 1000);
+      
+      if (seconds < 60) return 'Just now';
+      if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+      if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+      return `${Math.floor(seconds / 86400)}d ago`;
+    }
+    
+    async function markRead(notificationId) {
+      try {
+        await fetch(`/api/notifications/${notificationId}/read`, { method: 'POST' });
+        loadNotifications();
+      } catch (error) {
+        console.error('Failed to mark notification as read:', error);
+      }
+    }
+    
+    async function markAllRead() {
+      if (!confirm('Mark all notifications as read?')) return;
+      
+      try {
+        const response = await fetch('/api/notifications/read-all', { method: 'POST' });
+        const result = await response.json();
+        
+        if (result.success) {
+          console.log(`✅ Marked ${result.data.count} notifications as read`);
+          loadNotifications();
+        }
+      } catch (error) {
+        console.error('Failed to mark all as read:', error);
+      }
+    }
+    
+    async function clearOld() {
+      const days = prompt('Clear notifications older than how many days?', '7');
+      if (!days) return;
+      
+      try {
+        const response = await fetch('/api/notifications/cleanup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ daysOld: parseInt(days) })
+        });
+        const result = await response.json();
+        
+        if (result.success) {
+          console.log(`✅ Cleared ${result.data.removed} old notifications`);
+          loadNotifications();
+        }
+      } catch (error) {
+        console.error('Failed to clear old notifications:', error);
+      }
+    }
+    
+    // Initialize
+    connectWebSocket();
+    loadNotifications();
+    
+    // Refresh every 30 seconds
+    setInterval(loadNotifications, 30000);
+  </script>
+</body>
+</html>

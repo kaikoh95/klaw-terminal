@@ -72,6 +72,17 @@ import {
   resetWatchlist,
   detectTickerConfig
 } from '../lib/watchlist.js';
+import {
+  registerClient,
+  notifySignal,
+  notify,
+  loadNotifications,
+  getRecentNotifications,
+  markAsRead,
+  markAllAsRead,
+  clearOldNotifications,
+  getNotificationStats
+} from '../lib/notifications.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -381,12 +392,17 @@ app.post('/api/analyze', async (req, res) => {
     // Run AI analysis
     const analysis = await batchAnalyze(marketData, technicals);
     
-    // Save signals
+    // Save signals and send notifications
     const signalsGenerated = [];
     for (const [ticker, result] of Object.entries(analysis)) {
       if (result && !result.error && result.signal !== 'NEUTRAL') {
         signalsGenerated.push(result);
         saveSignals([result]);
+        
+        // Send notification for high-confidence signals (7+)
+        if (result.confidence >= 7) {
+          notifySignal(result);
+        }
       }
     }
     
@@ -936,6 +952,90 @@ app.post('/api/cache/clear', (req, res) => {
   }
 });
 
+// Notification Endpoints
+
+// Get all notifications
+app.get('/api/notifications', (req, res) => {
+  try {
+    const notifications = loadNotifications();
+    res.json({ success: true, data: notifications });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get recent notifications
+app.get('/api/notifications/recent', (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 20;
+    const notifications = getRecentNotifications(limit);
+    res.json({ success: true, data: notifications });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Mark notification as read
+app.post('/api/notifications/:id/read', (req, res) => {
+  try {
+    const { id } = req.params;
+    const success = markAsRead(id);
+    res.json({ success, message: success ? 'Marked as read' : 'Notification not found' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Mark all notifications as read
+app.post('/api/notifications/read-all', (req, res) => {
+  try {
+    const count = markAllAsRead();
+    res.json({ success: true, data: { count } });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Clear old notifications
+app.post('/api/notifications/cleanup', (req, res) => {
+  try {
+    const daysOld = parseInt(req.body.daysOld) || 7;
+    const removed = clearOldNotifications(daysOld);
+    res.json({ success: true, data: { removed } });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get notification statistics
+app.get('/api/notifications/stats', (req, res) => {
+  try {
+    const stats = getNotificationStats();
+    res.json({ success: true, data: stats });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Send custom notification (for testing or manual alerts)
+app.post('/api/notifications/send', (req, res) => {
+  try {
+    const { title, message, type, priority } = req.body;
+    
+    if (!title || !message) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Missing required fields: title, message' 
+      });
+    }
+    
+    notify(title, message, type || 'info', priority || 'medium');
+    res.json({ success: true, message: 'Notification sent' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Watchlist Management Endpoints
 
 // Get full watchlist
@@ -1007,6 +1107,9 @@ app.post('/api/watchlist/reset', (req, res) => {
 wss.on('connection', (ws) => {
   console.log('WebSocket client connected');
   
+  // Register client for notifications
+  registerClient(ws);
+  
   // Send initial data immediately on connect
   (async () => {
     try {
@@ -1016,8 +1119,16 @@ wss.on('connection', (ws) => {
         data: marketData,
         timestamp: Date.now()
       }));
+      
+      // Send recent notifications
+      const recentNotifications = getRecentNotifications(10);
+      ws.send(JSON.stringify({
+        type: 'notifications-init',
+        data: recentNotifications,
+        timestamp: Date.now()
+      }));
     } catch (error) {
-      console.error('Error sending initial market data:', error);
+      console.error('Error sending initial data:', error);
     }
   })();
   

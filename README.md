@@ -25,6 +25,7 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
 - **CSV Export** - Export signals, performance data, and technical analysis to CSV for Excel/external analysis
 - **Price Alerts** - Set custom price alerts with real-time notifications when levels are breached
 - **Smart Caching** - Intelligent Gemini analysis caching with 5-min TTL to reduce API costs and improve speed
+- **Real-Time Signal Notifications** - Instant WebSocket notifications for high-confidence AI signals (7+) with browser alerts and history tracking
 
 ## Dynamic Watchlist
 
@@ -160,6 +161,13 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
   - Manual cache clearing for troubleshooting
   - Auto-refresh every 10 seconds
   - Monitor API cost savings from cache hits
+- **Notifications** (`/notifications.html`) - Real-time AI signal alerts and notification center
+  - Instant WebSocket notifications for high-confidence signals (7+)
+  - Browser notifications with sound alerts for critical signals (9+)
+  - Complete notification history with read/unread tracking
+  - Priority-based filtering (critical/high/medium/low)
+  - Detailed signal information (entry, targets, stop loss, confidence)
+  - Auto-cleanup of old notifications
 - **Watchlist Manager** (`/watchlist.html`) - Dynamic ticker watchlist management
   - Add/remove custom tickers with auto-detection of exchange
   - Quick-add buttons for popular stocks (AAPL, TSLA, NVDA, etc.)
@@ -286,6 +294,13 @@ Automatic tracking of:
 - `POST /api/watchlist/add` - Add ticker to watchlist (params: symbol, exchange, name)
 - `DELETE /api/watchlist/remove/:symbol` - Remove ticker from watchlist
 - `POST /api/watchlist/reset` - Reset watchlist to defaults
+- `GET /api/notifications` - Get all notifications
+- `GET /api/notifications/recent?limit=N` - Get recent notifications (default: 20)
+- `GET /api/notifications/stats` - Get notification statistics (total, unread, by priority, connected clients)
+- `POST /api/notifications/:id/read` - Mark specific notification as read
+- `POST /api/notifications/read-all` - Mark all notifications as read
+- `POST /api/notifications/cleanup` - Clear old notifications (params: daysOld)
+- `POST /api/notifications/send` - Send custom notification (params: title, message, type, priority)
 
 ## Development
 

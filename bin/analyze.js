@@ -7,6 +7,7 @@ import { batchAnalyze } from '../lib/gemini.js';
 import { processBatchAnalysis } from '../lib/signals.js';
 import { generatePerformanceReport } from '../lib/performance.js';
 import { batchAnalyzeMultiTimeframe } from '../lib/multi-timeframe.js';
+import { notifySignal } from '../lib/notifications.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const dataDir = join(__dirname, '..', 'data');
@@ -81,13 +82,30 @@ try {
   console.log('SIGNAL GENERATION');
   console.log('═══════════════════════════════════════\n');
   
-  // Generate signals
+  // Generate signals and send notifications
   const newSignals = processBatchAnalysis(analysisResults, marketData);
+  
+  // Send notifications for high-confidence signals
+  let notificationsSent = 0;
+  for (const [ticker, analysis] of Object.entries(analysisResults)) {
+    if (analysis && !analysis.error && analysis.signal !== 'NEUTRAL' && analysis.confidence >= 7) {
+      try {
+        notifySignal(analysis);
+        notificationsSent++;
+      } catch (err) {
+        // Notifications might fail if WebSocket server not running, that's OK
+        console.warn(`⚠️ Failed to send notification for ${ticker}:`, err.message);
+      }
+    }
+  }
   
   if (newSignals.length === 0) {
     console.log('No high-confidence signals generated.');
   } else {
-    console.log(`\n${newSignals.length} signal(s) added to tracking.\n`);
+    console.log(`\n${newSignals.length} signal(s) added to tracking.`);
+    if (notificationsSent > 0) {
+      console.log(`🔔 ${notificationsSent} notification(s) sent to connected clients.\n`);
+    }
   }
   
   console.log('═══════════════════════════════════════');
