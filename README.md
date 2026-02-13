@@ -25,7 +25,7 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
 - **Signal Performance Tracker** - Track actual vs predicted outcomes, identify best-performing patterns
 - **CSV Export** - Export signals, performance data, and technical analysis to CSV for Excel/external analysis
 - **Price Alerts** - Set custom price alerts with real-time notifications when levels are breached
-- **Smart Caching** - Intelligent Gemini analysis caching with 5-min TTL to reduce API costs and improve speed
+- **Smart Caching** - Intelligent Gemini analysis caching (5-min TTL) + Market data caching (30-sec TTL) to reduce API costs and improve speed
 - **Real-Time Signal Notifications** - Instant WebSocket notifications for high-confidence AI signals (7+) with browser alerts and history tracking
 - **Trade Journal** - Log actual trades, track execution vs signals, learn from outcomes with comprehensive statistics and CSV export
 
@@ -309,6 +309,8 @@ Automatic tracking of:
 - `POST /api/earnings/refresh` - Fetch earnings for all watchlist tickers (params: tickers)
 - `GET /api/cache/stats` - Get Gemini analysis cache statistics (size, fresh/stale, entries)
 - `POST /api/cache/clear` - Clear all cached Gemini analyses
+- `GET /api/market-cache/stats` - Get market data cache statistics (size, fresh/stale, entries, cache hit rate)
+- `POST /api/market-cache/clear` - Clear all cached market data (forces fresh API calls)
 - `GET /api/watchlist` - Get full watchlist with ticker configs
 - `GET /api/watchlist/symbols` - Get ticker symbols only (array)
 - `POST /api/watchlist/add` - Add ticker to watchlist (params: symbol, exchange, name)

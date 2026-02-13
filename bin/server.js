@@ -6,7 +6,11 @@ import { WebSocketServer } from 'ws';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
-import { fetchAllTickers } from '../lib/market-data.js';
+import { 
+  fetchAllTickers, 
+  getCacheStats as getMarketDataCacheStats, 
+  clearCache as clearMarketDataCache 
+} from '../lib/market-data.js';
 import { analyzeMarketData } from '../lib/technicals.js';
 import { exportSignalsSummary, getRecentSignals } from '../lib/signals.js';
 import { loadPerformance, getPerformanceSummary } from '../lib/performance.js';
@@ -985,6 +989,28 @@ app.get('/api/cache/stats', (req, res) => {
 app.post('/api/cache/clear', (req, res) => {
   try {
     const result = clearCache();
+    res.json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Market Data Cache Management Endpoints
+
+// Get market data cache statistics
+app.get('/api/market-cache/stats', (req, res) => {
+  try {
+    const stats = getMarketDataCacheStats();
+    res.json({ success: true, data: stats });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Clear market data cache
+app.post('/api/market-cache/clear', (req, res) => {
+  try {
+    const result = clearMarketDataCache();
     res.json({ success: true, data: result });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
