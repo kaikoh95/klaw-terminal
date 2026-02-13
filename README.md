@@ -96,6 +96,7 @@ klaw-terminal/
 ## Technical Indicators
 
 - **RSI(14)** - Relative Strength Index
+- **MFI(14)** - Money Flow Index (volume-weighted RSI)
 - **MACD** - Moving Average Convergence Divergence
 - **Bollinger Bands** - Volatility bands
 - **VWAP** - Volume Weighted Average Price
@@ -103,6 +104,12 @@ klaw-terminal/
 - **EMA** - Exponential Moving Averages (9, 21)
 - **Support/Resistance** - Key price levels
 - **Volume Analysis** - Unusual volume detection
+- **OBV** - On-Balance Volume with divergence detection
+- **ADX** - Average Directional Index (trend strength)
+- **ATR** - Average True Range (volatility)
+- **Stochastic** - Stochastic Oscillator
+- **Fibonacci** - Retracement and extension levels
+- **Candlestick Patterns** - 12+ pattern recognition
 
 ## Signal Generation
 
