@@ -8,6 +8,7 @@ import { processBatchAnalysis } from '../lib/signals.js';
 import { generatePerformanceReport } from '../lib/performance.js';
 import { batchAnalyzeMultiTimeframe } from '../lib/multi-timeframe.js';
 import { notifySignal } from '../lib/notifications.js';
+import { detectMarketRegime, applyRegimeFilter } from '../lib/market-regime.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const dataDir = join(__dirname, '..', 'data');
@@ -36,12 +37,27 @@ try {
   
   const analysisResults = await batchAnalyze(marketData, technicals, multiTimeframeData);
   
+  // Detect market regime and apply filters
+  console.log('\n🔍 Detecting market regimes and applying filters...\n');
+  const regimeAnalysis = {};
+  const filteredResults = {};
+  
+  for (const [ticker, analysis] of Object.entries(analysisResults)) {
+    if (!analysis.error) {
+      const regime = detectMarketRegime(marketData[ticker], technicals[ticker], multiTimeframeData[ticker]);
+      regimeAnalysis[ticker] = regime;
+      filteredResults[ticker] = applyRegimeFilter(analysis, regime);
+    } else {
+      filteredResults[ticker] = analysis;
+    }
+  }
+  
   console.log('\n═══════════════════════════════════════');
-  console.log('AI ANALYSIS RESULTS');
+  console.log('AI ANALYSIS RESULTS (REGIME-FILTERED)');
   console.log('═══════════════════════════════════════\n');
   
   // Display results
-  for (const [ticker, analysis] of Object.entries(analysisResults)) {
+  for (const [ticker, analysis] of Object.entries(filteredResults)) {
     if (analysis.error) {
       console.log(`${ticker}: ❌ ${analysis.error}\n`);
       continue;
@@ -70,6 +86,22 @@ try {
     
     console.log(`  Reasoning: ${analysis.reasoning}`);
     
+    // Market regime information
+    if (regimeAnalysis[ticker]) {
+      const regime = regimeAnalysis[ticker];
+      console.log(`  📊 Market Regime: ${regime.overall} (Conf: ${regime.confidence}/10)`);
+      console.log(`     Risk Level: ${regime.riskLevel}`);
+      
+      if (analysis.regimeBoost) {
+        console.log(`     Confidence Adj: ${analysis.originalConfidence} → ${analysis.confidence} (${analysis.regimeBoost})`);
+      }
+      
+      if (analysis.regimeWarnings && analysis.regimeWarnings.length > 0) {
+        console.log(`     Warnings:`);
+        analysis.regimeWarnings.forEach(warning => console.log(`       ${warning}`));
+      }
+    }
+    
     if (analysis.alerts && analysis.alerts.length > 0) {
       console.log(`  Alerts:`);
       analysis.alerts.forEach(alert => console.log(`    • ${alert}`));
@@ -82,12 +114,12 @@ try {
   console.log('SIGNAL GENERATION');
   console.log('═══════════════════════════════════════\n');
   
-  // Generate signals and send notifications
-  const newSignals = processBatchAnalysis(analysisResults, marketData);
+  // Generate signals and send notifications (using regime-filtered results)
+  const newSignals = processBatchAnalysis(filteredResults, marketData);
   
   // Send notifications for high-confidence signals
   let notificationsSent = 0;
-  for (const [ticker, analysis] of Object.entries(analysisResults)) {
+  for (const [ticker, analysis] of Object.entries(filteredResults)) {
     if (analysis && !analysis.error && analysis.signal !== 'NEUTRAL' && analysis.confidence >= 7) {
       try {
         notifySignal(analysis);

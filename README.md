@@ -9,6 +9,7 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
 - **Market Scanner** - Real-time data from Yahoo Finance + Google Finance
 - **Technical Analysis** - RSI, MACD, Bollinger Bands, VWAP, Support/Resistance
 - **AI Analysis** - Gemini 2.5 Pro for trade setup detection and pattern recognition
+- **Market Regime Detection** - Professional-grade regime analysis across 6 dimensions (trend, volatility, momentum, volume, risk appetite, market phase) with automated signal filtering and strategy recommendations
 - **Signal Tracking** - Complete trade history with P&L tracking
 - **Performance Analytics** - Hit rate, win streaks, profit factor, expectancy
 - **Risk Management** - Position sizing calculator, portfolio heat tracking, Kelly Criterion, correlation matrix
@@ -123,6 +124,13 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
   - Kelly Criterion for optimal position sizing
   - Correlation matrix to identify concentration risk
   - Real-time risk status monitoring (SAFE/HEALTHY/ELEVATED/WARNING/DANGER)
+- **Market Regime** (`/regime.html`) - Professional market environment detection
+  - 6-dimensional regime analysis: Trend, Volatility, Momentum, Volume, Risk Appetite, Market Phase
+  - Overall regime classification with confidence scoring
+  - Risk level assessment (VERY HIGH/HIGH/MODERATE/LOW)
+  - Actionable trading recommendations based on current regime
+  - Detailed breakdown of each dimension with supporting metrics
+  - Auto-refresh every 2 minutes for real-time regime tracking
 - **Price Alerts** (`/alerts.html`) - Custom price level monitoring
   - Set alerts for any ticker above/below specific prices
   - Real-time WebSocket notifications when alerts trigger
@@ -259,6 +267,8 @@ Automatic tracking of:
 
 - `GET /api/market-data` - Latest market data
 - `GET /api/technicals` - Technical analysis
+- `GET /api/market-regime` - Market regime analysis for all tickers
+- `GET /api/market-regime?ticker=SPY` - Market regime analysis for specific ticker
 - `GET /api/latest-scan` - Last scan results
 - `GET /api/signals` - All signals
 - `GET /api/signals/recent?count=N` - Recent signals

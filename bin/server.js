@@ -93,6 +93,10 @@ import {
   getStats,
   exportToCSV as exportJournalToCSV
 } from '../lib/trade-journal.js';
+import {
+  detectMarketRegime,
+  applyRegimeFilter
+} from '../lib/market-regime.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -129,6 +133,31 @@ app.get('/api/technicals', async (req, res) => {
     }
     
     res.json({ success: true, data: technicals, timestamp: Date.now() });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get market regime analysis
+app.get('/api/market-regime', async (req, res) => {
+  try {
+    const { ticker } = req.query;
+    const marketData = await fetchAllTickers();
+    const regimes = {};
+    
+    for (const [symbol, data] of Object.entries(marketData)) {
+      if (ticker && symbol !== ticker) continue;
+      if (data && data.historicalData) {
+        const technicals = analyzeMarketData(data);
+        regimes[symbol] = detectMarketRegime(data, technicals);
+      }
+    }
+    
+    res.json({ 
+      success: true, 
+      data: ticker ? regimes[ticker] : regimes, 
+      timestamp: Date.now() 
+    });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }

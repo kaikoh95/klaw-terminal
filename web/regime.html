@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Klaw Terminal 🐾 - Market Regime</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🐾 KLAW TERMINAL</h1>
+      <p class="subtitle">Market Regime Detection</p>
+      <nav>
+        <a href="/">Dashboard</a>
+        <a href="/signals.html">Signals</a>
+        <a href="/analysis.html">Analysis</a>
+        <a href="/screener.html">Screener</a>
+        <a href="/heatmap.html">Heatmap</a>
+        <a href="/performance.html">Performance</a>
+        <a href="/risk.html">Risk</a>
+        <a href="/regime.html" class="active">Regime</a>
+        <a href="/alerts.html">Alerts</a>
+        <a href="/sentiment.html">Sentiment</a>
+        <a href="/news.html">News</a>
+        <a href="/options.html">Options</a>
+        <a href="/earnings.html">Earnings</a>
+        <a href="/watchlist.html">Watchlist</a>
+        <a href="/journal.html">Journal</a>
+      </nav>
+    </header>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>📊 Market Regime Analysis</h2>
+        <button id="refreshBtn" class="btn btn-primary">🔄 Refresh</button>
+      </div>
+      
+      <div class="info-box">
+        <p><strong>What is Market Regime Detection?</strong></p>
+        <p>Professional traders adapt their strategies based on market conditions. This tool identifies the current market environment across multiple dimensions:</p>
+        <ul>
+          <li><strong>Trend Regime:</strong> Is the market trending or ranging?</li>
+          <li><strong>Volatility Regime:</strong> High, normal, or low volatility?</li>
+          <li><strong>Momentum Regime:</strong> Strong or weak momentum?</li>
+          <li><strong>Volume Regime:</strong> High or low participation?</li>
+          <li><strong>Market Phase:</strong> Accumulation, markup, distribution, or markdown?</li>
+        </ul>
+        <p>Each regime suggests different trading strategies and helps filter signals for better probability.</p>
+      </div>
+    </div>
+
+    <div id="regimeContainer" class="loading">Loading market regime data...</div>
+
+  </div>
+
+  <script>
+    let regimeData = {};
+
+    async function fetchRegime() {
+      try {
+        document.getElementById('regimeContainer').innerHTML = '<div class="loading">Loading market regime data...</div>';
+        
+        const response = await fetch('/api/market-regime');
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to fetch regime data');
+        }
+        
+        regimeData = result.data;
+        renderRegimes();
+      } catch (error) {
+        document.getElementById('regimeContainer').innerHTML = `
+          <div class="card error">
+            <h3>❌ Error Loading Regime Data</h3>
+            <p>${error.message}</p>
+          </div>
+        `;
+      }
+    }
+
+    function renderRegimes() {
+      const container = document.getElementById('regimeContainer');
+      
+      if (!regimeData || Object.keys(regimeData).length === 0) {
+        container.innerHTML = '<div class="card"><p>No regime data available.</p></div>';
+        return;
+      }
+      
+      let html = '';
+      
+      for (const [ticker, regime] of Object.entries(regimeData)) {
+        html += `
+          <div class="card">
+            <div class="card-header">
+              <h2>${ticker}</h2>
+              <span class="badge ${getRegimeBadgeClass(regime.overall)}">${regime.overall}</span>
+            </div>
+            
+            <div class="grid grid-2">
+              <div class="stat-card">
+                <div class="stat-label">Overall Regime</div>
+                <div class="stat-value">${regime.overall.replace(/_/g, ' ')}</div>
+                <div class="stat-sublabel">Confidence: ${regime.confidence}/10</div>
+              </div>
+              
+              <div class="stat-card ${getRiskClass(regime.riskLevel)}">
+                <div class="stat-label">Risk Level</div>
+                <div class="stat-value">${regime.riskLevel}</div>
+              </div>
+            </div>
+            
+            <div class="grid grid-3">
+              <div class="stat-card-small">
+                <div class="stat-label">Trend</div>
+                <div class="stat-value-small">${regime.dimensions.trend.regime}</div>
+                <div class="stat-sublabel">${regime.dimensions.trend.direction} ${regime.dimensions.trend.strength}</div>
+              </div>
+              
+              <div class="stat-card-small">
+                <div class="stat-label">Volatility</div>
+                <div class="stat-value-small">${regime.dimensions.volatility.regime.replace(/_/g, ' ')}</div>
+                <div class="stat-sublabel">${regime.dimensions.volatility.level}</div>
+              </div>
+              
+              <div class="stat-card-small">
+                <div class="stat-label">Momentum</div>
+                <div class="stat-value-small">${regime.dimensions.momentum.regime.replace(/_/g, ' ')}</div>
+                <div class="stat-sublabel">${regime.dimensions.momentum.direction} ${regime.dimensions.momentum.strength}</div>
+              </div>
+              
+              <div class="stat-card-small">
+                <div class="stat-label">Volume</div>
+                <div class="stat-value-small">${regime.dimensions.volume.regime.replace(/_/g, ' ')}</div>
+                <div class="stat-sublabel">${regime.dimensions.volume.volumeRatio}x avg</div>
+              </div>
+              
+              <div class="stat-card-small">
+                <div class="stat-label">Risk Appetite</div>
+                <div class="stat-value-small">${regime.dimensions.riskAppetite.regime.replace(/_/g, ' ')}</div>
+                <div class="stat-sublabel">${regime.dimensions.riskAppetite.level}</div>
+              </div>
+              
+              <div class="stat-card-small">
+                <div class="stat-label">Market Phase</div>
+                <div class="stat-value-small">${regime.dimensions.phase.phase}</div>
+                <div class="stat-sublabel">${regime.dimensions.phase.volumeConfirmation ? '✅ Confirmed' : '⚠️ Unconfirmed'}</div>
+              </div>
+            </div>
+            
+            ${regime.recommendations && regime.recommendations.length > 0 ? `
+              <div class="recommendations">
+                <h3>💡 Trading Recommendations</h3>
+                <ul>
+                  ${regime.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                </ul>
+              </div>
+            ` : ''}
+            
+            <div class="regime-details">
+              <h4>📋 Detailed Breakdown</h4>
+              <div class="detail-grid">
+                <div class="detail-item">
+                  <strong>Trend:</strong> ${regime.dimensions.trend.regime} (${regime.dimensions.trend.tradingStyle})
+                  <br><small>ADX: ${regime.dimensions.trend.adxValue?.toFixed(1) || 'N/A'} | MA Alignment: ${regime.dimensions.trend.maAlignment.direction}</small>
+                </div>
+                
+                <div class="detail-item">
+                  <strong>Volatility:</strong> ${regime.dimensions.volatility.regime.replace(/_/g, ' ')}
+                  <br><small>${regime.dimensions.volatility.signal}</small>
+                  <br><small>ATR: ${regime.dimensions.volatility.atrPercent}% | BB Width: ${regime.dimensions.volatility.bbWidth}%</small>
+                </div>
+                
+                <div class="detail-item">
+                  <strong>Momentum:</strong> ${regime.dimensions.momentum.regime.replace(/_/g, ' ')}
+                  <br><small>Alignment: ${regime.dimensions.momentum.alignment} (${regime.dimensions.momentum.bullishSignals}/${regime.dimensions.momentum.totalIndicators} bullish)</small>
+                </div>
+                
+                <div class="detail-item">
+                  <strong>Volume:</strong> ${regime.dimensions.volume.regime.replace(/_/g, ' ')}
+                  <br><small>${regime.dimensions.volume.signal}</small>
+                  <br><small>${regime.dimensions.volume.reliable ? '✅ Reliable' : '⚠️ Unreliable'}</small>
+                </div>
+                
+                <div class="detail-item">
+                  <strong>Risk Appetite:</strong> ${regime.dimensions.riskAppetite.regime.replace(/_/g, ' ')}
+                  <br><small>${regime.dimensions.riskAppetite.signal}</small>
+                </div>
+                
+                <div class="detail-item">
+                  <strong>Market Phase:</strong> ${regime.dimensions.phase.phase}
+                  <br><small>${regime.dimensions.phase.description}</small>
+                  <br><small>Confidence: ${regime.dimensions.phase.confidence}/10</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      
+      container.innerHTML = html;
+    }
+
+    function getRegimeBadgeClass(regime) {
+      if (regime.includes('BULL')) return 'badge-success';
+      if (regime.includes('BEAR')) return 'badge-danger';
+      if (regime.includes('AVOID')) return 'badge-danger';
+      if (regime.includes('CONSOLIDATION') || regime.includes('ACCUMULATION')) return 'badge-warning';
+      if (regime.includes('HIGH_VOLATILITY')) return 'badge-warning';
+      return 'badge-neutral';
+    }
+
+    function getRiskClass(risk) {
+      if (risk === 'VERY_HIGH' || risk === 'HIGH') return 'danger';
+      if (risk === 'MODERATE') return 'warning';
+      return 'success';
+    }
+
+    // Event listeners
+    document.getElementById('refreshBtn').addEventListener('click', fetchRegime);
+
+    // Initial load
+    fetchRegime();
+
+    // Auto-refresh every 2 minutes
+    setInterval(fetchRegime, 2 * 60 * 1000);
+  </script>
+
+  <style>
+    .recommendations {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: rgba(52, 211, 153, 0.1);
+      border-left: 3px solid #34d399;
+      border-radius: 4px;
+    }
+
+    .recommendations h3 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1rem;
+      color: #34d399;
+    }
+
+    .recommendations ul {
+      margin: 0;
+      padding-left: 1.5rem;
+    }
+
+    .recommendations li {
+      margin: 0.3rem 0;
+      color: #d1d5db;
+    }
+
+    .regime-details {
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid #374151;
+    }
+
+    .regime-details h4 {
+      margin: 0 0 1rem 0;
+      font-size: 0.9rem;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+
+    .detail-item {
+      padding: 0.75rem;
+      background: rgba(31, 41, 55, 0.5);
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+
+    .detail-item strong {
+      color: #f3f4f6;
+    }
+
+    .detail-item small {
+      color: #9ca3af;
+      display: block;
+      margin-top: 0.25rem;
+    }
+
+    .badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-success {
+      background: rgba(52, 211, 153, 0.2);
+      color: #34d399;
+    }
+
+    .badge-danger {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+    }
+
+    .badge-warning {
+      background: rgba(251, 191, 36, 0.2);
+      color: #fbbf24;
+    }
+
+    .badge-neutral {
+      background: rgba(156, 163, 175, 0.2);
+      color: #9ca3af;
+    }
+
+    .stat-card.danger {
+      border-left: 3px solid #ef4444;
+    }
+
+    .stat-card.warning {
+      border-left: 3px solid #fbbf24;
+    }
+
+    .stat-card.success {
+      border-left: 3px solid #34d399;
+    }
+
+    .stat-card-small {
+      padding: 0.75rem;
+      background: rgba(31, 41, 55, 0.5);
+      border-radius: 6px;
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #9ca3af;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-value-small {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #f3f4f6;
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-sublabel {
+      font-size: 0.7rem;
+      color: #6b7280;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin: 1rem 0;
+    }
+
+    @media (max-width: 768px) {
+      .grid-2, .grid-3 {
+        grid-template-columns: 1fr;
+      }
+      
+      .detail-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .info-box {
+      background: rgba(59, 130, 246, 0.1);
+      border-left: 3px solid #3b82f6;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 4px;
+    }
+
+    .info-box p {
+      margin: 0.5rem 0;
+      color: #d1d5db;
+    }
+
+    .info-box strong {
+      color: #3b82f6;
+    }
+
+    .info-box ul {
+      margin: 0.5rem 0;
+      padding-left: 1.5rem;
+      color: #d1d5db;
+    }
+
+    .info-box li {
+      margin: 0.3rem 0;
+    }
+  </style>
+</body>
+</html>
