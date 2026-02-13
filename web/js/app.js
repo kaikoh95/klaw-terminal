@@ -459,8 +459,11 @@ function formatVolume(volume) {
   return volume.toString();
 }
 
-// Chart instance
+// Chart instances
 let priceChart = null;
+let rsiChart = null;
+let macdChart = null;
+let volumeChart = null;
 
 // Load price chart for ticker
 async function loadChart(ticker) {

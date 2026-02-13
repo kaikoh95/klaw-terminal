@@ -731,6 +731,34 @@ footer {
   border-radius: 8px;
 }
 
+/* Multi-Panel Chart Layout */
+.multi-chart-container {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 20px;
+}
+
+.chart-panel {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  background: var(--bg-secondary);
+}
+
+.price-panel .chart-container {
+  height: 350px;
+}
+
+.indicator-panel .chart-container {
+  height: 120px;
+}
+
+.small-chart canvas {
+  max-height: 100%;
+}
+
 .legend-item {
   display: flex;
   align-items: center;

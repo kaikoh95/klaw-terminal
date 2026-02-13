@@ -75,16 +75,42 @@
         </div>
       </div>
 
-      <!-- Price Chart -->
+      <!-- Multi-Panel Chart -->
       <div class="card chart-card">
         <h2>
-          Price Chart
+          Technical Analysis
           <select id="chartTicker" onchange="loadChart(this.value)">
             <option value="">Select ticker...</option>
           </select>
         </h2>
-        <div class="chart-container">
-          <canvas id="priceChart"></canvas>
+        <div class="multi-chart-container">
+          <!-- Price Chart -->
+          <div class="chart-panel price-panel">
+            <div class="chart-container">
+              <canvas id="priceChart"></canvas>
+            </div>
+          </div>
+          
+          <!-- RSI Chart -->
+          <div class="chart-panel indicator-panel">
+            <div class="chart-container small-chart">
+              <canvas id="rsiChart"></canvas>
+            </div>
+          </div>
+          
+          <!-- MACD Chart -->
+          <div class="chart-panel indicator-panel">
+            <div class="chart-container small-chart">
+              <canvas id="macdChart"></canvas>
+            </div>
+          </div>
+          
+          <!-- Volume Chart -->
+          <div class="chart-panel indicator-panel">
+            <div class="chart-container small-chart">
+              <canvas id="volumeChart"></canvas>
+            </div>
+          </div>
         </div>
         <div id="chartLegend" class="chart-legend"></div>
       </div>
@@ -121,6 +147,7 @@
   </div>
 
   <script src="/js/app.js"></script>
+  <script src="/js/app-charts.js"></script>
   <script>
     // Initialize WebSocket for real-time updates
     initWebSocket();
