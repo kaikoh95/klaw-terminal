@@ -9,6 +9,7 @@ import { generatePerformanceReport } from '../lib/performance.js';
 import { batchAnalyzeMultiTimeframe } from '../lib/multi-timeframe.js';
 import { notifySignal } from '../lib/notifications.js';
 import { detectMarketRegime, applyRegimeFilter } from '../lib/market-regime.js';
+import { generatePositionSizingRecommendations } from '../lib/risk-management.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const dataDir = join(__dirname, '..', 'data');
@@ -105,6 +106,24 @@ try {
     if (analysis.alerts && analysis.alerts.length > 0) {
       console.log(`  Alerts:`);
       analysis.alerts.forEach(alert => console.log(`    • ${alert}`));
+    }
+    
+    // Show position sizing recommendations for tradeable signals
+    if (analysis.signal !== 'NEUTRAL' && analysis.confidence >= 6) {
+      try {
+        const positionRec = generatePositionSizingRecommendations(analysis, 10000);
+        if (positionRec.canTrade) {
+          console.log(`  💰 Position Sizing (for $10,000 account):`);
+          console.log(`     Risk: ${positionRec.riskPercent}% ($${positionRec.riskAmount.toFixed(0)}) | Shares: ${positionRec.fullPosition.shares} (${positionRec.fullPosition.percentOfAccount}% of account)`);
+          console.log(`     Entry Plan: ${positionRec.scaling.initial.description}`);
+          console.log(`     Scale In: ${positionRec.scaling.scaleIn.description} (${positionRec.scaling.scaleIn.shares} shares)`);
+          console.log(`     Exit Plan: T1 ${positionRec.exits.t1.percent}% → T2 ${positionRec.exits.t2.percent}% → T3 ${positionRec.exits.t3.percent}%`);
+          console.log(`     Max Loss: $${positionRec.scenarios.maxLoss.amount} (${positionRec.scenarios.maxLoss.percent}%)`);
+          console.log(`     Target Profit: $${positionRec.scenarios.targetProfit.scaled.amount} (${positionRec.scenarios.targetProfit.scaled.percent}%) with scaled exits`);
+        }
+      } catch (err) {
+        // Position sizing calculation failed, but that's OK - continue
+      }
     }
     
     console.log('');

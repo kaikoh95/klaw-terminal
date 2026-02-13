@@ -27,7 +27,8 @@ import {
   calculatePortfolioHeat,
   calculateKellyCriterion,
   buildCorrelationMatrix,
-  analyzeSignalRisk
+  analyzeSignalRisk,
+  generatePositionSizingRecommendations
 } from '../lib/risk-management.js';
 import {
   exportSignalsToCSV,
@@ -394,6 +395,29 @@ app.post('/api/risk/analyze-signal', (req, res) => {
       signal,
       parseFloat(accountSize),
       parseFloat(riskPercent || 1)
+    );
+    
+    res.json({ success: true, data: result });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+// Generate detailed position sizing recommendations for a signal
+app.post('/api/risk/position-sizing-recommendations', (req, res) => {
+  try {
+    const { signal, accountSize } = req.body;
+    
+    if (!signal) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Missing required parameter: signal' 
+      });
+    }
+    
+    const result = generatePositionSizingRecommendations(
+      signal,
+      parseFloat(accountSize || 10000)
     );
     
     res.json({ success: true, data: result });
