@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Klaw Terminal 🐾 - Risk Management</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🐾 KLAW TERMINAL</h1>
+      <p class="subtitle">Risk Management & Position Sizing</p>
+      <nav>
+        <a href="/">Dashboard</a>
+        <a href="/signals.html">Signals</a>
+        <a href="/analysis.html">Analysis</a>
+        <a href="/heatmap.html">Heatmap</a>
+        <a href="/performance.html">Performance</a>
+        <a href="/risk.html" class="active">Risk</a>
+      </nav>
+    </header>
+
+    <div class="grid">
+      <!-- Account Settings -->
+      <div class="card">
+        <h2>⚙️ Account Settings</h2>
+        <div class="form-group">
+          <label for="accountSize">Account Size ($)</label>
+          <input type="number" id="accountSize" value="10000" min="100" step="100">
+        </div>
+        <div class="form-group">
+          <label for="defaultRisk">Default Risk Per Trade (%)</label>
+          <input type="number" id="defaultRisk" value="1" min="0.1" max="5" step="0.1">
+        </div>
+        <button id="saveSettings" class="btn-primary">Save Settings</button>
+      </div>
+
+      <!-- Position Size Calculator -->
+      <div class="card">
+        <h2>📊 Position Size Calculator</h2>
+        <div class="form-group">
+          <label for="entryPrice">Entry Price ($)</label>
+          <input type="number" id="entryPrice" step="0.01" placeholder="e.g., 150.00">
+        </div>
+        <div class="form-group">
+          <label for="stopLoss">Stop Loss ($)</label>
+          <input type="number" id="stopLoss" step="0.01" placeholder="e.g., 145.00">
+        </div>
+        <div class="form-group">
+          <label for="riskPercent">Risk This Trade (%)</label>
+          <input type="number" id="riskPercent" value="1" min="0.1" max="5" step="0.1">
+        </div>
+        <button id="calculatePosition" class="btn-primary">Calculate Position</button>
+        
+        <div id="positionResult" class="result-box" style="display: none;">
+          <h3>💡 Position Sizing Results</h3>
+          <div class="result-grid">
+            <div class="result-item">
+              <span class="label">Shares to Buy:</span>
+              <span id="resultShares" class="value">--</span>
+            </div>
+            <div class="result-item">
+              <span class="label">Position Value:</span>
+              <span id="resultValue" class="value">--</span>
+            </div>
+            <div class="result-item">
+              <span class="label">Position % of Account:</span>
+              <span id="resultPercent" class="value">--</span>
+            </div>
+            <div class="result-item">
+              <span class="label">Risk Amount ($):</span>
+              <span id="resultRisk" class="value">--</span>
+            </div>
+            <div class="result-item">
+              <span class="label">Risk Per Share:</span>
+              <span id="resultRiskPerShare" class="value">--</span>
+            </div>
+            <div class="result-item">
+              <span class="label">Max Loss:</span>
+              <span id="resultMaxLoss" class="value">--</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kelly Criterion Calculator -->
+      <div class="card">
+        <h2>🎯 Kelly Criterion - Optimal Position Sizing</h2>
+        <div class="form-group">
+          <label for="winRate">Win Rate (0-1)</label>
+          <input type="number" id="winRate" value="0.55" min="0.01" max="0.99" step="0.01">
+        </div>
+        <div class="form-group">
+          <label for="avgWin">Average Win ($)</label>
+          <input type="number" id="avgWin" value="200" min="1" step="1">
+        </div>
+        <div class="form-group">
+          <label for="avgLoss">Average Loss ($)</label>
+          <input type="number" id="avgLoss" value="100" min="1" step="1">
+        </div>
+        <button id="calculateKelly" class="btn-primary">Calculate Kelly</button>
+        
+        <div id="kellyResult" class="result-box" style="display: none;">
+          <h3>📈 Kelly Criterion Results</h3>
+          <div class="result-grid">
+            <div class="result-item">
+              <span class="label">Full Kelly:</span>
+              <span id="fullKelly" class="value">--</span>
+            </div>
+            <div class="result-item">
+              <span class="label">Half Kelly (Recommended):</span>
+              <span id="halfKelly" class="value kelly-highlight">--</span>
+            </div>
+            <div class="result-item">
+              <span class="label">Quarter Kelly (Conservative):</span>
+              <span id="quarterKelly" class="value">--</span>
+            </div>
+            <div class="result-item">
+              <span class="label">Payoff Ratio (W/L):</span>
+              <span id="payoffRatio" class="value">--</span>
+            </div>
+          </div>
+          <div id="kellyRecommendation" class="kelly-recommendation"></div>
+        </div>
+      </div>
+
+      <!-- Portfolio Heat -->
+      <div class="card full-width">
+        <h2>🔥 Portfolio Heat - Total Risk Exposure</h2>
+        <div id="portfolioHeatDisplay">
+          <div class="heat-summary">
+            <div class="heat-stat">
+              <span class="heat-label">Total Risk</span>
+              <span id="totalRisk" class="heat-value">$0.00</span>
+            </div>
+            <div class="heat-stat">
+              <span class="heat-label">Risk %</span>
+              <span id="totalRiskPercent" class="heat-value">0.00%</span>
+            </div>
+            <div class="heat-stat">
+              <span class="heat-label">Active Positions</span>
+              <span id="positionCount" class="heat-value">0</span>
+            </div>
+            <div class="heat-stat">
+              <span class="heat-label">Status</span>
+              <span id="heatStatus" class="heat-value">SAFE</span>
+            </div>
+          </div>
+          <div id="heatRecommendation" class="heat-recommendation">
+            No active positions tracked
+          </div>
+        </div>
+        
+        <h3>➕ Add Position to Track</h3>
+        <div class="add-position-form">
+          <input type="text" id="newTicker" placeholder="Ticker (e.g., SPY)" style="width: 100px;">
+          <input type="number" id="newShares" placeholder="Shares" step="1" style="width: 100px;">
+          <input type="number" id="newEntry" placeholder="Entry $" step="0.01" style="width: 100px;">
+          <input type="number" id="newStop" placeholder="Stop $" step="0.01" style="width: 100px;">
+          <button id="addPosition" class="btn-primary">Add Position</button>
+        </div>
+        
+        <div id="positionsList" class="positions-list"></div>
+      </div>
+
+      <!-- Correlation Matrix -->
+      <div class="card full-width">
+        <h2>🔗 Ticker Correlation Matrix</h2>
+        <p class="info-text">High correlation (>0.7) = Concentrated risk. Diversify or reduce position sizes.</p>
+        <button id="loadCorrelation" class="btn-primary">Load Correlation Matrix</button>
+        <div id="correlationMatrix" class="correlation-matrix"></div>
+        <div id="highCorrelations" class="high-correlations"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/risk.js"></script>
+</body>
+</html>

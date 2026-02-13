@@ -11,6 +11,7 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
 - **AI Analysis** - Gemini 2.5 Pro for trade setup detection and pattern recognition
 - **Signal Tracking** - Complete trade history with P&L tracking
 - **Performance Analytics** - Hit rate, win streaks, profit factor, expectancy
+- **Risk Management** - Position sizing calculator, portfolio heat tracking, Kelly Criterion, correlation matrix
 - **Web Dashboard** - Clean, dark-themed trading terminal interface
 - **Market Heatmap** - Visual color-coded grid showing relative strength across all tickers
 - **Multi-Panel Charts** - Professional 4-panel layout with Price, RSI, MACD, and Volume charts
@@ -79,6 +80,12 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
   - Best performing patterns, timeframes, and tickers
   - Confidence level correlation analysis
   - Recent closed signal outcomes
+- **Risk Management** (`/risk.html`) - Position sizing & portfolio risk tools
+  - Position size calculator based on account size and risk %
+  - Portfolio heat tracker (total risk across all positions)
+  - Kelly Criterion for optimal position sizing
+  - Correlation matrix to identify concentration risk
+  - Real-time risk status monitoring (SAFE/HEALTHY/ELEVATED/WARNING/DANGER)
 
 ## Project Structure
 
@@ -163,6 +170,11 @@ Automatic tracking of:
 - `GET /api/signal-performance/active` - Active tracked signals
 - `GET /api/signal-performance/closed?limit=N` - Recently closed signals
 - `GET /api/signal-performance/best-patterns` - Highest win-rate patterns
+- `POST /api/risk/position-size` - Calculate position size (params: accountSize, riskPercent, entryPrice, stopLoss)
+- `POST /api/risk/portfolio-heat` - Calculate total portfolio risk (params: positions, accountSize)
+- `POST /api/risk/kelly` - Calculate Kelly Criterion (params: winRate, avgWin, avgLoss)
+- `GET /api/risk/correlation` - Get ticker correlation matrix
+- `POST /api/risk/analyze-signal` - Analyze risk for a specific signal (params: signal, accountSize, riskPercent)
 
 ## Development
 

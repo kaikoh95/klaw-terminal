@@ -17,6 +17,13 @@ import {
   getClosedSignals, 
   getBestPatterns 
 } from '../lib/signal-performance.js';
+import {
+  calculatePositionSize,
+  calculatePortfolioHeat,
+  calculateKellyCriterion,
+  buildCorrelationMatrix,
+  analyzeSignalRisk
+} from '../lib/risk-management.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -182,13 +189,124 @@ app.get('/api/signal-performance/best-patterns', (req, res) => {
   }
 });
 
+// Risk Management Endpoints
+
+// Calculate position size
+app.post('/api/risk/position-size', (req, res) => {
+  try {
+    const { accountSize, riskPercent, entryPrice, stopLoss, commission } = req.body;
+    
+    if (!accountSize || !riskPercent || !entryPrice || !stopLoss) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Missing required parameters: accountSize, riskPercent, entryPrice, stopLoss' 
+      });
+    }
+    
+    const result = calculatePositionSize(
+      parseFloat(accountSize),
+      parseFloat(riskPercent),
+      parseFloat(entryPrice),
+      parseFloat(stopLoss),
+      parseFloat(commission || 0)
+    );
+    
+    res.json({ success: true, data: result });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+// Calculate portfolio heat
+app.post('/api/risk/portfolio-heat', (req, res) => {
+  try {
+    const { positions, accountSize } = req.body;
+    
+    if (!accountSize) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Missing required parameter: accountSize' 
+      });
+    }
+    
+    const result = calculatePortfolioHeat(
+      positions || [],
+      parseFloat(accountSize)
+    );
+    
+    res.json({ success: true, data: result });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+// Calculate Kelly Criterion
+app.post('/api/risk/kelly', (req, res) => {
+  try {
+    const { winRate, avgWin, avgLoss } = req.body;
+    
+    if (!winRate || !avgWin || !avgLoss) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Missing required parameters: winRate, avgWin, avgLoss' 
+      });
+    }
+    
+    const result = calculateKellyCriterion(
+      parseFloat(winRate),
+      parseFloat(avgWin),
+      parseFloat(avgLoss)
+    );
+    
+    res.json({ success: true, data: result });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+// Build correlation matrix
+app.get('/api/risk/correlation', async (req, res) => {
+  try {
+    const marketData = await fetchAllTickers();
+    const result = buildCorrelationMatrix(marketData);
+    
+    res.json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Analyze signal risk
+app.post('/api/risk/analyze-signal', (req, res) => {
+  try {
+    const { signal, accountSize, riskPercent } = req.body;
+    
+    if (!signal || !accountSize) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Missing required parameters: signal, accountSize' 
+      });
+    }
+    
+    const result = analyzeSignalRisk(
+      signal,
+      parseFloat(accountSize),
+      parseFloat(riskPercent || 1)
+    );
+    
+    res.json({ success: true, data: result });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ 
     success: true, 
     status: 'healthy',
     timestamp: Date.now(),
-    version: '1.0.0'
+    version: '1.1.0'
   });
 });
 
