@@ -837,8 +837,91 @@ async function populateChartTickers() {
   }
 }
 
+// Run AI Analysis from web UI
+async function runAIAnalysis() {
+  const btn = document.getElementById('analyzeBtn');
+  const statusEl = document.getElementById('analysisStatus');
+  
+  if (!btn || !statusEl) return;
+  
+  try {
+    // Disable button and show loading state
+    btn.disabled = true;
+    btn.textContent = '🔄 Analyzing...';
+    statusEl.innerHTML = '<div class="analysis-loading">🤖 Running Gemini AI analysis on all tickers...</div>';
+    statusEl.className = 'analysis-status loading';
+    
+    // Trigger analysis
+    const response = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      // Success feedback
+      const signalCount = result.data.signalsGenerated || 0;
+      statusEl.innerHTML = `
+        <div class="analysis-success">
+          ✅ Analysis complete! Generated ${signalCount} signal${signalCount !== 1 ? 's' : ''}.
+        </div>
+      `;
+      statusEl.className = 'analysis-status success';
+      
+      // Refresh signals to show new data
+      setTimeout(() => {
+        loadActiveSignals();
+        loadRecentSignals();
+        loadPerformance();
+        
+        // Clear status after a few seconds
+        setTimeout(() => {
+          statusEl.innerHTML = '';
+          statusEl.className = 'analysis-status';
+        }, 5000);
+      }, 500);
+    } else {
+      // Error feedback
+      const errorMsg = result.hint || result.error || 'Unknown error';
+      statusEl.innerHTML = `
+        <div class="analysis-error">
+          ❌ Analysis failed: ${errorMsg}
+        </div>
+      `;
+      statusEl.className = 'analysis-status error';
+      
+      // Clear error after 10 seconds
+      setTimeout(() => {
+        statusEl.innerHTML = '';
+        statusEl.className = 'analysis-status';
+      }, 10000);
+    }
+  } catch (error) {
+    console.error('Failed to run AI analysis:', error);
+    statusEl.innerHTML = `
+      <div class="analysis-error">
+        ❌ Network error: ${error.message}
+      </div>
+    `;
+    statusEl.className = 'analysis-status error';
+    
+    setTimeout(() => {
+      statusEl.innerHTML = '';
+      statusEl.className = 'analysis-status';
+    }, 10000);
+  } finally {
+    // Re-enable button
+    btn.disabled = false;
+    btn.textContent = '🤖 Run AI Analysis';
+  }
+}
+
 // Export functions for use in HTML
 window.loadDashboard = loadDashboard;
 window.refreshMarket = refreshMarket;
 window.updateTimestamp = updateTimestamp;
 window.loadChart = loadChart;
+window.runAIAnalysis = runAIAnalysis;

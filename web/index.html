@@ -137,7 +137,14 @@
 
       <!-- Watchlist -->
       <div class="card">
-        <h2>Watchlist <button class="btn-small" onclick="refreshMarket()">↻ Refresh</button></h2>
+        <h2>
+          Watchlist 
+          <button class="btn-small" onclick="refreshMarket()">↻ Refresh</button>
+          <button class="btn-small btn-ai" onclick="runAIAnalysis()" id="analyzeBtn">
+            🤖 Run AI Analysis
+          </button>
+        </h2>
+        <div id="analysisStatus" class="analysis-status"></div>
         <div id="watchlist" class="watchlist">
           <div class="loading">Loading market data...</div>
         </div>

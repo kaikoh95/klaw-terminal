@@ -192,6 +192,60 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Trigger AI analysis from web UI
+app.post('/api/analyze', async (req, res) => {
+  try {
+    console.log('🤖 AI Analysis triggered from web UI...');
+    
+    // Fetch fresh market data
+    const marketData = await fetchAllTickers();
+    const technicals = {};
+    
+    // Calculate technicals for all tickers
+    for (const [ticker, data] of Object.entries(marketData)) {
+      if (data && data.historicalData) {
+        technicals[ticker] = analyzeMarketData(data);
+      }
+    }
+    
+    // Import Gemini module dynamically
+    const { batchAnalyze } = await import('../lib/gemini.js');
+    const { saveSignals } = await import('../lib/signals.js');
+    
+    // Run AI analysis
+    const analysis = await batchAnalyze(marketData, technicals);
+    
+    // Save signals
+    const signalsGenerated = [];
+    for (const [ticker, result] of Object.entries(analysis)) {
+      if (result && !result.error && result.signal !== 'NEUTRAL') {
+        signalsGenerated.push(result);
+        saveSignals([result]);
+      }
+    }
+    
+    console.log(`✅ Analysis complete. Generated ${signalsGenerated.length} signals.`);
+    
+    res.json({ 
+      success: true, 
+      data: {
+        analysis,
+        signalsGenerated: signalsGenerated.length,
+        timestamp: Date.now()
+      }
+    });
+  } catch (error) {
+    console.error('❌ AI Analysis error:', error.message);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message,
+      hint: error.message.includes('GEMINI_API_KEY') 
+        ? 'Set GEMINI_API_KEY environment variable' 
+        : 'Check server logs for details'
+    });
+  }
+});
+
 // WebSocket connection handling
 wss.on('connection', (ws) => {
   console.log('WebSocket client connected');
