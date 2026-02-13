@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import { batchAnalyze } from '../lib/gemini.js';
 import { processBatchAnalysis } from '../lib/signals.js';
 import { generatePerformanceReport } from '../lib/performance.js';
+import { batchAnalyzeMultiTimeframe } from '../lib/multi-timeframe.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const dataDir = join(__dirname, '..', 'data');
@@ -27,7 +28,12 @@ console.log(`Analyzing ${Object.keys(marketData).length} tickers with Gemini AI.
 
 // Run AI analysis
 try {
-  const analysisResults = await batchAnalyze(marketData, technicals);
+  // First, fetch multi-timeframe data for all tickers
+  console.log('🔄 Fetching multi-timeframe data...\n');
+  const tickers = Object.keys(marketData);
+  const multiTimeframeData = await batchAnalyzeMultiTimeframe(tickers);
+  
+  const analysisResults = await batchAnalyze(marketData, technicals, multiTimeframeData);
   
   console.log('\n═══════════════════════════════════════');
   console.log('AI ANALYSIS RESULTS');

@@ -54,6 +54,10 @@ import {
   analyzeOptionsChain,
   batchAnalyzeOptions
 } from '../lib/options.js';
+import {
+  analyzeMultiTimeframe,
+  batchAnalyzeMultiTimeframe
+} from '../lib/multi-timeframe.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -744,6 +748,68 @@ app.get('/api/options', (req, res) => {
     }
     
     const data = JSON.parse(readFileSync(optionsFile, 'utf8'));
+    res.json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Multi-Timeframe Analysis Endpoints
+
+// Analyze single ticker across multiple timeframes
+app.get('/api/multi-timeframe/:ticker', async (req, res) => {
+  try {
+    const { ticker } = req.params;
+    console.log(`Analyzing ${ticker} across multiple timeframes...`);
+    
+    const mtfData = await analyzeMultiTimeframe(ticker);
+    res.json({ success: true, data: mtfData });
+  } catch (error) {
+    console.error(`Error analyzing ${req.params.ticker}:`, error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Batch analyze multiple tickers with multi-timeframe
+app.post('/api/multi-timeframe/refresh', async (req, res) => {
+  try {
+    const tickers = req.body.tickers || ['SPY', 'QQQ', 'ONDS', 'USAR', 'RDDT', 'UUUU'];
+    
+    console.log(`Multi-timeframe analysis for: ${tickers.join(', ')}`);
+    
+    const mtfData = await batchAnalyzeMultiTimeframe(tickers);
+    
+    // Save to file
+    const outputPath = join(__dirname, '..', 'data', 'multi-timeframe.json');
+    const data = {
+      timestamp: Date.now(),
+      tickers: mtfData
+    };
+    
+    writeFileSync(outputPath, JSON.stringify(data, null, 2));
+    
+    console.log(`✅ Multi-timeframe data analyzed and saved`);
+    
+    res.json({ success: true, data });
+  } catch (error) {
+    console.error('Error analyzing multi-timeframe:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get cached multi-timeframe data
+app.get('/api/multi-timeframe', (req, res) => {
+  try {
+    const mtfFile = join(__dirname, '..', 'data', 'multi-timeframe.json');
+    
+    if (!existsSync(mtfFile)) {
+      return res.json({ 
+        success: false, 
+        error: 'No multi-timeframe data available. Use POST /api/multi-timeframe/refresh to fetch.' 
+      });
+    }
+    
+    const data = JSON.parse(readFileSync(mtfFile, 'utf8'));
     res.json({ success: true, data });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
