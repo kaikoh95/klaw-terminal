@@ -12,6 +12,7 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
 - **Signal Tracking** - Complete trade history with P&L tracking
 - **Performance Analytics** - Hit rate, win streaks, profit factor, expectancy
 - **Risk Management** - Position sizing calculator, portfolio heat tracking, Kelly Criterion, correlation matrix
+- **Social Sentiment** - StockTwits integration for real-time retail trader sentiment analysis
 - **Web Dashboard** - Clean, dark-themed trading terminal interface
 - **Market Heatmap** - Visual color-coded grid showing relative strength across all tickers
 - **Multi-Panel Charts** - Professional 4-panel layout with Price, RSI, MACD, and Volume charts
@@ -37,19 +38,33 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
    export GEMINI_API_KEY="your-api-key-here"
    ```
 
-3. **Run market scan:**
+3. **(Optional) Configure StockTwits:**
+   ```bash
+   # Use demo mode if you don't have StockTwits API access
+   export STOCKTWITS_DEMO=true
+   ```
+   
+   Or create a `.env` file (see `.env.example`)
+
+4. **Run market scan:**
    ```bash
    npm run scan
    # or: node bin/scan.js
    ```
 
-4. **Run AI analysis:**
+5. **Run AI analysis:**
    ```bash
    npm run analyze
    # or: node bin/analyze.js
    ```
 
-5. **Start web UI:**
+6. **(Optional) Fetch social sentiment:**
+   ```bash
+   npm run sentiment
+   # or: node bin/sentiment.js
+   ```
+
+7. **Start web UI:**
    ```bash
    npm start
    # or: node bin/server.js
@@ -63,6 +78,7 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
 
 - `npm run scan` - Fetch market data and run technical analysis
 - `npm run analyze` - Run AI analysis on scanned data and generate signals
+- `npm run sentiment` - Fetch social sentiment from StockTwits (optional: specify tickers)
 - `npm start` - Start web UI server on port 3847
 - `npm run dev` - Start server with auto-reload
 
@@ -93,6 +109,12 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
   - Real-time WebSocket notifications when alerts trigger
   - Track triggered alerts history
   - Optional notes for each alert
+- **Social Sentiment** (`/sentiment.html`) - StockTwits sentiment tracking
+  - Real-time sentiment scores from retail trader community
+  - Bullish/bearish breakdown with confidence levels
+  - Recent message feed for each ticker
+  - Trending stocks discovery
+  - Refresh sentiment data on demand
 
 ## Project Structure
 
@@ -192,6 +214,10 @@ Automatic tracking of:
 - `POST /api/alerts` - Create new alert (params: ticker, price, condition, note)
 - `DELETE /api/alerts/:id` - Delete an alert
 - `POST /api/alerts/cleanup` - Clear old triggered alerts (params: daysOld)
+- `GET /api/sentiment` - Get cached sentiment data
+- `GET /api/sentiment/:ticker` - Get fresh sentiment for specific ticker
+- `GET /api/sentiment/trending` - Get trending stocks from StockTwits
+- `POST /api/sentiment/refresh` - Refresh sentiment data for all watchlist tickers
 
 ## Development
 

@@ -1,0 +1,168 @@
+{
+  "timestamp": 1770973966399,
+  "tickers": {
+    "SPY": {
+      "ticker": "SPY",
+      "available": true,
+      "score": 34,
+      "signal": "bullish",
+      "bullishCount": 28,
+      "bearishCount": 13,
+      "neutralCount": 8,
+      "totalMessages": 49,
+      "confidence": 66,
+      "recentMessages": [
+        {
+          "text": "SPY looking strong on technicals, might break resistance soon",
+          "sentiment": "Bullish",
+          "createdAt": "2026-02-13T09:07:43.366Z"
+        },
+        {
+          "text": "Watching SPY closely, volume picking up",
+          "sentiment": null,
+          "createdAt": "2026-02-13T09:02:43.368Z"
+        },
+        {
+          "text": "SPY oversold, potential bounce play",
+          "sentiment": "Bullish",
+          "createdAt": "2026-02-13T08:57:43.368Z"
+        },
+        {
+          "text": "Not convinced on SPY here, need to see more confirmation",
+          "sentiment": "Bearish",
+          "createdAt": "2026-02-13T08:52:43.368Z"
+        },
+        {
+          "text": "SPY chart pattern interesting, setting alerts",
+          "sentiment": null,
+          "createdAt": "2026-02-13T08:47:43.368Z"
+        }
+      ],
+      "watchlistCount": 27054
+    },
+    "QQQ": {
+      "ticker": "QQQ",
+      "available": true,
+      "score": -90,
+      "signal": "bearish",
+      "bullishCount": 1,
+      "bearishCount": 39,
+      "neutralCount": 6,
+      "totalMessages": 46,
+      "confidence": 69,
+      "recentMessages": [
+        {
+          "text": "QQQ looking strong on technicals, might break resistance soon",
+          "sentiment": "Bullish",
+          "createdAt": "2026-02-13T09:07:44.369Z"
+        },
+        {
+          "text": "Watching QQQ closely, volume picking up",
+          "sentiment": null,
+          "createdAt": "2026-02-13T09:02:44.369Z"
+        },
+        {
+          "text": "QQQ oversold, potential bounce play",
+          "sentiment": "Bullish",
+          "createdAt": "2026-02-13T08:57:44.369Z"
+        },
+        {
+          "text": "Not convinced on QQQ here, need to see more confirmation",
+          "sentiment": "Bearish",
+          "createdAt": "2026-02-13T08:52:44.369Z"
+        },
+        {
+          "text": "QQQ chart pattern interesting, setting alerts",
+          "sentiment": null,
+          "createdAt": "2026-02-13T08:47:44.369Z"
+        }
+      ],
+      "watchlistCount": 18068
+    },
+    "ONDS": {
+      "ticker": "ONDS",
+      "available": true,
+      "score": 0,
+      "signal": "neutral",
+      "bullishCount": 21,
+      "bearishCount": 17,
+      "neutralCount": 0,
+      "totalMessages": 38,
+      "confidence": 85,
+      "recentMessages": [
+        {
+          "text": "ONDS looking strong on technicals, might break resistance soon",
+          "sentiment": "Bullish",
+          "createdAt": "2026-02-13T09:07:45.369Z"
+        },
+        {
+          "text": "Watching ONDS closely, volume picking up",
+          "sentiment": null,
+          "createdAt": "2026-02-13T09:02:45.369Z"
+        },
+        {
+          "text": "ONDS oversold, potential bounce play",
+          "sentiment": "Bullish",
+          "createdAt": "2026-02-13T08:57:45.369Z"
+        },
+        {
+          "text": "Not convinced on ONDS here, need to see more confirmation",
+          "sentiment": "Bearish",
+          "createdAt": "2026-02-13T08:52:45.369Z"
+        },
+        {
+          "text": "ONDS chart pattern interesting, setting alerts",
+          "sentiment": null,
+          "createdAt": "2026-02-13T08:47:45.369Z"
+        }
+      ],
+      "watchlistCount": 33262
+    }
+  },
+  "summary": {
+    "overallScore": -19,
+    "overallSignal": "slightly_bearish",
+    "tickersAnalyzed": 3,
+    "bullishTickers": [
+      "SPY"
+    ],
+    "bearishTickers": [
+      "QQQ"
+    ],
+    "mostBullish": {
+      "ticker": "SPY",
+      "score": 34
+    },
+    "mostBearish": {
+      "ticker": "QQQ",
+      "score": -90
+    }
+  },
+  "trending": [
+    {
+      "ticker": "TSLA",
+      "title": "Tesla Inc",
+      "watchlistCount": 125420
+    },
+    {
+      "ticker": "NVDA",
+      "title": "NVIDIA Corp",
+      "watchlistCount": 98330
+    },
+    {
+      "ticker": "AAPL",
+      "title": "Apple Inc",
+      "watchlistCount": 87654
+    },
+    {
+      "ticker": "AMD",
+      "title": "Advanced Micro Devices",
+      "watchlistCount": 76543
+    },
+    {
+      "ticker": "PLTR",
+      "title": "Palantir Technologies",
+      "watchlistCount": 65432
+    }
+  ]
+}

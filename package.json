@@ -7,6 +7,7 @@
   "scripts": {
     "scan": "node bin/scan.js",
     "analyze": "node bin/analyze.js",
+    "sentiment": "node bin/sentiment.js",
     "start": "node bin/server.js",
     "dev": "node --watch bin/server.js"
   },

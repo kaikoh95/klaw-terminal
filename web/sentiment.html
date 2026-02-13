@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Klaw Terminal 🐾 - Social Sentiment</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .sentiment-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+    
+    .sentiment-summary-card {
+      background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 153, 204, 0.05));
+      border: 1px solid rgba(0, 212, 255, 0.3);
+      border-radius: 8px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .sentiment-gauge {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .sentiment-score-big {
+      font-size: 4rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #00d4ff, #00ff88);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .sentiment-label-big {
+      font-size: 1.5rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    
+    .sentiment-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 1.5rem;
+    }
+    
+    .sentiment-ticker-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 1.5rem;
+      transition: all 0.2s;
+    }
+    
+    .sentiment-ticker-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(0, 212, 255, 0.3);
+      box-shadow: 0 4px 12px rgba(0, 212, 255, 0.1);
+    }
+    
+    .ticker-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .ticker-symbol {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #00d4ff;
+    }
+    
+    .ticker-sentiment-emoji {
+      font-size: 2rem;
+    }
+    
+    .sentiment-score-bar {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 1rem 0;
+    }
+    
+    .sentiment-score-fill {
+      height: 100%;
+      transition: width 0.3s, background 0.3s;
+    }
+    
+    .sentiment-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+    
+    .sentiment-stat {
+      background: rgba(0, 0, 0, 0.2);
+      padding: 0.75rem;
+      border-radius: 4px;
+    }
+    
+    .sentiment-stat-label {
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.6);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .sentiment-stat-value {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #fff;
+    }
+    
+    .recent-messages {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .message-item {
+      padding: 0.5rem;
+      margin: 0.5rem 0;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 4px;
+      font-size: 0.85rem;
+      display: flex;
+      gap: 0.5rem;
+      align-items: flex-start;
+    }
+    
+    .message-emoji {
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    
+    .message-text {
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.4;
+    }
+    
+    .trending-section {
+      margin-top: 2rem;
+    }
+    
+    .trending-stocks {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .trending-stock {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 1rem;
+      text-align: center;
+    }
+    
+    .trending-stock:hover {
+      border-color: rgba(0, 212, 255, 0.3);
+      background: rgba(0, 212, 255, 0.05);
+    }
+    
+    .trending-ticker {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #00d4ff;
+      margin-bottom: 0.5rem;
+    }
+    
+    .trending-title {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 0.5rem;
+    }
+    
+    .trending-watchers {
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .no-data {
+      text-align: center;
+      padding: 3rem;
+      color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .refresh-info {
+      text-align: center;
+      margin-top: 1rem;
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🐾 KLAW TERMINAL</h1>
+      <p class="subtitle">AI-Powered Trading Intelligence</p>
+      <nav>
+        <a href="/">Dashboard</a>
+        <a href="/signals.html">Signals</a>
+        <a href="/analysis.html">Analysis</a>
+        <a href="/screener.html">Screener</a>
+        <a href="/heatmap.html">Heatmap</a>
+        <a href="/performance.html">Performance</a>
+        <a href="/risk.html">Risk</a>
+        <a href="/alerts.html">Alerts</a>
+        <a href="/sentiment.html" class="active">Sentiment</a>
+      </nav>
+    </header>
+
+    <div class="sentiment-header">
+      <h2>💭 Social Sentiment Analysis</h2>
+      <button class="btn-small" onclick="refreshSentiment()">↻ Refresh</button>
+    </div>
+
+    <!-- Overall Summary -->
+    <div class="sentiment-summary-card">
+      <div id="overallSentiment" class="sentiment-gauge">
+        <div class="sentiment-emoji" style="font-size: 3rem;">😐</div>
+        <div class="sentiment-score-big">0</div>
+        <div class="sentiment-label-big">Loading...</div>
+      </div>
+    </div>
+
+    <!-- Ticker Sentiment Cards -->
+    <div class="card">
+      <h2>📊 Ticker Sentiment</h2>
+      <div id="sentimentGrid" class="sentiment-grid">
+        <div class="no-data">Loading sentiment data...</div>
+      </div>
+    </div>
+
+    <!-- Trending Stocks -->
+    <div class="card trending-section">
+      <h2>🔥 Trending on StockTwits</h2>
+      <div id="trendingStocks" class="trending-stocks">
+        <div class="no-data">Loading trending stocks...</div>
+      </div>
+    </div>
+
+    <div class="refresh-info" id="refreshInfo"></div>
+  </div>
+
+  <script>
+    let sentimentData = null;
+
+    async function loadSentiment() {
+      try {
+        const response = await fetch('/api/sentiment');
+        const result = await response.json();
+
+        if (!result.success) {
+          document.getElementById('sentimentGrid').innerHTML = `
+            <div class="no-data">
+              <p>${result.error}</p>
+              <p>Run <code>npm run sentiment</code> to fetch sentiment data</p>
+            </div>
+          `;
+          return;
+        }
+
+        sentimentData = result.data;
+        displaySentiment();
+      } catch (error) {
+        console.error('Error loading sentiment:', error);
+        document.getElementById('sentimentGrid').innerHTML = `
+          <div class="no-data">Error loading sentiment data: ${error.message}</div>
+        `;
+      }
+    }
+
+    function displaySentiment() {
+      if (!sentimentData) return;
+
+      // Update overall summary
+      const { summary } = sentimentData;
+      const overallDiv = document.getElementById('overallSentiment');
+      
+      const overallEmoji = summary.overallScore > 30 ? '🟢' :
+                          summary.overallScore > 10 ? '🟡' :
+                          summary.overallScore < -30 ? '🔴' :
+                          summary.overallScore < -10 ? '🟠' : '⚪';
+      
+      const scoreColor = summary.overallScore > 30 ? '#00ff88' :
+                        summary.overallScore > 10 ? '#ffcc00' :
+                        summary.overallScore < -30 ? '#ff4444' :
+                        summary.overallScore < -10 ? '#ff9944' : '#888';
+
+      overallDiv.innerHTML = `
+        <div class="sentiment-emoji" style="font-size: 3rem;">${overallEmoji}</div>
+        <div class="sentiment-score-big" style="color: ${scoreColor};">
+          ${summary.overallScore > 0 ? '+' : ''}${summary.overallScore}
+        </div>
+        <div class="sentiment-label-big">${summary.overallSignal.replace('_', ' ').toUpperCase()}</div>
+        <p style="margin-top: 1rem; color: rgba(255,255,255,0.6);">
+          ${summary.tickersAnalyzed} tickers analyzed
+        </p>
+      `;
+
+      // Update ticker cards
+      const grid = document.getElementById('sentimentGrid');
+      const tickers = Object.values(sentimentData.tickers).filter(t => t.available);
+
+      if (tickers.length === 0) {
+        grid.innerHTML = '<div class="no-data">No sentiment data available</div>';
+        return;
+      }
+
+      grid.innerHTML = tickers.map(ticker => {
+        const emoji = ticker.score > 30 ? '🟢' :
+                     ticker.score > 10 ? '🟡' :
+                     ticker.score < -30 ? '🔴' :
+                     ticker.score < -10 ? '🟠' : '⚪';
+
+        const fillColor = ticker.score > 0 
+          ? `rgba(0, 255, 136, ${Math.abs(ticker.score) / 100})`
+          : `rgba(255, 68, 68, ${Math.abs(ticker.score) / 100})`;
+
+        const fillWidth = `${Math.abs(ticker.score)}%`;
+
+        const messagesHtml = ticker.recentMessages && ticker.recentMessages.length > 0
+          ? `
+            <div class="recent-messages">
+              <div class="sentiment-stat-label">Recent Messages</div>
+              ${ticker.recentMessages.map(msg => {
+                const msgEmoji = msg.sentiment === 'Bullish' ? '🟢' :
+                               msg.sentiment === 'Bearish' ? '🔴' : '⚪';
+                return `
+                  <div class="message-item">
+                    <div class="message-emoji">${msgEmoji}</div>
+                    <div class="message-text">${msg.text}</div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `
+          : '';
+
+        return `
+          <div class="sentiment-ticker-card">
+            <div class="ticker-header">
+              <div class="ticker-symbol">${ticker.ticker}</div>
+              <div class="ticker-sentiment-emoji">${emoji}</div>
+            </div>
+            
+            <div style="text-align: center; margin: 1rem 0;">
+              <div style="font-size: 2rem; font-weight: 700; color: ${ticker.score > 0 ? '#00ff88' : ticker.score < 0 ? '#ff4444' : '#888'};">
+                ${ticker.score > 0 ? '+' : ''}${ticker.score}
+              </div>
+              <div style="color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 1px; font-size: 0.9rem;">
+                ${ticker.signal.replace('_', ' ')}
+              </div>
+            </div>
+
+            <div class="sentiment-score-bar">
+              <div class="sentiment-score-fill" style="width: ${fillWidth}; background: ${fillColor};"></div>
+            </div>
+
+            <div class="sentiment-stats">
+              <div class="sentiment-stat">
+                <div class="sentiment-stat-label">Confidence</div>
+                <div class="sentiment-stat-value">${ticker.confidence}%</div>
+              </div>
+              <div class="sentiment-stat">
+                <div class="sentiment-stat-label">Messages</div>
+                <div class="sentiment-stat-value">${ticker.totalMessages}</div>
+              </div>
+              <div class="sentiment-stat">
+                <div class="sentiment-stat-label">🟢 Bullish</div>
+                <div class="sentiment-stat-value">${ticker.bullishCount}</div>
+              </div>
+              <div class="sentiment-stat">
+                <div class="sentiment-stat-label">🔴 Bearish</div>
+                <div class="sentiment-stat-value">${ticker.bearishCount}</div>
+              </div>
+            </div>
+
+            ${messagesHtml}
+
+            <div style="margin-top: 1rem; text-align: center; font-size: 0.8rem; color: rgba(255,255,255,0.5);">
+              ${ticker.watchlistCount ? `${ticker.watchlistCount.toLocaleString()} watchers` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Update trending stocks
+      if (sentimentData.trending && sentimentData.trending.length > 0) {
+        const trendingDiv = document.getElementById('trendingStocks');
+        trendingDiv.innerHTML = sentimentData.trending.slice(0, 12).map(stock => `
+          <div class="trending-stock">
+            <div class="trending-ticker">${stock.ticker}</div>
+            <div class="trending-title">${stock.title}</div>
+            <div class="trending-watchers">${stock.watchlistCount.toLocaleString()} watchers</div>
+          </div>
+        `).join('');
+      }
+
+      // Update refresh info
+      const timestamp = new Date(sentimentData.timestamp);
+      document.getElementById('refreshInfo').textContent = 
+        `Last updated: ${timestamp.toLocaleString()}`;
+    }
+
+    async function refreshSentiment() {
+      const btn = event.target;
+      btn.disabled = true;
+      btn.textContent = 'Refreshing...';
+
+      try {
+        const response = await fetch('/api/sentiment/refresh', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          sentimentData = result.data;
+          displaySentiment();
+        } else {
+          alert(`Error: ${result.error}`);
+        }
+      } catch (error) {
+        console.error('Error refreshing sentiment:', error);
+        alert(`Error: ${error.message}`);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '↻ Refresh';
+      }
+    }
+
+    // Load on page load
+    loadSentiment();
+  </script>
+</body>
+</html>

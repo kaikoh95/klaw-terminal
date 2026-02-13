@@ -39,6 +39,12 @@ import {
   clearOldTriggeredAlerts,
   getAlertsForTicker
 } from '../lib/alerts.js';
+import {
+  getTickerSentiment,
+  batchGetSentiment,
+  getSentimentSummary,
+  getTrendingStocks
+} from '../lib/stocktwits.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -513,6 +519,79 @@ app.post('/api/alerts/cleanup', (req, res) => {
     const removed = clearOldTriggeredAlerts(daysOld);
     res.json({ success: true, data: { removed } });
   } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// StockTwits Sentiment Endpoints
+
+// Get sentiment data from cache
+app.get('/api/sentiment', (req, res) => {
+  try {
+    const sentimentFile = join(__dirname, '..', 'data', 'sentiment.json');
+    
+    if (!existsSync(sentimentFile)) {
+      return res.json({ 
+        success: false, 
+        error: 'No sentiment data available. Run npm run sentiment first.' 
+      });
+    }
+    
+    const data = JSON.parse(readFileSync(sentimentFile, 'utf8'));
+    res.json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get fresh sentiment for a specific ticker
+app.get('/api/sentiment/:ticker', async (req, res) => {
+  try {
+    const ticker = req.params.ticker.toUpperCase();
+    const sentiment = await getTickerSentiment(ticker);
+    res.json({ success: true, data: sentiment });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get trending stocks from StockTwits
+app.get('/api/sentiment/trending', async (req, res) => {
+  try {
+    const trending = await getTrendingStocks();
+    res.json({ success: true, data: trending });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Refresh sentiment data for all watchlist tickers
+app.post('/api/sentiment/refresh', async (req, res) => {
+  try {
+    const tickers = req.body.tickers || ['SPY', 'QQQ', 'ONDS', 'USAR', 'HOVR', 'RDDT', 'UUUU'];
+    
+    console.log(`Refreshing sentiment for: ${tickers.join(', ')}`);
+    
+    const sentimentData = await batchGetSentiment(tickers);
+    const summary = getSentimentSummary(sentimentData);
+    const trending = await getTrendingStocks();
+    
+    // Save to file
+    const outputPath = join(__dirname, '..', 'data', 'sentiment.json');
+    const data = {
+      timestamp: Date.now(),
+      tickers: sentimentData,
+      summary,
+      trending: trending.slice(0, 20)
+    };
+    
+    writeFileSync(outputPath, JSON.stringify(data, null, 2));
+    
+    console.log(`✅ Sentiment data refreshed and saved`);
+    
+    res.json({ success: true, data });
+  } catch (error) {
+    console.error('Error refreshing sentiment:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
