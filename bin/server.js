@@ -11,7 +11,12 @@ import { analyzeMarketData } from '../lib/technicals.js';
 import { exportSignalsSummary, getRecentSignals } from '../lib/signals.js';
 import { loadPerformance, getPerformanceSummary } from '../lib/performance.js';
 import { calculateMarketSentiment } from '../lib/sentiment.js';
-import { getPerformanceSummary, getActiveSignals, getClosedSignals, getBestPatterns } from '../lib/signal-performance.js';
+import { 
+  getPerformanceSummary as getSignalPerformanceSummary, 
+  getActiveSignals, 
+  getClosedSignals, 
+  getBestPatterns 
+} from '../lib/signal-performance.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -141,7 +146,7 @@ app.get('/api/sentiment', (req, res) => {
 // Signal performance tracking
 app.get('/api/signal-performance/summary', (req, res) => {
   try {
-    const summary = getPerformanceSummary();
+    const summary = getSignalPerformanceSummary();
     res.json({ success: true, data: summary });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
