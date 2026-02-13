@@ -138,6 +138,83 @@ function handleMarketUpdate(marketData, timestamp) {
       second: '2-digit'
     });
   }
+  
+  // Update top movers
+  updateTopMovers(marketData);
+}
+
+// Update Top Movers widget
+function updateTopMovers(marketData) {
+  if (!marketData) return;
+  
+  // Convert to array and sort by change percent
+  const tickers = Object.entries(marketData)
+    .filter(([_, data]) => data && data.changePercent !== undefined)
+    .map(([ticker, data]) => ({
+      ticker,
+      price: data.price,
+      change: data.change,
+      changePercent: data.changePercent,
+      volume: data.volume,
+      volumeRatio: data.volumeRatio || 1
+    }))
+    .sort((a, b) => Math.abs(b.changePercent) - Math.abs(a.changePercent));
+  
+  // Top 3 gainers
+  const gainers = tickers
+    .filter(t => t.changePercent > 0)
+    .slice(0, 3);
+  
+  // Top 3 losers
+  const losers = tickers
+    .filter(t => t.changePercent < 0)
+    .slice(0, 3);
+  
+  // Render gainers
+  const gainersContainer = document.getElementById('topGainers');
+  if (gainersContainer) {
+    if (gainers.length === 0) {
+      gainersContainer.innerHTML = '<div class="loading-small">No gainers today</div>';
+    } else {
+      gainersContainer.innerHTML = gainers.map(t => `
+        <div class="mover-item ${t.volumeRatio >= 1.5 ? 'high-volume' : ''}">
+          <div class="mover-info">
+            <div class="mover-ticker">${t.ticker}</div>
+            <div class="mover-volume ${t.volumeRatio >= 1.5 ? 'high' : ''}">
+              ${t.volumeRatio >= 1.5 ? '🔥 ' : ''}Vol: ${formatVolume(t.volume)} (${t.volumeRatio.toFixed(1)}x)
+            </div>
+          </div>
+          <div class="mover-change positive">
+            <div class="mover-price">$${t.price.toFixed(2)}</div>
+            <div class="mover-percent">+${t.changePercent.toFixed(2)}%</div>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+  
+  // Render losers
+  const losersContainer = document.getElementById('topLosers');
+  if (losersContainer) {
+    if (losers.length === 0) {
+      losersContainer.innerHTML = '<div class="loading-small">No losers today</div>';
+    } else {
+      losersContainer.innerHTML = losers.map(t => `
+        <div class="mover-item ${t.volumeRatio >= 1.5 ? 'high-volume' : ''}">
+          <div class="mover-info">
+            <div class="mover-ticker">${t.ticker}</div>
+            <div class="mover-volume ${t.volumeRatio >= 1.5 ? 'high' : ''}">
+              ${t.volumeRatio >= 1.5 ? '🔥 ' : ''}Vol: ${formatVolume(t.volume)} (${t.volumeRatio.toFixed(1)}x)
+            </div>
+          </div>
+          <div class="mover-change negative">
+            <div class="mover-price">$${t.price.toFixed(2)}</div>
+            <div class="mover-percent">${t.changePercent.toFixed(2)}%</div>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
 }
 
 // Update connection status indicator
