@@ -43,15 +43,21 @@ console.log('══════════════════════�
 const technicals = {};
 
 for (const [ticker, data] of Object.entries(marketData)) {
-  if (!data || !data.historicalData) {
-    console.log(`${ticker}: Skipped (insufficient data)\n`);
+  if (!data) {
+    console.log(`${ticker}: Skipped (no data)\n`);
     continue;
   }
   
   const analysis = analyzeMarketData(data);
+  if (!analysis) {
+    console.log(`${ticker}: Skipped (analysis failed)\n`);
+    continue;
+  }
+  
   technicals[ticker] = analysis;
   
-  console.log(`${ticker} - ${analysis.trend.toUpperCase()}`);
+  const analysisLabel = analysis.analysisType === 'basic' ? ' (LIMITED DATA - Google only)' : '';
+  console.log(`${ticker} - ${analysis.trend.toUpperCase()}${analysisLabel}`);
   console.log(`  Price: $${analysis.price.toFixed(2)}`);
   
   if (analysis.rsi) {
