@@ -10,6 +10,7 @@ import { fetchAllTickers } from '../lib/market-data.js';
 import { analyzeMarketData } from '../lib/technicals.js';
 import { exportSignalsSummary, getRecentSignals } from '../lib/signals.js';
 import { loadPerformance, getPerformanceSummary } from '../lib/performance.js';
+import { calculateMarketSentiment } from '../lib/sentiment.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -61,6 +62,12 @@ app.get('/api/latest-scan', (req, res) => {
     }
     
     const data = JSON.parse(readFileSync(scanFile, 'utf8'));
+    
+    // Add sentiment analysis if we have technicals
+    if (data.technicals && Object.keys(data.technicals).length > 0) {
+      data.sentiment = calculateMarketSentiment(data.technicals);
+    }
+    
     res.json({ success: true, data });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -103,6 +110,28 @@ app.get('/api/performance/summary', (req, res) => {
   try {
     const summary = getPerformanceSummary();
     res.json({ success: true, data: summary });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get market sentiment
+app.get('/api/sentiment', (req, res) => {
+  try {
+    const scanFile = join(__dirname, '..', 'data', 'latest-scan.json');
+    
+    if (!existsSync(scanFile)) {
+      return res.json({ success: false, error: 'No scan data available. Run a market scan first.' });
+    }
+    
+    const data = JSON.parse(readFileSync(scanFile, 'utf8'));
+    
+    if (!data.technicals || Object.keys(data.technicals).length === 0) {
+      return res.json({ success: false, error: 'No technical analysis data available' });
+    }
+    
+    const sentiment = calculateMarketSentiment(data.technicals);
+    res.json({ success: true, data: sentiment });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
