@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Klaw Terminal 🐾 - Market Screener</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .screener-controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .filter-group {
+      background: rgba(255,255,255,0.02);
+      padding: 1rem;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    .filter-group h3 {
+      margin: 0 0 1rem 0;
+      font-size: 0.9rem;
+      color: #00d4ff;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .filter-option {
+      margin: 0.5rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .filter-option input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+    
+    .filter-option label {
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    
+    .filter-option input[type="range"] {
+      flex: 1;
+      cursor: pointer;
+    }
+    
+    .range-value {
+      min-width: 60px;
+      text-align: right;
+      font-weight: 600;
+      color: #00d4ff;
+    }
+    
+    .screener-actions {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .btn {
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, #00d4ff, #0099cc);
+      color: #0a0e1a;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+    }
+    
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+    
+    .results-summary {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      background: rgba(0, 212, 255, 0.1);
+      border-radius: 6px;
+      border: 1px solid rgba(0, 212, 255, 0.2);
+    }
+    
+    .results-summary h3 {
+      margin: 0;
+      color: #00d4ff;
+    }
+    
+    .match-count {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #00ff88;
+    }
+    
+    .screener-results {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 1rem;
+    }
+    
+    .screener-card {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 1.5rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.2s;
+    }
+    
+    .screener-card:hover {
+      transform: translateY(-2px);
+      border-color: #00d4ff;
+      box-shadow: 0 4px 12px rgba(0, 212, 255, 0.2);
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .card-ticker {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #00d4ff;
+    }
+    
+    .card-price {
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+    
+    .match-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    
+    .badge {
+      padding: 0.25rem 0.75rem;
+      background: rgba(0, 255, 136, 0.2);
+      color: #00ff88;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border: 1px solid rgba(0, 255, 136, 0.3);
+    }
+    
+    .badge.warning {
+      background: rgba(255, 200, 0, 0.2);
+      color: #ffc800;
+      border-color: rgba(255, 200, 0, 0.3);
+    }
+    
+    .badge.danger {
+      background: rgba(255, 80, 80, 0.2);
+      color: #ff5050;
+      border-color: rgba(255, 80, 80, 0.3);
+    }
+    
+    .quick-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .stat {
+      font-size: 0.85rem;
+    }
+    
+    .stat-label {
+      color: #888;
+      margin-right: 0.5rem;
+    }
+    
+    .stat-value {
+      font-weight: 600;
+      color: #00d4ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🐾 KLAW TERMINAL</h1>
+      <p class="subtitle">AI-Powered Trading Intelligence</p>
+      <nav>
+        <a href="/">Dashboard</a>
+        <a href="/signals.html">Signals</a>
+        <a href="/analysis.html">Analysis</a>
+        <a href="/screener.html" class="active">Screener</a>
+        <a href="/heatmap.html">Heatmap</a>
+        <a href="/performance.html">Performance</a>
+        <a href="/risk.html">Risk</a>
+      </nav>
+    </header>
+
+    <div class="card">
+      <h2>🔍 Market Screener</h2>
+      <p style="color: #888; margin-bottom: 2rem;">Filter stocks by technical criteria to find trading setups</p>
+      
+      <div class="screener-controls">
+        <!-- RSI Filters -->
+        <div class="filter-group">
+          <h3>📊 RSI Conditions</h3>
+          <div class="filter-option">
+            <input type="checkbox" id="rsi-oversold" onchange="updateFilters()">
+            <label for="rsi-oversold">Oversold (RSI &lt; 30)</label>
+          </div>
+          <div class="filter-option">
+            <input type="checkbox" id="rsi-overbought" onchange="updateFilters()">
+            <label for="rsi-overbought">Overbought (RSI &gt; 70)</label>
+          </div>
+          <div class="filter-option">
+            <input type="checkbox" id="rsi-neutral" onchange="updateFilters()">
+            <label for="rsi-neutral">Neutral (30-70)</label>
+          </div>
+        </div>
+        
+        <!-- Trend Filters -->
+        <div class="filter-group">
+          <h3>📈 Trend Direction</h3>
+          <div class="filter-option">
+            <input type="checkbox" id="trend-strong-uptrend" onchange="updateFilters()">
+            <label for="trend-strong-uptrend">Strong Uptrend</label>
+          </div>
+          <div class="filter-option">
+            <input type="checkbox" id="trend-uptrend" onchange="updateFilters()">
+            <label for="trend-uptrend">Uptrend</label>
+          </div>
+          <div class="filter-option">
+            <input type="checkbox" id="trend-downtrend" onchange="updateFilters()">
+            <label for="trend-downtrend">Downtrend</label>
+          </div>
+          <div class="filter-option">
+            <input type="checkbox" id="trend-strong-downtrend" onchange="updateFilters()">
+            <label for="trend-strong-downtrend">Strong Downtrend</label>
+          </div>
+        </div>
+        
+        <!-- Volume Filters -->
+        <div class="filter-group">
+          <h3>📊 Volume Activity</h3>
+          <div class="filter-option">
+            <input type="checkbox" id="volume-high" onchange="updateFilters()">
+            <label for="volume-high">High Volume (&gt; 1.5x avg)</label>
+          </div>
+          <div class="filter-option">
+            <input type="checkbox" id="volume-extreme" onchange="updateFilters()">
+            <label for="volume-extreme">Extreme Volume (&gt; 2x avg)</label>
+          </div>
+          <div class="filter-option">
+            <label for="volume-min">Min Volume Ratio:</label>
+            <input type="range" id="volume-min" min="0.5" max="3" step="0.1" value="1" oninput="updateVolumeValue(this.value); updateFilters()">
+            <span class="range-value" id="volume-value">1.0x</span>
+          </div>
+        </div>
+        
+        <!-- MACD Filters -->
+        <div class="filter-group">
+          <h3>📉 MACD Signals</h3>
+          <div class="filter-option">
+            <input type="checkbox" id="macd-bullish" onchange="updateFilters()">
+            <label for="macd-bullish">Bullish (MACD &gt; Signal)</label>
+          </div>
+          <div class="filter-option">
+            <input type="checkbox" id="macd-bearish" onchange="updateFilters()">
+            <label for="macd-bearish">Bearish (MACD &lt; Signal)</label>
+          </div>
+          <div class="filter-option">
+            <input type="checkbox" id="macd-histogram-pos" onchange="updateFilters()">
+            <label for="macd-histogram-pos">Histogram Positive</label>
+          </div>
+        </div>
+        
+        <!-- Moving Average Filters -->
+        <div class="filter-group">
+          <h3>📏 Moving Averages</h3>
+          <div class="filter-option">
+            <input type="checkbox" id="ma-above-sma50" onchange="updateFilters()">
+            <label for="ma-above-sma50">Above SMA(50)</label>
+          </div>
+          <div class="filter-option">
+            <input type="checkbox" id="ma-above-sma200" onchange="updateFilters()">
+            <label for="ma-above-sma200">Above SMA(200)</label>
+          </div>
+          <div class="filter-option">
+            <input type="checkbox" id="ma-golden-cross" onchange="updateFilters()">
+            <label for="ma-golden-cross">Golden Cross (SMA50 &gt; SMA200)</label>
+          </div>
+        </div>
+        
+        <!-- ADX Trend Strength -->
+        <div class="filter-group">
+          <h3>💪 Trend Strength (ADX)</h3>
+          <div class="filter-option">
+            <input type="checkbox" id="adx-trending" onchange="updateFilters()">
+            <label for="adx-trending">Trending (ADX &gt; 25)</label>
+          </div>
+          <div class="filter-option">
+            <input type="checkbox" id="adx-strong" onchange="updateFilters()">
+            <label for="adx-strong">Strong Trend (ADX &gt; 40)</label>
+          </div>
+          <div class="filter-option">
+            <label for="adx-min">Min ADX:</label>
+            <input type="range" id="adx-min" min="0" max="60" step="5" value="0" oninput="updateADXValue(this.value); updateFilters()">
+            <span class="range-value" id="adx-value">0</span>
+          </div>
+        </div>
+        
+        <!-- Bollinger Bands -->
+        <div class="filter-group">
+          <h3>📊 Bollinger Bands</h3>
+          <div class="filter-option">
+            <input type="checkbox" id="bb-squeeze" onchange="updateFilters()">
+            <label for="bb-squeeze">Squeeze (Width &lt; 5%)</label>
+          </div>
+          <div class="filter-option">
+            <input type="checkbox" id="bb-near-upper" onchange="updateFilters()">
+            <label for="bb-near-upper">Near Upper Band</label>
+          </div>
+          <div class="filter-option">
+            <input type="checkbox" id="bb-near-lower" onchange="updateFilters()">
+            <label for="bb-near-lower">Near Lower Band</label>
+          </div>
+        </div>
+        
+        <!-- Special Patterns -->
+        <div class="filter-group">
+          <h3>🎯 Special Patterns</h3>
+          <div class="filter-option">
+            <input type="checkbox" id="pattern-obv-div" onchange="updateFilters()">
+            <label for="pattern-obv-div">OBV Divergence</label>
+          </div>
+          <div class="filter-option">
+            <input type="checkbox" id="pattern-candlestick" onchange="updateFilters()">
+            <label for="pattern-candlestick">Candlestick Pattern</label>
+          </div>
+          <div class="filter-option">
+            <input type="checkbox" id="pattern-ichimoku" onchange="updateFilters()">
+            <label for="pattern-ichimoku">Ichimoku Signal</label>
+          </div>
+        </div>
+      </div>
+      
+      <div class="screener-actions">
+        <button class="btn" onclick="runScreener()">🔍 Run Screener</button>
+        <button class="btn btn-secondary" onclick="clearFilters()">Clear All Filters</button>
+      </div>
+      
+      <div id="results-container" style="display: none;">
+        <div class="results-summary">
+          <h3>Matching Stocks</h3>
+          <div class="match-count" id="match-count">0</div>
+        </div>
+        
+        <div id="screener-results" class="screener-results"></div>
+      </div>
+      
+      <div id="no-results" style="display: none; text-align: center; padding: 3rem; color: #888;">
+        <p style="font-size: 1.2rem;">No stocks match the selected criteria</p>
+        <p>Try adjusting your filters or clearing some conditions</p>
+      </div>
+    </div>
+
+    <footer>
+      <p>Last scan: <span id="lastUpdate">--</span></p>
+      <p>🐾 Maine Klaw Terminal v1.0</p>
+    </footer>
+  </div>
+
+  <script>
+    let scanData = null;
+    let activeFilters = {};
+    
+    // Load scan data on page load
+    async function loadScanData() {
+      try {
+        const response = await fetch('/api/latest-scan');
+        const result = await response.json();
+        
+        if (result.success) {
+          scanData = result.data;
+          updateTimestamp();
+        } else {
+          console.error('No scan data available');
+        }
+      } catch (error) {
+        console.error('Failed to load scan data:', error);
+      }
+    }
+    
+    function updateVolumeValue(value) {
+      document.getElementById('volume-value').textContent = parseFloat(value).toFixed(1) + 'x';
+    }
+    
+    function updateADXValue(value) {
+      document.getElementById('adx-value').textContent = value;
+    }
+    
+    function updateFilters() {
+      activeFilters = {
+        rsiOversold: document.getElementById('rsi-oversold').checked,
+        rsiOverbought: document.getElementById('rsi-overbought').checked,
+        rsiNeutral: document.getElementById('rsi-neutral').checked,
+        trendStrongUp: document.getElementById('trend-strong-uptrend').checked,
+        trendUp: document.getElementById('trend-uptrend').checked,
+        trendDown: document.getElementById('trend-downtrend').checked,
+        trendStrongDown: document.getElementById('trend-strong-downtrend').checked,
+        volumeHigh: document.getElementById('volume-high').checked,
+        volumeExtreme: document.getElementById('volume-extreme').checked,
+        volumeMin: parseFloat(document.getElementById('volume-min').value),
+        macdBullish: document.getElementById('macd-bullish').checked,
+        macdBearish: document.getElementById('macd-bearish').checked,
+        macdHistPos: document.getElementById('macd-histogram-pos').checked,
+        maAboveSMA50: document.getElementById('ma-above-sma50').checked,
+        maAboveSMA200: document.getElementById('ma-above-sma200').checked,
+        maGoldenCross: document.getElementById('ma-golden-cross').checked,
+        adxTrending: document.getElementById('adx-trending').checked,
+        adxStrong: document.getElementById('adx-strong').checked,
+        adxMin: parseInt(document.getElementById('adx-min').value),
+        bbSqueeze: document.getElementById('bb-squeeze').checked,
+        bbNearUpper: document.getElementById('bb-near-upper').checked,
+        bbNearLower: document.getElementById('bb-near-lower').checked,
+        obvDivergence: document.getElementById('pattern-obv-div').checked,
+        candlestickPattern: document.getElementById('pattern-candlestick').checked,
+        ichimokuSignal: document.getElementById('pattern-ichimoku').checked
+      };
+    }
+    
+    function clearFilters() {
+      document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+      document.getElementById('volume-min').value = 1;
+      document.getElementById('adx-min').value = 0;
+      updateVolumeValue(1);
+      updateADXValue(0);
+      updateFilters();
+      document.getElementById('results-container').style.display = 'none';
+      document.getElementById('no-results').style.display = 'none';
+    }
+    
+    function runScreener() {
+      if (!scanData || !scanData.technicals) {
+        alert('No scan data available. Run a market scan first (npm run scan)');
+        return;
+      }
+      
+      const matches = [];
+      
+      for (const [ticker, tech] of Object.entries(scanData.technicals)) {
+        if (!tech) continue;
+        
+        const market = scanData.marketData[ticker];
+        if (!market) continue;
+        
+        const matchReasons = [];
+        let isMatch = true;
+        
+        // Check if ANY filter is active
+        const hasActiveFilters = Object.values(activeFilters).some(v => v === true || (typeof v === 'number' && v > 0));
+        if (!hasActiveFilters) {
+          isMatch = false;
+          continue;
+        }
+        
+        // RSI Filters
+        if (activeFilters.rsiOversold && tech.rsi < 30) matchReasons.push('RSI Oversold');
+        else if (activeFilters.rsiOversold) isMatch = false;
+        
+        if (activeFilters.rsiOverbought && tech.rsi > 70) matchReasons.push('RSI Overbought');
+        else if (activeFilters.rsiOverbought) isMatch = false;
+        
+        if (activeFilters.rsiNeutral && tech.rsi >= 30 && tech.rsi <= 70) matchReasons.push('RSI Neutral');
+        else if (activeFilters.rsiNeutral) isMatch = false;
+        
+        // Trend Filters
+        if (activeFilters.trendStrongUp && tech.trend === 'strong_uptrend') matchReasons.push('Strong Uptrend');
+        else if (activeFilters.trendStrongUp) isMatch = false;
+        
+        if (activeFilters.trendUp && (tech.trend === 'uptrend' || tech.trend === 'strong_uptrend')) matchReasons.push('Uptrend');
+        else if (activeFilters.trendUp) isMatch = false;
+        
+        if (activeFilters.trendDown && (tech.trend === 'downtrend' || tech.trend === 'strong_downtrend')) matchReasons.push('Downtrend');
+        else if (activeFilters.trendDown) isMatch = false;
+        
+        if (activeFilters.trendStrongDown && tech.trend === 'strong_downtrend') matchReasons.push('Strong Downtrend');
+        else if (activeFilters.trendStrongDown) isMatch = false;
+        
+        // Volume Filters
+        if (activeFilters.volumeHigh && market.volumeRatio >= 1.5) matchReasons.push('High Volume');
+        else if (activeFilters.volumeHigh) isMatch = false;
+        
+        if (activeFilters.volumeExtreme && market.volumeRatio >= 2) matchReasons.push('Extreme Volume');
+        else if (activeFilters.volumeExtreme) isMatch = false;
+        
+        if (activeFilters.volumeMin > 1 && market.volumeRatio >= activeFilters.volumeMin) {
+          matchReasons.push(`Vol ${market.volumeRatio.toFixed(1)}x`);
+        } else if (activeFilters.volumeMin > 1) {
+          isMatch = false;
+        }
+        
+        // MACD Filters
+        if (tech.macd) {
+          if (activeFilters.macdBullish && tech.macd.macd > tech.macd.signal) matchReasons.push('MACD Bullish');
+          else if (activeFilters.macdBullish) isMatch = false;
+          
+          if (activeFilters.macdBearish && tech.macd.macd < tech.macd.signal) matchReasons.push('MACD Bearish');
+          else if (activeFilters.macdBearish) isMatch = false;
+          
+          if (activeFilters.macdHistPos && tech.macd.histogram > 0) matchReasons.push('MACD Hist+');
+          else if (activeFilters.macdHistPos) isMatch = false;
+        } else if (activeFilters.macdBullish || activeFilters.macdBearish || activeFilters.macdHistPos) {
+          isMatch = false;
+        }
+        
+        // Moving Average Filters
+        if (activeFilters.maAboveSMA50 && tech.price > tech.movingAverages.sma50) matchReasons.push('Above SMA50');
+        else if (activeFilters.maAboveSMA50) isMatch = false;
+        
+        if (activeFilters.maAboveSMA200 && tech.price > tech.movingAverages.sma200) matchReasons.push('Above SMA200');
+        else if (activeFilters.maAboveSMA200) isMatch = false;
+        
+        if (activeFilters.maGoldenCross && tech.movingAverages.sma50 > tech.movingAverages.sma200) matchReasons.push('Golden Cross');
+        else if (activeFilters.maGoldenCross) isMatch = false;
+        
+        // ADX Filters
+        if (tech.adx) {
+          if (activeFilters.adxTrending && tech.adx.adx > 25) matchReasons.push('Trending');
+          else if (activeFilters.adxTrending) isMatch = false;
+          
+          if (activeFilters.adxStrong && tech.adx.adx > 40) matchReasons.push('Strong Trend');
+          else if (activeFilters.adxStrong) isMatch = false;
+          
+          if (activeFilters.adxMin > 0 && tech.adx.adx >= activeFilters.adxMin) {
+            matchReasons.push(`ADX ${tech.adx.adx.toFixed(0)}`);
+          } else if (activeFilters.adxMin > 0) {
+            isMatch = false;
+          }
+        } else if (activeFilters.adxTrending || activeFilters.adxStrong || activeFilters.adxMin > 0) {
+          isMatch = false;
+        }
+        
+        // Bollinger Bands Filters
+        if (tech.bollingerBands) {
+          if (activeFilters.bbSqueeze && tech.bollingerBands.bandwidth < 5) matchReasons.push('BB Squeeze');
+          else if (activeFilters.bbSqueeze) isMatch = false;
+          
+          const bbPosition = ((tech.price - tech.bollingerBands.lower) / (tech.bollingerBands.upper - tech.bollingerBands.lower)) * 100;
+          
+          if (activeFilters.bbNearUpper && bbPosition > 80) matchReasons.push('Near BB Upper');
+          else if (activeFilters.bbNearUpper) isMatch = false;
+          
+          if (activeFilters.bbNearLower && bbPosition < 20) matchReasons.push('Near BB Lower');
+          else if (activeFilters.bbNearLower) isMatch = false;
+        } else if (activeFilters.bbSqueeze || activeFilters.bbNearUpper || activeFilters.bbNearLower) {
+          isMatch = false;
+        }
+        
+        // Pattern Filters
+        if (activeFilters.obvDivergence && tech.obvDivergence) matchReasons.push(`OBV ${tech.obvDivergence.type} Div`);
+        else if (activeFilters.obvDivergence) isMatch = false;
+        
+        if (activeFilters.candlestickPattern && tech.candlestickPatterns && tech.candlestickPatterns.primary) {
+          matchReasons.push(tech.candlestickPatterns.primary.pattern);
+        } else if (activeFilters.candlestickPattern) {
+          isMatch = false;
+        }
+        
+        if (activeFilters.ichimokuSignal && tech.ichimoku && tech.ichimoku.signal !== 'neutral') {
+          matchReasons.push(`Ichimoku ${tech.ichimoku.signal}`);
+        } else if (activeFilters.ichimokuSignal) {
+          isMatch = false;
+        }
+        
+        if (isMatch && matchReasons.length > 0) {
+          matches.push({
+            ticker,
+            market,
+            tech,
+            matchReasons
+          });
+        }
+      }
+      
+      displayResults(matches);
+    }
+    
+    function displayResults(matches) {
+      const resultsContainer = document.getElementById('results-container');
+      const noResults = document.getElementById('no-results');
+      const resultsGrid = document.getElementById('screener-results');
+      const matchCount = document.getElementById('match-count');
+      
+      if (matches.length === 0) {
+        resultsContainer.style.display = 'none';
+        noResults.style.display = 'block';
+        return;
+      }
+      
+      resultsContainer.style.display = 'block';
+      noResults.style.display = 'none';
+      matchCount.textContent = matches.length;
+      
+      let html = '';
+      
+      for (const match of matches) {
+        const { ticker, market, tech, matchReasons } = match;
+        const changeClass = market.change >= 0 ? 'positive' : 'negative';
+        
+        html += `
+          <div class="screener-card">
+            <div class="card-header">
+              <div class="card-ticker">${ticker}</div>
+              <div class="card-price ${changeClass}">
+                $${market.price.toFixed(2)}
+                <div style="font-size: 0.9rem;">${market.change >= 0 ? '+' : ''}${market.changePercent.toFixed(2)}%</div>
+              </div>
+            </div>
+            
+            <div class="match-badges">
+              ${matchReasons.map(reason => {
+                let badgeClass = 'badge';
+                if (reason.includes('Overbought') || reason.includes('Extreme')) badgeClass += ' warning';
+                if (reason.includes('Bearish') || reason.includes('Downtrend')) badgeClass += ' danger';
+                return `<span class="${badgeClass}">${reason}</span>`;
+              }).join('')}
+            </div>
+            
+            <div class="quick-stats">
+              <div class="stat">
+                <span class="stat-label">RSI:</span>
+                <span class="stat-value">${tech.rsi ? tech.rsi.toFixed(1) : '--'}</span>
+              </div>
+              <div class="stat">
+                <span class="stat-label">Vol:</span>
+                <span class="stat-value">${market.volumeRatio.toFixed(2)}x</span>
+              </div>
+              <div class="stat">
+                <span class="stat-label">ADX:</span>
+                <span class="stat-value">${tech.adx ? tech.adx.adx.toFixed(0) : '--'}</span>
+              </div>
+              <div class="stat">
+                <span class="stat-label">Trend:</span>
+                <span class="stat-value">${tech.trend.replace(/_/g, ' ')}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      
+      resultsGrid.innerHTML = html;
+    }
+    
+    function updateTimestamp() {
+      const elem = document.getElementById('lastUpdate');
+      if (elem) {
+        elem.textContent = new Date().toLocaleString();
+      }
+    }
+    
+    // Initialize
+    loadScanData();
+  </script>
+</body>
+</html>
