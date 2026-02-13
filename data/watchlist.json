@@ -1,0 +1,58 @@
+{
+  "SPY": {
+    "yahoo": "SPY",
+    "google": "SPY:NYSEARCA",
+    "name": "S&P 500 ETF",
+    "exchange": "NYSEARCA"
+  },
+  "QQQ": {
+    "yahoo": "QQQ",
+    "google": "QQQ:NASDAQ",
+    "name": "Nasdaq-100 ETF",
+    "exchange": "NASDAQ"
+  },
+  "ONDS": {
+    "yahoo": "ONDS",
+    "google": "ONDS:NASDAQ",
+    "name": "Ondas Holdings",
+    "exchange": "NASDAQ"
+  },
+  "USAR": {
+    "yahoo": "USAR",
+    "google": "USAR:NYSEARCA",
+    "name": "American Century US Equity",
+    "exchange": "NYSEARCA"
+  },
+  "RDDT": {
+    "yahoo": "RDDT",
+    "google": "RDDT:NYSE",
+    "name": "Reddit Inc",
+    "exchange": "NYSE"
+  },
+  "UUUU": {
+    "yahoo": "UUUU",
+    "google": "UUUU:NYSEAMERICAN",
+    "name": "Energy Fuels Inc",
+    "exchange": "NYSEAMERICAN"
+  },
+  "HOVR": {
+    "yahoo": "HOVR",
+    "google": "HOVR:NYSEARCA",
+    "name": "Innovator Premium Income 20",
+    "exchange": "NYSEARCA"
+  },
+  "TSLA": {
+    "yahoo": "TSLA",
+    "google": "TSLA:NASDAQ",
+    "name": "Tesla Inc",
+    "exchange": "NASDAQ",
+    "addedAt": 1770994606086
+  },
+  "DBS": {
+    "yahoo": "D05.SI",
+    "google": "D05:SGX",
+    "name": "DBS Group Holdings",
+    "exchange": "SGX",
+    "addedAt": 1770994606093
+  }
+}
