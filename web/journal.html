@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trade Journal 🐾 - Klaw Terminal</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🐾 TRADE JOURNAL</h1>
+      <p class="subtitle">Track Actual Trades & Learn from Outcomes</p>
+      <nav>
+        <a href="/">Dashboard</a>
+        <a href="/signals.html">Signals</a>
+        <a href="/analysis.html">Analysis</a>
+        <a href="/screener.html">Screener</a>
+        <a href="/heatmap.html">Heatmap</a>
+        <a href="/performance.html">Performance</a>
+        <a href="/risk.html">Risk</a>
+        <a href="/alerts.html">Alerts</a>
+        <a href="/sentiment.html">Sentiment</a>
+        <a href="/news.html">News</a>
+        <a href="/options.html">Options</a>
+        <a href="/earnings.html">Earnings</a>
+        <a href="/watchlist.html">Watchlist</a>
+        <a href="/cache.html">Cache</a>
+        <a href="/notifications.html">Notifications</a>
+        <a href="/journal.html" class="active">Journal</a>
+      </nav>
+    </header>
+
+    <!-- Journal Stats -->
+    <div class="grid">
+      <div class="card">
+        <h2>📊 Journal Statistics</h2>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Win Rate</div>
+            <div class="stat-value" id="statWinRate">--</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total P&L</div>
+            <div class="stat-value" id="statTotalPnL">--</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Avg Return</div>
+            <div class="stat-value" id="statAvgReturn">--</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Profit Factor</div>
+            <div class="stat-value" id="statProfitFactor">--</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Expectancy</div>
+            <div class="stat-value" id="statExpectancy">--</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Current Streak</div>
+            <div class="stat-value" id="statStreak">--</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total Trades</div>
+            <div class="stat-value" id="statTotalTrades">--</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Open Trades</div>
+            <div class="stat-value" id="statOpenTrades">--</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Trade Form -->
+    <div class="card">
+      <h2>
+        ➕ <span id="formTitle">Add New Trade</span>
+        <button id="toggleFormBtn" onclick="toggleAddForm()" style="float: right;">Show Form</button>
+      </h2>
+      
+      <form id="tradeForm" style="display: none;">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Ticker *</label>
+            <input type="text" id="ticker" required placeholder="e.g., SPY">
+          </div>
+          
+          <div class="form-group">
+            <label>Direction *</label>
+            <select id="direction" required>
+              <option value="LONG">LONG</option>
+              <option value="SHORT">SHORT</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>Entry Date *</label>
+            <input type="datetime-local" id="entryDate" required>
+          </div>
+          
+          <div class="form-group">
+            <label>Entry Price *</label>
+            <input type="number" id="entryPrice" step="0.01" required placeholder="0.00">
+          </div>
+          
+          <div class="form-group">
+            <label>Position Size *</label>
+            <input type="number" id="size" required placeholder="Shares/Contracts">
+          </div>
+          
+          <div class="form-group">
+            <label>Stop Loss</label>
+            <input type="number" id="stopLoss" step="0.01" placeholder="0.00">
+          </div>
+          
+          <div class="form-group">
+            <label>Exit Date</label>
+            <input type="datetime-local" id="exitDate">
+          </div>
+          
+          <div class="form-group">
+            <label>Exit Price</label>
+            <input type="number" id="exitPrice" step="0.01" placeholder="0.00">
+          </div>
+          
+          <div class="form-group">
+            <label>Target 1</label>
+            <input type="number" id="target1" step="0.01" placeholder="0.00">
+          </div>
+          
+          <div class="form-group">
+            <label>Target 2</label>
+            <input type="number" id="target2" step="0.01" placeholder="0.00">
+          </div>
+          
+          <div class="form-group">
+            <label>Target 3</label>
+            <input type="number" id="target3" step="0.01" placeholder="0.00">
+          </div>
+          
+          <div class="form-group">
+            <label>Status</label>
+            <select id="status">
+              <option value="OPEN">OPEN</option>
+              <option value="CLOSED">CLOSED</option>
+              <option value="STOPPED_OUT">STOPPED OUT</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>Pattern</label>
+            <input type="text" id="pattern" placeholder="e.g., Breakout, Reversal">
+          </div>
+          
+          <div class="form-group">
+            <label>Timeframe</label>
+            <select id="timeframe">
+              <option value="">Select...</option>
+              <option value="Scalp (minutes)">Scalp (minutes)</option>
+              <option value="Intraday (hours)">Intraday (hours)</option>
+              <option value="Swing (days)">Swing (days)</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>Signal Confidence (1-10)</label>
+            <input type="number" id="signalConfidence" min="1" max="10" placeholder="1-10">
+          </div>
+          
+          <div class="form-group">
+            <label>Slippage ($)</label>
+            <input type="number" id="slippage" step="0.01" placeholder="0.00">
+          </div>
+          
+          <div class="form-group">
+            <label>Target Hit</label>
+            <select id="targetHit">
+              <option value="">None</option>
+              <option value="t1">Target 1</option>
+              <option value="t2">Target 2</option>
+              <option value="t3">Target 3</option>
+              <option value="stop">Stopped Out</option>
+            </select>
+          </div>
+          
+          <div class="form-group full-width">
+            <label>Tags (comma-separated)</label>
+            <input type="text" id="tags" placeholder="e.g., momentum, breakout, earnings">
+          </div>
+          
+          <div class="form-group full-width">
+            <label>Notes</label>
+            <textarea id="notes" rows="3" placeholder="Trade setup, entry reasoning..."></textarea>
+          </div>
+          
+          <div class="form-group full-width">
+            <label>Lessons Learned</label>
+            <textarea id="lessons" rows="3" placeholder="What went well? What could be improved?"></textarea>
+          </div>
+        </div>
+        
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <button type="submit" class="btn-primary">💾 Save Trade</button>
+          <button type="button" onclick="cancelEdit()" class="btn-secondary">❌ Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Filters -->
+    <div class="card">
+      <h2>🔍 Filter Trades</h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Status</label>
+          <select id="filterStatus" onchange="loadTrades()">
+            <option value="">All</option>
+            <option value="OPEN">Open</option>
+            <option value="CLOSED">Closed</option>
+            <option value="STOPPED_OUT">Stopped Out</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>Direction</label>
+          <select id="filterDirection" onchange="loadTrades()">
+            <option value="">All</option>
+            <option value="LONG">Long</option>
+            <option value="SHORT">Short</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>Outcome</label>
+          <select id="filterOutcome" onchange="loadTrades()">
+            <option value="">All</option>
+            <option value="winners">Winners Only</option>
+            <option value="losers">Losers Only</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>Limit</label>
+          <select id="filterLimit" onchange="loadTrades()">
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="250">250</option>
+            <option value="">All</option>
+          </select>
+        </div>
+      </div>
+      
+      <div style="margin-top: 15px;">
+        <button onclick="loadTrades()" class="btn-primary">🔄 Refresh</button>
+        <button onclick="exportJournal()" class="btn-secondary">📥 Export CSV</button>
+      </div>
+    </div>
+
+    <!-- Trades List -->
+    <div class="card">
+      <h2>📋 Trade History</h2>
+      <div id="tradesList" class="loading">Loading trades...</div>
+    </div>
+  </div>
+
+  <script>
+    let editingTradeId = null;
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      loadStats();
+      loadTrades();
+      
+      // Set default entry date to now
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      document.getElementById('entryDate').value = now.toISOString().slice(0, 16);
+      
+      // Form submission
+      document.getElementById('tradeForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await saveTrade();
+      });
+    });
+
+    function toggleAddForm() {
+      const form = document.getElementById('tradeForm');
+      const btn = document.getElementById('toggleFormBtn');
+      
+      if (form.style.display === 'none') {
+        form.style.display = 'block';
+        btn.textContent = 'Hide Form';
+      } else {
+        form.style.display = 'none';
+        btn.textContent = 'Show Form';
+      }
+    }
+
+    async function loadStats() {
+      try {
+        const res = await fetch('/api/journal/stats');
+        const { success, data } = await res.json();
+        
+        if (!success) return;
+        
+        document.getElementById('statWinRate').textContent = data.winRate.toFixed(1) + '%';
+        document.getElementById('statWinRate').className = 'stat-value ' + (data.winRate >= 50 ? 'positive' : 'negative');
+        
+        document.getElementById('statTotalPnL').textContent = formatCurrency(data.totalPnL);
+        document.getElementById('statTotalPnL').className = 'stat-value ' + (data.totalPnL >= 0 ? 'positive' : 'negative');
+        
+        document.getElementById('statAvgReturn').textContent = data.avgReturn.toFixed(2) + '%';
+        document.getElementById('statAvgReturn').className = 'stat-value ' + (data.avgReturn >= 0 ? 'positive' : 'negative');
+        
+        document.getElementById('statProfitFactor').textContent = data.profitFactor === Infinity ? '∞' : data.profitFactor.toFixed(2);
+        document.getElementById('statProfitFactor').className = 'stat-value ' + (data.profitFactor >= 1.5 ? 'positive' : data.profitFactor >= 1 ? 'neutral' : 'negative');
+        
+        document.getElementById('statExpectancy').textContent = formatCurrency(data.expectancy);
+        document.getElementById('statExpectancy').className = 'stat-value ' + (data.expectancy >= 0 ? 'positive' : 'negative');
+        
+        const streakText = data.recentStreak.type ? 
+          `${data.recentStreak.count} ${data.recentStreak.type}${data.recentStreak.count > 1 ? 'S' : ''}` : 
+          'N/A';
+        document.getElementById('statStreak').textContent = streakText;
+        document.getElementById('statStreak').className = 'stat-value ' + (data.recentStreak.type === 'WIN' ? 'positive' : data.recentStreak.type === 'LOSS' ? 'negative' : '');
+        
+        document.getElementById('statTotalTrades').textContent = data.totalTrades;
+        document.getElementById('statOpenTrades').textContent = data.openTrades;
+        
+      } catch (error) {
+        console.error('Failed to load stats:', error);
+      }
+    }
+
+    async function loadTrades() {
+      const tradesList = document.getElementById('tradesList');
+      tradesList.innerHTML = '<div class="loading">Loading trades...</div>';
+      
+      try {
+        const params = new URLSearchParams();
+        
+        const status = document.getElementById('filterStatus').value;
+        const direction = document.getElementById('filterDirection').value;
+        const outcome = document.getElementById('filterOutcome').value;
+        const limit = document.getElementById('filterLimit').value;
+        
+        if (status) params.append('status', status);
+        if (direction) params.append('direction', direction);
+        if (outcome) params.append('outcome', outcome);
+        if (limit) params.append('limit', limit);
+        
+        const res = await fetch(`/api/journal/trades?${params}`);
+        const { success, data } = await res.json();
+        
+        if (!success || !data || data.length === 0) {
+          tradesList.innerHTML = '<div class="empty-state">No trades found. Add your first trade above!</div>';
+          return;
+        }
+        
+        tradesList.innerHTML = data.map(trade => `
+          <div class="trade-card ${trade.pnl !== null ? (trade.pnl >= 0 ? 'winner' : 'loser') : 'open'}">
+            <div class="trade-header">
+              <div class="trade-title">
+                <strong>${trade.ticker}</strong>
+                <span class="badge ${trade.direction.toLowerCase()}">${trade.direction}</span>
+                <span class="badge ${trade.status === 'OPEN' ? 'neutral' : trade.status === 'CLOSED' ? 'success' : 'danger'}">${trade.status}</span>
+              </div>
+              <div class="trade-actions">
+                <button onclick="editTrade('${trade.id}')" class="btn-small">✏️ Edit</button>
+                <button onclick="deleteTrade('${trade.id}')" class="btn-small btn-danger">🗑️</button>
+              </div>
+            </div>
+            
+            <div class="trade-details">
+              <div class="detail-row">
+                <div class="detail-item">
+                  <span class="detail-label">Entry Date:</span>
+                  <span class="detail-value">${new Date(trade.entryDate).toLocaleString()}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Entry Price:</span>
+                  <span class="detail-value">$${trade.entryPrice.toFixed(2)}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Size:</span>
+                  <span class="detail-value">${trade.size}</span>
+                </div>
+              </div>
+              
+              ${trade.exitPrice ? `
+                <div class="detail-row">
+                  <div class="detail-item">
+                    <span class="detail-label">Exit Date:</span>
+                    <span class="detail-value">${new Date(trade.exitDate).toLocaleString()}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Exit Price:</span>
+                    <span class="detail-value">$${trade.exitPrice.toFixed(2)}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">P&L:</span>
+                    <span class="detail-value ${trade.pnl >= 0 ? 'positive' : 'negative'}">
+                      ${formatCurrency(trade.pnl)} (${trade.pnlPercent.toFixed(2)}%)
+                    </span>
+                  </div>
+                </div>
+              ` : '<div class="detail-row"><em>Trade still open</em></div>'}
+              
+              ${trade.pattern || trade.timeframe || trade.signalConfidence ? `
+                <div class="detail-row">
+                  ${trade.pattern ? `<div class="detail-item"><span class="detail-label">Pattern:</span> ${trade.pattern}</div>` : ''}
+                  ${trade.timeframe ? `<div class="detail-item"><span class="detail-label">Timeframe:</span> ${trade.timeframe}</div>` : ''}
+                  ${trade.signalConfidence ? `<div class="detail-item"><span class="detail-label">Confidence:</span> ${trade.signalConfidence}/10</div>` : ''}
+                </div>
+              ` : ''}
+              
+              ${trade.notes ? `<div class="trade-notes"><strong>Notes:</strong> ${trade.notes}</div>` : ''}
+              ${trade.lessons ? `<div class="trade-lessons"><strong>Lessons:</strong> ${trade.lessons}</div>` : ''}
+              ${trade.tags && trade.tags.length > 0 ? `
+                <div class="trade-tags">
+                  ${trade.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `).join('');
+        
+      } catch (error) {
+        console.error('Failed to load trades:', error);
+        tradesList.innerHTML = '<div class="error">Failed to load trades</div>';
+      }
+    }
+
+    async function saveTrade() {
+      const tradeData = {
+        ticker: document.getElementById('ticker').value.toUpperCase(),
+        direction: document.getElementById('direction').value,
+        entryDate: new Date(document.getElementById('entryDate').value).getTime(),
+        entryPrice: parseFloat(document.getElementById('entryPrice').value),
+        size: parseInt(document.getElementById('size').value),
+        stopLoss: document.getElementById('stopLoss').value ? parseFloat(document.getElementById('stopLoss').value) : null,
+        exitDate: document.getElementById('exitDate').value ? new Date(document.getElementById('exitDate').value).getTime() : null,
+        exitPrice: document.getElementById('exitPrice').value ? parseFloat(document.getElementById('exitPrice').value) : null,
+        targets: {
+          t1: document.getElementById('target1').value ? parseFloat(document.getElementById('target1').value) : null,
+          t2: document.getElementById('target2').value ? parseFloat(document.getElementById('target2').value) : null,
+          t3: document.getElementById('target3').value ? parseFloat(document.getElementById('target3').value) : null
+        },
+        status: document.getElementById('status').value,
+        pattern: document.getElementById('pattern').value || null,
+        timeframe: document.getElementById('timeframe').value || null,
+        signalConfidence: document.getElementById('signalConfidence').value ? parseInt(document.getElementById('signalConfidence').value) : null,
+        slippage: document.getElementById('slippage').value ? parseFloat(document.getElementById('slippage').value) : 0,
+        executionQuality: {
+          slippage: document.getElementById('slippage').value ? parseFloat(document.getElementById('slippage').value) : 0,
+          targetHit: document.getElementById('targetHit').value || null
+        },
+        notes: document.getElementById('notes').value || '',
+        lessons: document.getElementById('lessons').value || '',
+        tags: document.getElementById('tags').value ? document.getElementById('tags').value.split(',').map(t => t.trim()).filter(t => t) : []
+      };
+      
+      try {
+        let res;
+        if (editingTradeId) {
+          res = await fetch(`/api/journal/trades/${editingTradeId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(tradeData)
+          });
+        } else {
+          res = await fetch('/api/journal/trades', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(tradeData)
+          });
+        }
+        
+        const result = await res.json();
+        
+        if (result.success) {
+          alert(editingTradeId ? 'Trade updated!' : 'Trade added to journal!');
+          cancelEdit();
+          loadStats();
+          loadTrades();
+        } else {
+          alert('Error: ' + result.error);
+        }
+      } catch (error) {
+        console.error('Failed to save trade:', error);
+        alert('Failed to save trade');
+      }
+    }
+
+    async function editTrade(tradeId) {
+      try {
+        const res = await fetch(`/api/journal/trades/${tradeId}`);
+        const { success, data } = await res.json();
+        
+        if (!success) {
+          alert('Failed to load trade');
+          return;
+        }
+        
+        editingTradeId = tradeId;
+        
+        // Populate form
+        document.getElementById('ticker').value = data.ticker;
+        document.getElementById('direction').value = data.direction;
+        
+        const entryDate = new Date(data.entryDate);
+        entryDate.setMinutes(entryDate.getMinutes() - entryDate.getTimezoneOffset());
+        document.getElementById('entryDate').value = entryDate.toISOString().slice(0, 16);
+        
+        document.getElementById('entryPrice').value = data.entryPrice;
+        document.getElementById('size').value = data.size;
+        document.getElementById('stopLoss').value = data.stopLoss || '';
+        
+        if (data.exitDate) {
+          const exitDate = new Date(data.exitDate);
+          exitDate.setMinutes(exitDate.getMinutes() - exitDate.getTimezoneOffset());
+          document.getElementById('exitDate').value = exitDate.toISOString().slice(0, 16);
+        }
+        
+        document.getElementById('exitPrice').value = data.exitPrice || '';
+        document.getElementById('target1').value = data.targets?.t1 || '';
+        document.getElementById('target2').value = data.targets?.t2 || '';
+        document.getElementById('target3').value = data.targets?.t3 || '';
+        document.getElementById('status').value = data.status;
+        document.getElementById('pattern').value = data.pattern || '';
+        document.getElementById('timeframe').value = data.timeframe || '';
+        document.getElementById('signalConfidence').value = data.signalConfidence || '';
+        document.getElementById('slippage').value = data.executionQuality?.slippage || '';
+        document.getElementById('targetHit').value = data.executionQuality?.targetHit || '';
+        document.getElementById('notes').value = data.notes || '';
+        document.getElementById('lessons').value = data.lessons || '';
+        document.getElementById('tags').value = data.tags?.join(', ') || '';
+        
+        // Show form
+        document.getElementById('tradeForm').style.display = 'block';
+        document.getElementById('toggleFormBtn').textContent = 'Hide Form';
+        document.getElementById('formTitle').textContent = 'Edit Trade';
+        
+        // Scroll to form
+        document.getElementById('tradeForm').scrollIntoView({ behavior: 'smooth' });
+        
+      } catch (error) {
+        console.error('Failed to load trade:', error);
+        alert('Failed to load trade');
+      }
+    }
+
+    function cancelEdit() {
+      editingTradeId = null;
+      document.getElementById('tradeForm').reset();
+      document.getElementById('tradeForm').style.display = 'none';
+      document.getElementById('toggleFormBtn').textContent = 'Show Form';
+      document.getElementById('formTitle').textContent = 'Add New Trade';
+      
+      // Reset entry date to now
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      document.getElementById('entryDate').value = now.toISOString().slice(0, 16);
+    }
+
+    async function deleteTrade(tradeId) {
+      if (!confirm('Are you sure you want to delete this trade? This cannot be undone.')) {
+        return;
+      }
+      
+      try {
+        const res = await fetch(`/api/journal/trades/${tradeId}`, {
+          method: 'DELETE'
+        });
+        
+        const result = await res.json();
+        
+        if (result.success) {
+          alert('Trade deleted');
+          loadStats();
+          loadTrades();
+        } else {
+          alert('Error: ' + result.error);
+        }
+      } catch (error) {
+        console.error('Failed to delete trade:', error);
+        alert('Failed to delete trade');
+      }
+    }
+
+    async function exportJournal() {
+      try {
+        window.location.href = '/api/journal/export';
+      } catch (error) {
+        console.error('Failed to export journal:', error);
+        alert('Failed to export journal');
+      }
+    }
+
+    function formatCurrency(value) {
+      if (value === null || value === undefined) return '--';
+      const sign = value >= 0 ? '+' : '';
+      return sign + '$' + value.toFixed(2);
+    }
+  </script>
+</body>
+</html>

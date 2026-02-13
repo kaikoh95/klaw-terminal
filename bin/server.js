@@ -83,6 +83,16 @@ import {
   clearOldNotifications,
   getNotificationStats
 } from '../lib/notifications.js';
+import {
+  loadJournal,
+  addTrade,
+  updateTrade,
+  deleteTrade,
+  getTrades,
+  getTrade,
+  getStats,
+  exportToCSV as exportJournalToCSV
+} from '../lib/trade-journal.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -1098,6 +1108,91 @@ app.post('/api/watchlist/reset', (req, res) => {
   try {
     const watchlist = resetWatchlist();
     res.json({ success: true, data: watchlist, message: 'Watchlist reset to defaults' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Trade Journal Endpoints
+
+// Get all trades with optional filters
+app.get('/api/journal/trades', (req, res) => {
+  try {
+    const filters = {
+      ticker: req.query.ticker,
+      status: req.query.status,
+      direction: req.query.direction,
+      pattern: req.query.pattern,
+      outcome: req.query.outcome, // 'winners' or 'losers'
+      startDate: req.query.startDate ? parseInt(req.query.startDate) : undefined,
+      endDate: req.query.endDate ? parseInt(req.query.endDate) : undefined,
+      limit: req.query.limit ? parseInt(req.query.limit) : undefined
+    };
+    
+    const trades = getTrades(filters);
+    res.json({ success: true, data: trades });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get a single trade by ID
+app.get('/api/journal/trades/:id', (req, res) => {
+  try {
+    const trade = getTrade(req.params.id);
+    res.json({ success: true, data: trade });
+  } catch (error) {
+    res.status(404).json({ success: false, error: error.message });
+  }
+});
+
+// Add a new trade
+app.post('/api/journal/trades', (req, res) => {
+  try {
+    const trade = addTrade(req.body);
+    res.json({ success: true, data: trade, message: 'Trade added to journal' });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+// Update an existing trade
+app.put('/api/journal/trades/:id', (req, res) => {
+  try {
+    const trade = updateTrade(req.params.id, req.body);
+    res.json({ success: true, data: trade, message: 'Trade updated' });
+  } catch (error) {
+    res.status(404).json({ success: false, error: error.message });
+  }
+});
+
+// Delete a trade
+app.delete('/api/journal/trades/:id', (req, res) => {
+  try {
+    const result = deleteTrade(req.params.id);
+    res.json({ success: true, data: result, message: 'Trade deleted' });
+  } catch (error) {
+    res.status(404).json({ success: false, error: error.message });
+  }
+});
+
+// Get journal statistics
+app.get('/api/journal/stats', (req, res) => {
+  try {
+    const stats = getStats();
+    res.json({ success: true, data: stats });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Export journal to CSV
+app.get('/api/journal/export', (req, res) => {
+  try {
+    const csv = exportJournalToCSV();
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="trade-journal.csv"');
+    res.send(csv);
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }

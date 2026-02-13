@@ -26,6 +26,7 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
 - **Price Alerts** - Set custom price alerts with real-time notifications when levels are breached
 - **Smart Caching** - Intelligent Gemini analysis caching with 5-min TTL to reduce API costs and improve speed
 - **Real-Time Signal Notifications** - Instant WebSocket notifications for high-confidence AI signals (7+) with browser alerts and history tracking
+- **Trade Journal** - Log actual trades, track execution vs signals, learn from outcomes with comprehensive statistics and CSV export
 
 ## Dynamic Watchlist
 
@@ -133,6 +134,15 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
   - Recent message feed for each ticker
   - Trending stocks discovery
   - Refresh sentiment data on demand
+- **Trade Journal** (`/journal.html`) - Track actual trading performance
+  - Log real trades with entry/exit prices, P&L, and position sizes
+  - Link trades to original AI signals for accuracy tracking
+  - Add notes, lessons learned, and trade tags
+  - Track execution quality (slippage, timing delays)
+  - Comprehensive statistics: win rate, profit factor, expectancy, streaks
+  - Performance breakdown by pattern, ticker, and timeframe
+  - Filter trades by status, direction, outcome
+  - Export complete trading history to CSV for analysis
 - **News Feed** (`/news.html`) - Market news and sentiment from Alpha Vantage
   - Real-time news articles for each ticker
   - News sentiment analysis (bullish/bearish/neutral)
@@ -301,6 +311,13 @@ Automatic tracking of:
 - `POST /api/notifications/read-all` - Mark all notifications as read
 - `POST /api/notifications/cleanup` - Clear old notifications (params: daysOld)
 - `POST /api/notifications/send` - Send custom notification (params: title, message, type, priority)
+- `GET /api/journal/trades` - Get all trades with optional filters (ticker, status, direction, pattern, outcome, dateRange, limit)
+- `GET /api/journal/trades/:id` - Get a single trade by ID
+- `POST /api/journal/trades` - Add a new trade to the journal (params: ticker, direction, entryDate, entryPrice, size, exitPrice, stopLoss, targets, status, pattern, timeframe, notes, lessons, tags, executionQuality)
+- `PUT /api/journal/trades/:id` - Update an existing trade
+- `DELETE /api/journal/trades/:id` - Delete a trade from the journal
+- `GET /api/journal/stats` - Get comprehensive journal statistics (win rate, total P&L, avg return, profit factor, expectancy, streaks, execution quality, breakdown by pattern/ticker)
+- `GET /api/journal/export` - Export entire journal to CSV for external analysis
 
 ## Development
 
