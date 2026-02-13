@@ -13,6 +13,8 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
 - **Performance Analytics** - Hit rate, win streaks, profit factor, expectancy
 - **Web Dashboard** - Clean, dark-themed trading terminal interface
 - **Market Heatmap** - Visual color-coded grid showing relative strength across all tickers
+- **Multi-Panel Charts** - Professional 4-panel layout with Price, RSI, MACD, and Volume charts
+- **Live WebSocket Updates** - Real-time price updates with visual flash animations
 
 ## Supported Tickers
 
@@ -63,6 +65,11 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
 ### Web UI
 
 - **Dashboard** (`/`) - Watchlist, active signals, performance stats
+  - Multi-panel technical charts with synchronized zoom/pan
+  - Panel 1: Price action with MA, Bollinger Bands, VWAP overlays
+  - Panel 2: RSI(14) with overbought/oversold zones
+  - Panel 3: MACD with histogram and signal line
+  - Panel 4: Volume bars color-coded by price direction
 - **Signals** (`/signals.html`) - Complete signal history with filtering
 - **Analysis** (`/analysis.html`) - Detailed technical analysis for all tickers
 - **Heatmap** (`/heatmap.html`) - Visual market heatmap with color-coded performance
