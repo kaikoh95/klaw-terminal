@@ -11,6 +11,7 @@ import { analyzeMarketData } from '../lib/technicals.js';
 import { exportSignalsSummary, getRecentSignals } from '../lib/signals.js';
 import { loadPerformance, getPerformanceSummary } from '../lib/performance.js';
 import { calculateMarketSentiment } from '../lib/sentiment.js';
+import { getCacheStats, clearCache } from '../lib/gemini.js';
 import { 
   getPerformanceSummary as getSignalPerformanceSummary, 
   getActiveSignals, 
@@ -900,6 +901,28 @@ app.get('/api/earnings/summary', (req, res) => {
     const summary = getEarningsSummary(data.tickers);
     
     res.json({ success: true, data: summary });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Gemini Cache Management Endpoints
+
+// Get cache statistics
+app.get('/api/cache/stats', (req, res) => {
+  try {
+    const stats = getCacheStats();
+    res.json({ success: true, data: stats });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Clear analysis cache
+app.post('/api/cache/clear', (req, res) => {
+  try {
+    const result = clearCache();
+    res.json({ success: true, data: result });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }

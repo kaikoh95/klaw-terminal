@@ -23,6 +23,7 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
 - **Signal Performance Tracker** - Track actual vs predicted outcomes, identify best-performing patterns
 - **CSV Export** - Export signals, performance data, and technical analysis to CSV for Excel/external analysis
 - **Price Alerts** - Set custom price alerts with real-time notifications when levels are breached
+- **Smart Caching** - Intelligent Gemini analysis caching with 5-min TTL to reduce API costs and improve speed
 
 ## Supported Tickers
 
@@ -149,6 +150,12 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
   - Visual timeline organized by urgency
   - Alpha Vantage integration (free tier: 25 calls/day)
   - Demo mode when API key not configured
+- **Cache Manager** (`/cache.html`) - Gemini analysis cache monitoring and control
+  - Real-time cache statistics (size, fresh/stale entries, TTL)
+  - View all cached analyses with age and signal details
+  - Manual cache clearing for troubleshooting
+  - Auto-refresh every 10 seconds
+  - Monitor API cost savings from cache hits
 
 ## Project Structure
 
@@ -262,6 +269,8 @@ Automatic tracking of:
 - `GET /api/earnings/:ticker` - Get earnings calendar for specific ticker
 - `GET /api/earnings/summary` - Get earnings summary with alerts and upcoming counts
 - `POST /api/earnings/refresh` - Fetch earnings for all watchlist tickers (params: tickers)
+- `GET /api/cache/stats` - Get Gemini analysis cache statistics (size, fresh/stale, entries)
+- `POST /api/cache/clear` - Clear all cached Gemini analyses
 
 ## Development
 

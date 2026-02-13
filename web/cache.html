@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Klaw Terminal 🐾 - Cache Manager</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🐾 KLAW TERMINAL</h1>
+      <p class="subtitle">Gemini Analysis Cache Manager</p>
+      <nav>
+        <a href="/">Dashboard</a>
+        <a href="/signals.html">Signals</a>
+        <a href="/analysis.html">Analysis</a>
+        <a href="/screener.html">Screener</a>
+        <a href="/heatmap.html">Heatmap</a>
+        <a href="/performance.html">Performance</a>
+        <a href="/risk.html">Risk</a>
+        <a href="/alerts.html">Alerts</a>
+        <a href="/sentiment.html">Sentiment</a>
+        <a href="/news.html">News</a>
+        <a href="/options.html">Options</a>
+        <a href="/earnings.html">Earnings</a>
+        <a href="/cache.html" class="active">Cache</a>
+      </nav>
+    </header>
+
+    <div class="grid">
+      <!-- Cache Stats -->
+      <div class="card stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Entries</div>
+          <div class="stat-value" id="cacheSize">--</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Fresh</div>
+          <div class="stat-value positive" id="cacheFresh">--</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Stale</div>
+          <div class="stat-value negative" id="cacheStale">--</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">TTL</div>
+          <div class="stat-value" id="cacheTTL">--</div>
+        </div>
+      </div>
+
+      <!-- Cache Controls -->
+      <div class="card">
+        <h2>⚙️ Cache Controls</h2>
+        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+          <button class="btn" onclick="refreshStats()">↻ Refresh Stats</button>
+          <button class="btn btn-danger" onclick="clearCache()">🗑️ Clear Cache</button>
+        </div>
+        <div id="cacheMessage" class="info-message" style="display: none;"></div>
+      </div>
+
+      <!-- Cache Entries -->
+      <div class="card">
+        <h2>📦 Cached Analyses</h2>
+        <div id="cacheEntries" class="signals-list">
+          <div class="loading">Loading cache data...</div>
+        </div>
+      </div>
+
+      <!-- Cache Benefits -->
+      <div class="card">
+        <h2>💡 Cache Benefits</h2>
+        <div style="line-height: 1.8;">
+          <p><strong>Speed:</strong> Cached responses return instantly (no API call)</p>
+          <p><strong>Cost:</strong> Reduces Gemini API usage and associated costs</p>
+          <p><strong>Reliability:</strong> Serves cached data during API outages</p>
+          <p><strong>TTL:</strong> Cache expires after 5 minutes to ensure freshness</p>
+          <p><strong>Smart Keys:</strong> Cache invalidates on price/RSI/trend changes</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let statsRefreshInterval;
+
+    // Load cache stats on page load
+    async function loadCacheStats() {
+      try {
+        const response = await fetch('/api/cache/stats');
+        const data = await response.json();
+        
+        if (data.success) {
+          const stats = data.data;
+          
+          document.getElementById('cacheSize').textContent = stats.size;
+          document.getElementById('cacheFresh').textContent = stats.fresh;
+          document.getElementById('cacheStale').textContent = stats.stale;
+          document.getElementById('cacheTTL').textContent = formatDuration(stats.ttl);
+          
+          displayCacheEntries(stats.entries);
+        }
+      } catch (error) {
+        console.error('Error loading cache stats:', error);
+        showMessage('Failed to load cache stats', 'error');
+      }
+    }
+
+    // Display cache entries
+    function displayCacheEntries(entries) {
+      const container = document.getElementById('cacheEntries');
+      
+      if (entries.length === 0) {
+        container.innerHTML = '<div class="no-data">No cached analyses</div>';
+        return;
+      }
+      
+      // Sort by age (newest first)
+      entries.sort((a, b) => a.age - b.age);
+      
+      let html = '<div class="table-responsive"><table>';
+      html += '<thead><tr><th>Ticker</th><th>Signal</th><th>Confidence</th><th>Age</th><th>Cache Key</th></tr></thead><tbody>';
+      
+      for (const entry of entries) {
+        const signalClass = entry.signal === 'LONG' ? 'positive' : 
+                           entry.signal === 'SHORT' ? 'negative' : 'neutral';
+        const ageColor = entry.age < 60000 ? 'positive' : 
+                        entry.age < 180000 ? 'warning' : 'neutral';
+        
+        html += '<tr>';
+        html += `<td><strong>${entry.ticker}</strong></td>`;
+        html += `<td class="${signalClass}">${entry.signal}</td>`;
+        html += `<td>${entry.confidence}/10</td>`;
+        html += `<td class="${ageColor}">${formatDuration(entry.age)}</td>`;
+        html += `<td style="font-size: 0.85em; color: #888;">${entry.key}</td>`;
+        html += '</tr>';
+      }
+      
+      html += '</tbody></table></div>';
+      container.innerHTML = html;
+    }
+
+    // Clear cache
+    async function clearCache() {
+      if (!confirm('Are you sure you want to clear all cached analyses?')) {
+        return;
+      }
+      
+      try {
+        const response = await fetch('/api/cache/clear', {
+          method: 'POST'
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          showMessage(`✅ Cleared ${data.data.cleared} cached entries`, 'success');
+          await loadCacheStats();
+        } else {
+          showMessage('❌ Failed to clear cache', 'error');
+        }
+      } catch (error) {
+        console.error('Error clearing cache:', error);
+        showMessage('❌ Error clearing cache', 'error');
+      }
+    }
+
+    // Refresh stats
+    function refreshStats() {
+      loadCacheStats();
+      showMessage('🔄 Stats refreshed', 'info');
+    }
+
+    // Show message
+    function showMessage(text, type = 'info') {
+      const messageEl = document.getElementById('cacheMessage');
+      messageEl.textContent = text;
+      messageEl.className = `info-message ${type}`;
+      messageEl.style.display = 'block';
+      
+      setTimeout(() => {
+        messageEl.style.display = 'none';
+      }, 5000);
+    }
+
+    // Format duration
+    function formatDuration(ms) {
+      const seconds = Math.floor(ms / 1000);
+      const minutes = Math.floor(seconds / 60);
+      const hours = Math.floor(minutes / 60);
+      
+      if (hours > 0) return `${hours}h ${minutes % 60}m`;
+      if (minutes > 0) return `${minutes}m ${seconds % 60}s`;
+      return `${seconds}s`;
+    }
+
+    // Initialize
+    loadCacheStats();
+    
+    // Auto-refresh every 10 seconds
+    statsRefreshInterval = setInterval(loadCacheStats, 10000);
+  </script>
+</body>
+</html>
