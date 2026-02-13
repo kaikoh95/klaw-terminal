@@ -58,6 +58,11 @@ import {
   analyzeMultiTimeframe,
   batchAnalyzeMultiTimeframe
 } from '../lib/multi-timeframe.js';
+import {
+  fetchEarningsCalendar,
+  batchFetchEarnings,
+  getEarningsSummary
+} from '../lib/earnings.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -811,6 +816,90 @@ app.get('/api/multi-timeframe', (req, res) => {
     
     const data = JSON.parse(readFileSync(mtfFile, 'utf8'));
     res.json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Earnings Calendar Endpoints
+
+// Get earnings calendar for a specific ticker
+app.get('/api/earnings/:ticker', async (req, res) => {
+  try {
+    const { ticker } = req.params;
+    console.log(`Fetching earnings calendar for ${ticker}...`);
+    
+    const earnings = await fetchEarningsCalendar(ticker);
+    res.json({ success: true, data: earnings });
+  } catch (error) {
+    console.error(`Error fetching earnings for ${req.params.ticker}:`, error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Batch fetch earnings for all watchlist tickers
+app.post('/api/earnings/refresh', async (req, res) => {
+  try {
+    const tickers = req.body.tickers || ['SPY', 'QQQ', 'ONDS', 'USAR', 'RDDT', 'UUUU'];
+    
+    console.log(`Fetching earnings calendar for: ${tickers.join(', ')}`);
+    console.log('⚠️ Alpha Vantage free tier: 25 calls/day, 5 calls/min. This may take a while...');
+    
+    const earningsData = await batchFetchEarnings(tickers);
+    
+    // Save to file
+    const outputPath = join(__dirname, '..', 'data', 'earnings.json');
+    const data = {
+      timestamp: Date.now(),
+      tickers: earningsData
+    };
+    
+    writeFileSync(outputPath, JSON.stringify(data, null, 2));
+    
+    console.log(`✅ Earnings calendar data fetched and saved`);
+    
+    res.json({ success: true, data });
+  } catch (error) {
+    console.error('Error fetching earnings calendar:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get cached earnings data
+app.get('/api/earnings', (req, res) => {
+  try {
+    const earningsFile = join(__dirname, '..', 'data', 'earnings.json');
+    
+    if (!existsSync(earningsFile)) {
+      return res.json({ 
+        success: false, 
+        error: 'No earnings data available. Use POST /api/earnings/refresh to fetch.' 
+      });
+    }
+    
+    const data = JSON.parse(readFileSync(earningsFile, 'utf8'));
+    res.json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get earnings summary (upcoming, alerts, etc.)
+app.get('/api/earnings/summary', (req, res) => {
+  try {
+    const earningsFile = join(__dirname, '..', 'data', 'earnings.json');
+    
+    if (!existsSync(earningsFile)) {
+      return res.json({ 
+        success: false, 
+        error: 'No earnings data available. Use POST /api/earnings/refresh to fetch.' 
+      });
+    }
+    
+    const data = JSON.parse(readFileSync(earningsFile, 'utf8'));
+    const summary = getEarningsSummary(data.tickers);
+    
+    res.json({ success: true, data: summary });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }

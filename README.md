@@ -15,6 +15,7 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
 - **Social Sentiment** - StockTwits integration for real-time retail trader sentiment analysis
 - **News Feed** - Real-time market news and sentiment analysis from Alpha Vantage
 - **Options Chain Analysis** - Max pain calculation, put/call ratios, gamma walls, unusual options activity detection
+- **Earnings Calendar** - Upcoming earnings dates with alerts for imminent reports, automatic tracking across all watchlist tickers
 - **Web Dashboard** - Clean, dark-themed trading terminal interface
 - **Market Heatmap** - Visual color-coded grid showing relative strength across all tickers
 - **Multi-Panel Charts** - Professional 4-panel layout with Price, RSI, MACD, and Volume charts
@@ -140,6 +141,14 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
   - Unusual activity detection (high volume/OI ratios)
   - Key strike levels and sentiment signals
   - Refresh on demand for real-time options data
+- **Earnings Calendar** (`/earnings.html`) - Upcoming earnings dates and alerts
+  - Automatic earnings tracking for all watchlist tickers
+  - Imminent earnings alerts (≤7 days)
+  - Summary view: this week, next week, this month
+  - Estimated EPS and fiscal period information
+  - Visual timeline organized by urgency
+  - Alpha Vantage integration (free tier: 25 calls/day)
+  - Demo mode when API key not configured
 
 ## Project Structure
 
@@ -249,6 +258,10 @@ Automatic tracking of:
 - `GET /api/options` - Get cached options analysis data
 - `GET /api/options/:ticker` - Get fresh options analysis for specific ticker
 - `POST /api/options/refresh` - Analyze options for all watchlist tickers (params: tickers)
+- `GET /api/earnings` - Get cached earnings calendar data
+- `GET /api/earnings/:ticker` - Get earnings calendar for specific ticker
+- `GET /api/earnings/summary` - Get earnings summary with alerts and upcoming counts
+- `POST /api/earnings/refresh` - Fetch earnings for all watchlist tickers (params: tickers)
 
 ## Development
 

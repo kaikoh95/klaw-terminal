@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Klaw Terminal 🐾 - Earnings Calendar</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .earnings-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+    
+    .earnings-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .summary-card {
+      background: rgba(255, 255, 255, 0.02);
+      padding: 1.5rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      text-align: center;
+    }
+    
+    .summary-card.alert {
+      background: rgba(255, 59, 48, 0.1);
+      border-color: rgba(255, 59, 48, 0.3);
+    }
+    
+    .summary-card h3 {
+      margin: 0 0 0.5rem 0;
+      font-size: 0.85rem;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .summary-card .value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #00d4ff;
+    }
+    
+    .summary-card.alert .value {
+      color: #ff3b30;
+    }
+    
+    .earnings-timeline {
+      margin-bottom: 2rem;
+    }
+    
+    .timeline-section {
+      margin-bottom: 2rem;
+    }
+    
+    .timeline-section h2 {
+      margin: 0 0 1rem 0;
+      font-size: 1.2rem;
+      color: #00d4ff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .earnings-list {
+      display: grid;
+      gap: 0.75rem;
+    }
+    
+    .earnings-item {
+      background: rgba(255, 255, 255, 0.02);
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      display: grid;
+      grid-template-columns: 80px 1fr 120px 150px 100px;
+      gap: 1.5rem;
+      align-items: center;
+      transition: all 0.2s;
+    }
+    
+    .earnings-item:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(0, 212, 255, 0.3);
+      transform: translateX(4px);
+    }
+    
+    .earnings-item.imminent {
+      background: rgba(255, 59, 48, 0.1);
+      border-color: rgba(255, 59, 48, 0.3);
+    }
+    
+    .earnings-item.soon {
+      background: rgba(255, 159, 10, 0.1);
+      border-color: rgba(255, 159, 10, 0.3);
+    }
+    
+    .ticker-badge {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #fff;
+      text-align: center;
+    }
+    
+    .date-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    
+    .date-primary {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #fff;
+    }
+    
+    .date-secondary {
+      font-size: 0.85rem;
+      color: #888;
+    }
+    
+    .fiscal-period {
+      text-align: center;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #00d4ff;
+    }
+    
+    .estimate {
+      text-align: right;
+    }
+    
+    .estimate-label {
+      font-size: 0.75rem;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .estimate-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #4cd964;
+    }
+    
+    .days-until {
+      text-align: center;
+      font-size: 0.9rem;
+    }
+    
+    .days-number {
+      display: block;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #00d4ff;
+    }
+    
+    .days-label {
+      font-size: 0.75rem;
+      color: #888;
+      text-transform: uppercase;
+    }
+    
+    .alert-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .alert-badge.imminent {
+      background: #ff3b30;
+      color: #fff;
+    }
+    
+    .alert-badge.soon {
+      background: #ff9f0a;
+      color: #0a0e1a;
+    }
+    
+    .alert-badge.upcoming {
+      background: #00d4ff;
+      color: #0a0e1a;
+    }
+    
+    .no-data {
+      text-align: center;
+      padding: 3rem;
+      color: #888;
+      font-size: 1.1rem;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      color: #00d4ff;
+      font-size: 1.1rem;
+    }
+    
+    .btn-refresh {
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, #00d4ff, #0099cc);
+      color: #0a0e1a;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 1rem;
+    }
+    
+    .btn-refresh:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+    }
+    
+    .btn-refresh:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .api-warning {
+      background: rgba(255, 159, 10, 0.1);
+      border: 1px solid rgba(255, 159, 10, 0.3);
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      font-size: 0.9rem;
+      color: #ff9f0a;
+    }
+    
+    .demo-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      background: rgba(255, 159, 10, 0.2);
+      border: 1px solid rgba(255, 159, 10, 0.4);
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #ff9f0a;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-left: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🐾 KLAW TERMINAL</h1>
+      <p class="subtitle">Earnings Calendar</p>
+      <nav>
+        <a href="/">Dashboard</a>
+        <a href="/signals.html">Signals</a>
+        <a href="/analysis.html">Analysis</a>
+        <a href="/screener.html">Screener</a>
+        <a href="/heatmap.html">Heatmap</a>
+        <a href="/performance.html">Performance</a>
+        <a href="/risk.html">Risk</a>
+        <a href="/alerts.html">Alerts</a>
+        <a href="/sentiment.html">Sentiment</a>
+        <a href="/news.html">News</a>
+        <a href="/earnings.html" class="active">Earnings</a>
+      </nav>
+    </header>
+
+    <div class="earnings-header">
+      <h2>📅 Earnings Calendar <span id="demoBadge"></span></h2>
+      <button class="btn-refresh" onclick="refreshEarnings()" id="refreshBtn">
+        ↻ Refresh Data
+      </button>
+    </div>
+
+    <div id="apiWarning" class="api-warning" style="display: none;">
+      ⚠️ <strong>Rate Limit Notice:</strong> Alpha Vantage free tier allows 25 API calls/day and 5 calls/minute.
+      Refreshing earnings for all tickers may take several minutes. Data is cached after first fetch.
+    </div>
+
+    <div class="earnings-summary" id="summary">
+      <div class="summary-card alert">
+        <h3>⚠️ Imminent</h3>
+        <div class="value" id="imminentCount">--</div>
+      </div>
+      <div class="summary-card">
+        <h3>📅 This Week</h3>
+        <div class="value" id="thisWeekCount">--</div>
+      </div>
+      <div class="summary-card">
+        <h3>📆 Next Week</h3>
+        <div class="value" id="nextWeekCount">--</div>
+      </div>
+      <div class="summary-card">
+        <h3>🗓️ This Month</h3>
+        <div class="value" id="thisMonthCount">--</div>
+      </div>
+    </div>
+
+    <div class="earnings-timeline" id="timeline">
+      <div class="loading">Loading earnings data...</div>
+    </div>
+  </div>
+
+  <script>
+    let earningsData = null;
+
+    // Load earnings on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      loadEarnings();
+    });
+
+    async function loadEarnings() {
+      try {
+        const response = await fetch('/api/earnings');
+        const result = await response.json();
+
+        if (result.success) {
+          earningsData = result.data;
+          displayEarnings(earningsData.tickers);
+          updateSummary();
+          
+          // Check if using demo data
+          const isDemo = Object.values(earningsData.tickers).some(t => t.demo);
+          if (isDemo) {
+            document.getElementById('demoBadge').innerHTML = '<span class="demo-badge">Demo Mode</span>';
+            document.getElementById('apiWarning').style.display = 'block';
+          }
+        } else {
+          document.getElementById('timeline').innerHTML = 
+            '<div class="no-data">No earnings data available. Click "Refresh Data" to fetch.</div>';
+        }
+      } catch (error) {
+        console.error('Error loading earnings:', error);
+        document.getElementById('timeline').innerHTML = 
+          '<div class="no-data">Error loading earnings data. Please try again.</div>';
+      }
+    }
+
+    function displayEarnings(tickers) {
+      // Collect all upcoming earnings
+      const allUpcoming = [];
+      
+      for (const [ticker, data] of Object.entries(tickers)) {
+        if (data.error || !data.upcoming) continue;
+        
+        data.upcoming.forEach(e => {
+          allUpcoming.push({
+            ticker,
+            ...e
+          });
+        });
+      }
+
+      // Sort by date
+      allUpcoming.sort((a, b) => a.timestamp - b.timestamp);
+
+      // Group by time period
+      const imminent = allUpcoming.filter(e => e.daysUntil <= 7);
+      const nextWeek = allUpcoming.filter(e => e.daysUntil > 7 && e.daysUntil <= 14);
+      const later = allUpcoming.filter(e => e.daysUntil > 14);
+
+      let html = '';
+
+      if (imminent.length > 0) {
+        html += renderSection('🚨 Imminent (≤7 days)', imminent, 'imminent');
+      }
+
+      if (nextWeek.length > 0) {
+        html += renderSection('⚠️ Next Week (8-14 days)', nextWeek, 'soon');
+      }
+
+      if (later.length > 0) {
+        html += renderSection('📅 Upcoming (>14 days)', later.slice(0, 10), 'upcoming');
+      }
+
+      if (html === '') {
+        html = '<div class="no-data">No upcoming earnings scheduled.</div>';
+      }
+
+      document.getElementById('timeline').innerHTML = html;
+    }
+
+    function renderSection(title, earnings, alertClass) {
+      let html = `<div class="timeline-section">`;
+      html += `<h2>${title}</h2>`;
+      html += `<div class="earnings-list">`;
+
+      earnings.forEach(e => {
+        const itemClass = e.alert === 'IMMINENT' ? 'imminent' : 
+                          e.alert === 'SOON' ? 'soon' : '';
+        
+        html += `
+          <div class="earnings-item ${itemClass}">
+            <div class="ticker-badge">${e.ticker}</div>
+            <div class="date-info">
+              <div class="date-primary">${formatDate(e.date)}</div>
+              <div class="date-secondary">${formatDayOfWeek(e.date)}</div>
+            </div>
+            <div class="fiscal-period">${e.fiscalPeriod}</div>
+            <div class="estimate">
+              <div class="estimate-label">Est. EPS</div>
+              <div class="estimate-value">${e.estimatedEPS !== null ? '$' + e.estimatedEPS.toFixed(2) : 'N/A'}</div>
+            </div>
+            <div class="days-until">
+              <span class="days-number">${e.daysUntil}</span>
+              <span class="days-label">${e.daysUntil === 1 ? 'day' : 'days'}</span>
+            </div>
+          </div>
+        `;
+      });
+
+      html += `</div></div>`;
+      return html;
+    }
+
+    function updateSummary() {
+      if (!earningsData) return;
+
+      // Get summary from API
+      fetch('/api/earnings/summary')
+        .then(res => res.json())
+        .then(result => {
+          if (result.success) {
+            const summary = result.data;
+            document.getElementById('imminentCount').textContent = summary.imminent;
+            document.getElementById('thisWeekCount').textContent = summary.thisWeek;
+            document.getElementById('nextWeekCount').textContent = summary.nextWeek;
+            document.getElementById('thisMonthCount').textContent = summary.thisMonth;
+          }
+        })
+        .catch(error => console.error('Error loading summary:', error));
+    }
+
+    async function refreshEarnings() {
+      const btn = document.getElementById('refreshBtn');
+      btn.disabled = true;
+      btn.textContent = '⏳ Fetching...';
+
+      document.getElementById('apiWarning').style.display = 'block';
+      document.getElementById('timeline').innerHTML = 
+        '<div class="loading">Fetching earnings data from Alpha Vantage...<br>This may take several minutes due to API rate limits.</div>';
+
+      try {
+        const response = await fetch('/api/earnings/refresh', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tickers: ['SPY', 'QQQ', 'ONDS', 'USAR', 'RDDT', 'UUUU'] })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          earningsData = result.data;
+          displayEarnings(earningsData.tickers);
+          updateSummary();
+          btn.textContent = '✅ Updated';
+          setTimeout(() => {
+            btn.textContent = '↻ Refresh Data';
+            btn.disabled = false;
+          }, 3000);
+        } else {
+          alert('Failed to refresh earnings: ' + result.error);
+          btn.textContent = '↻ Refresh Data';
+          btn.disabled = false;
+        }
+      } catch (error) {
+        console.error('Error refreshing earnings:', error);
+        alert('Error refreshing earnings data');
+        btn.textContent = '↻ Refresh Data';
+        btn.disabled = false;
+      }
+    }
+
+    function formatDate(dateString) {
+      const date = new Date(dateString + 'T00:00:00');
+      const options = { month: 'short', day: 'numeric', year: 'numeric' };
+      return date.toLocaleDateString('en-US', options);
+    }
+
+    function formatDayOfWeek(dateString) {
+      const date = new Date(dateString + 'T00:00:00');
+      return date.toLocaleDateString('en-US', { weekday: 'long' });
+    }
+  </script>
+</body>
+</html>
