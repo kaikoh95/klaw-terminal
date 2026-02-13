@@ -24,6 +24,11 @@ import {
   buildCorrelationMatrix,
   analyzeSignalRisk
 } from '../lib/risk-management.js';
+import {
+  exportSignalsToCSV,
+  exportPerformanceToCSV,
+  exportAnalysisToCSV
+} from '../lib/export.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -361,6 +366,47 @@ app.post('/api/analyze', async (req, res) => {
         ? 'Set GEMINI_API_KEY environment variable' 
         : 'Check server logs for details'
     });
+  }
+});
+
+// Export endpoints
+
+// Export signals to CSV
+app.get('/api/export/signals', (req, res) => {
+  try {
+    const csv = exportSignalsToCSV();
+    
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="klaw-terminal-signals-${Date.now()}.csv"`);
+    res.send(csv);
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Export performance to CSV
+app.get('/api/export/performance', (req, res) => {
+  try {
+    const csv = exportPerformanceToCSV();
+    
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="klaw-terminal-performance-${Date.now()}.csv"`);
+    res.send(csv);
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Export technical analysis to CSV
+app.get('/api/export/analysis', (req, res) => {
+  try {
+    const csv = exportAnalysisToCSV();
+    
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="klaw-terminal-analysis-${Date.now()}.csv"`);
+    res.send(csv);
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 

@@ -241,7 +241,11 @@
     </header>
 
     <div class="card">
-      <h2>📊 Signal Performance Tracker <button class="btn-small" onclick="loadPerformance()">↻ Refresh</button></h2>
+      <h2>
+        📊 Signal Performance Tracker 
+        <button class="btn-small" onclick="loadPerformance()">↻ Refresh</button>
+        <button class="btn-small" onclick="exportPerformance()">📥 Export CSV</button>
+      </h2>
       <p style="color: #6b7280; margin-bottom: 24px;">Track how accurate your AI signals are and identify the best-performing setups</p>
       
       <!-- Overview Stats -->
@@ -621,6 +625,11 @@
       });
     }
     
+    // Export performance data to CSV
+    function exportPerformance() {
+      window.location.href = '/api/export/performance';
+    }
+
     // Initial load
     loadPerformance();
     

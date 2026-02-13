@@ -31,7 +31,12 @@
     </div>
 
     <div class="card">
-      <h2>Signal History</h2>
+      <h2>
+        Signal History
+        <button class="btn-small" onclick="exportSignals()" style="float: right;">
+          📥 Export CSV
+        </button>
+      </h2>
       <div id="signalsTable" class="signals-table">
         <div class="loading">Loading signals...</div>
       </div>
@@ -148,6 +153,11 @@
       
       html += '</tbody></table>';
       container.innerHTML = html;
+    }
+
+    // Export signals to CSV
+    function exportSignals() {
+      window.location.href = '/api/export/signals';
     }
 
     // Initial load

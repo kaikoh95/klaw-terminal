@@ -23,7 +23,11 @@
     </header>
 
     <div class="card">
-      <h2>Technical Analysis <button class="btn-small" onclick="loadAnalysis()">↻ Refresh</button></h2>
+      <h2>
+        Technical Analysis 
+        <button class="btn-small" onclick="loadAnalysis()">↻ Refresh</button>
+        <button class="btn-small" onclick="exportAnalysis()">📥 Export CSV</button>
+      </h2>
       <div id="analysisGrid" class="analysis-grid">
         <div class="loading">Loading analysis...</div>
       </div>
@@ -170,6 +174,11 @@
       if (rsi > 70) return 'overbought';
       if (rsi < 30) return 'oversold';
       return '';
+    }
+    
+    // Export technical analysis to CSV
+    function exportAnalysis() {
+      window.location.href = '/api/export/analysis';
     }
     
     // Initial load

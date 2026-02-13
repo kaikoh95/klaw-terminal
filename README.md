@@ -17,6 +17,7 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
 - **Multi-Panel Charts** - Professional 4-panel layout with Price, RSI, MACD, and Volume charts
 - **Live WebSocket Updates** - Real-time price updates with visual flash animations
 - **Signal Performance Tracker** - Track actual vs predicted outcomes, identify best-performing patterns
+- **CSV Export** - Export signals, performance data, and technical analysis to CSV for Excel/external analysis
 
 ## Supported Tickers
 
@@ -175,6 +176,9 @@ Automatic tracking of:
 - `POST /api/risk/kelly` - Calculate Kelly Criterion (params: winRate, avgWin, avgLoss)
 - `GET /api/risk/correlation` - Get ticker correlation matrix
 - `POST /api/risk/analyze-signal` - Analyze risk for a specific signal (params: signal, accountSize, riskPercent)
+- `GET /api/export/signals` - Export signals to CSV
+- `GET /api/export/performance` - Export performance data to CSV
+- `GET /api/export/analysis` - Export technical analysis to CSV
 
 ## Development
 
