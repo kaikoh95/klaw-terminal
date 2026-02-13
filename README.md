@@ -13,6 +13,7 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
 - **Performance Analytics** - Hit rate, win streaks, profit factor, expectancy
 - **Risk Management** - Position sizing calculator, portfolio heat tracking, Kelly Criterion, correlation matrix
 - **Social Sentiment** - StockTwits integration for real-time retail trader sentiment analysis
+- **News Feed** - Real-time market news and sentiment analysis from Alpha Vantage
 - **Web Dashboard** - Clean, dark-themed trading terminal interface
 - **Market Heatmap** - Visual color-coded grid showing relative strength across all tickers
 - **Multi-Panel Charts** - Professional 4-panel layout with Price, RSI, MACD, and Volume charts
@@ -46,25 +47,34 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
    
    Or create a `.env` file (see `.env.example`)
 
-4. **Run market scan:**
+4. **(Optional) Configure Alpha Vantage for News Feed:**
+   ```bash
+   export ALPHA_VANTAGE_API_KEY="your-api-key-here"
+   ```
+   
+   Get a free API key at https://www.alphavantage.co/support/#api-key
+   
+   Free tier: 25 API calls per day. If not configured, uses demo key with limited access.
+
+5. **Run market scan:**
    ```bash
    npm run scan
    # or: node bin/scan.js
    ```
 
-5. **Run AI analysis:**
+6. **Run AI analysis:**
    ```bash
    npm run analyze
    # or: node bin/analyze.js
    ```
 
-6. **(Optional) Fetch social sentiment:**
+7. **(Optional) Fetch social sentiment:**
    ```bash
    npm run sentiment
    # or: node bin/sentiment.js
    ```
 
-7. **Start web UI:**
+8. **Start web UI:**
    ```bash
    npm start
    # or: node bin/server.js
@@ -115,6 +125,13 @@ Real-time market scanning, technical analysis, and AI-powered trade signal gener
   - Recent message feed for each ticker
   - Trending stocks discovery
   - Refresh sentiment data on demand
+- **News Feed** (`/news.html`) - Market news and sentiment from Alpha Vantage
+  - Real-time news articles for each ticker
+  - News sentiment analysis (bullish/bearish/neutral)
+  - Article relevance scoring
+  - Top trending topics across all tickers
+  - Source attribution and timestamps
+  - Refresh on demand (25 API calls/day on free tier)
 
 ## Project Structure
 
@@ -218,6 +235,9 @@ Automatic tracking of:
 - `GET /api/sentiment/:ticker` - Get fresh sentiment for specific ticker
 - `GET /api/sentiment/trending` - Get trending stocks from StockTwits
 - `POST /api/sentiment/refresh` - Refresh sentiment data for all watchlist tickers
+- `GET /api/news` - Get cached news data
+- `GET /api/news/:ticker?limit=N` - Get news for specific ticker (default limit: 10)
+- `POST /api/news/refresh` - Refresh news data for all watchlist tickers (params: tickers, limit)
 
 ## Development
 

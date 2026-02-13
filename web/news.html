@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Klaw Terminal 🐾 - News Feed</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .news-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+    
+    .news-summary-card {
+      background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 153, 204, 0.05));
+      border: 1px solid rgba(0, 212, 255, 0.3);
+      border-radius: 8px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+    
+    .summary-stat {
+      text-align: center;
+    }
+    
+    .summary-stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #00d4ff, #00ff88);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .summary-stat-label {
+      font-size: 0.85rem;
+      color: #888;
+      margin-top: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .news-grid {
+      display: grid;
+      gap: 2rem;
+    }
+    
+    .ticker-news-section {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 1.5rem;
+    }
+    
+    .ticker-news-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .ticker-symbol-large {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #00d4ff;
+    }
+    
+    .news-sentiment-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    
+    .news-sentiment-badge.bullish {
+      background: rgba(34, 197, 94, 0.2);
+      color: #22c55e;
+      border: 1px solid rgba(34, 197, 94, 0.4);
+    }
+    
+    .news-sentiment-badge.bearish {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+    
+    .news-sentiment-badge.neutral {
+      background: rgba(156, 163, 175, 0.2);
+      color: #9ca3af;
+      border: 1px solid rgba(156, 163, 175, 0.4);
+    }
+    
+    .news-articles {
+      display: grid;
+      gap: 1rem;
+    }
+    
+    .news-article {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 6px;
+      padding: 1rem;
+      transition: all 0.2s;
+    }
+    
+    .news-article:hover {
+      transform: translateX(4px);
+      border-color: rgba(0, 212, 255, 0.3);
+      background: rgba(255, 255, 255, 0.05);
+    }
+    
+    .article-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .article-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #e8eaf0;
+      margin: 0;
+      flex: 1;
+    }
+    
+    .article-title a {
+      color: #e8eaf0;
+      text-decoration: none;
+    }
+    
+    .article-title a:hover {
+      color: #00d4ff;
+    }
+    
+    .article-sentiment {
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    
+    .article-sentiment.bullish {
+      background: rgba(34, 197, 94, 0.2);
+      color: #22c55e;
+    }
+    
+    .article-sentiment.bearish {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+    }
+    
+    .article-sentiment.neutral {
+      background: rgba(156, 163, 175, 0.2);
+      color: #9ca3af;
+    }
+    
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-size: 0.85rem;
+      color: #888;
+      margin-bottom: 0.5rem;
+    }
+    
+    .article-source {
+      font-weight: 600;
+      color: #00d4ff;
+    }
+    
+    .article-summary {
+      font-size: 0.9rem;
+      color: #9ca3af;
+      line-height: 1.5;
+    }
+    
+    .no-news {
+      text-align: center;
+      padding: 3rem;
+      color: #888;
+    }
+    
+    .refresh-button {
+      background: linear-gradient(135deg, #00d4ff, #00b8d4);
+      color: #0a0e27;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .refresh-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+    }
+    
+    .refresh-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(10, 14, 39, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    
+    .loading-spinner {
+      font-size: 2rem;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🐾 KLAW TERMINAL</h1>
+      <p class="subtitle">AI-Powered Trading Intelligence</p>
+      <nav>
+        <a href="/">Dashboard</a>
+        <a href="/signals.html">Signals</a>
+        <a href="/analysis.html">Analysis</a>
+        <a href="/screener.html">Screener</a>
+        <a href="/heatmap.html">Heatmap</a>
+        <a href="/performance.html">Performance</a>
+        <a href="/risk.html">Risk</a>
+        <a href="/alerts.html">Alerts</a>
+        <a href="/sentiment.html">Sentiment</a>
+        <a href="/news.html" class="active">News</a>
+      </nav>
+    </header>
+
+    <div class="card">
+      <div class="news-header">
+        <div>
+          <h2>📰 News Feed</h2>
+          <p style="color: #888; margin-top: 0.5rem;">Market news and sentiment from Alpha Vantage</p>
+        </div>
+        <button class="refresh-button" onclick="refreshNews()" id="refreshBtn">
+          🔄 Refresh News
+        </button>
+      </div>
+      
+      <!-- Summary Card -->
+      <div class="news-summary-card" id="summaryCard" style="display: none;">
+        <h3 style="margin: 0 0 1rem 0; color: #00d4ff;">Market News Overview</h3>
+        <div class="summary-grid">
+          <div class="summary-stat">
+            <div class="summary-stat-value" id="totalArticles">--</div>
+            <div class="summary-stat-label">Total Articles</div>
+          </div>
+          <div class="summary-stat">
+            <div class="summary-stat-value" id="avgSentiment">--</div>
+            <div class="summary-stat-label">Avg Sentiment</div>
+          </div>
+          <div class="summary-stat">
+            <div class="summary-stat-value" id="sentimentLabel">--</div>
+            <div class="summary-stat-label">Overall</div>
+          </div>
+        </div>
+        <div id="topTopics" style="margin-top: 1.5rem; color: #9ca3af;"></div>
+      </div>
+      
+      <!-- News Grid -->
+      <div class="news-grid" id="newsGrid">
+        <div class="loading-small">Loading news data...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let newsData = null;
+    
+    // Load news data on page load
+    async function loadNews() {
+      try {
+        const res = await fetch('/api/news');
+        const data = await res.json();
+        
+        if (data.success) {
+          newsData = data.data;
+          renderNews();
+        } else {
+          document.getElementById('newsGrid').innerHTML = `
+            <div class="no-news">
+              <p style="font-size: 1.2rem; margin-bottom: 1rem;">📰 No news data available</p>
+              <p style="color: #888;">Click "Refresh News" to fetch latest market news</p>
+              <p style="font-size: 0.85rem; color: #666; margin-top: 1rem;">
+                Note: Alpha Vantage free tier allows 25 API calls per day
+              </p>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('Error loading news:', error);
+        document.getElementById('newsGrid').innerHTML = `
+          <div class="no-news">
+            <p style="color: #ef4444;">❌ Failed to load news data</p>
+            <p style="color: #888;">${error.message}</p>
+          </div>
+        `;
+      }
+    }
+    
+    // Refresh news from API
+    async function refreshNews() {
+      const btn = document.getElementById('refreshBtn');
+      btn.disabled = true;
+      btn.textContent = '⏳ Fetching...';
+      
+      // Show loading overlay
+      const overlay = document.createElement('div');
+      overlay.className = 'loading-overlay';
+      overlay.innerHTML = '<div class="loading-spinner">📰</div>';
+      document.body.appendChild(overlay);
+      
+      try {
+        const res = await fetch('/api/news/refresh', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tickers: ['SPY', 'QQQ', 'ONDS', 'USAR', 'HOVR', 'RDDT', 'UUUU']
+          })
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+          newsData = data.data;
+          renderNews();
+        } else {
+          alert('Failed to refresh news: ' + data.error);
+        }
+      } catch (error) {
+        console.error('Error refreshing news:', error);
+        alert('Failed to refresh news: ' + error.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '🔄 Refresh News';
+        overlay.remove();
+      }
+    }
+    
+    // Render news data
+    function renderNews() {
+      if (!newsData) return;
+      
+      // Update summary
+      if (newsData.summary) {
+        document.getElementById('summaryCard').style.display = 'block';
+        document.getElementById('totalArticles').textContent = newsData.summary.totalArticles;
+        document.getElementById('avgSentiment').textContent = newsData.summary.avgSentiment.toFixed(3);
+        document.getElementById('sentimentLabel').textContent = newsData.summary.sentimentLabel;
+        
+        if (newsData.summary.topTopics && newsData.summary.topTopics.length > 0) {
+          document.getElementById('topTopics').innerHTML = `
+            <strong>Top Topics:</strong> ${newsData.summary.topTopics.join(', ')}
+          `;
+        }
+      }
+      
+      // Render ticker sections
+      const tickers = Object.keys(newsData.tickers).sort();
+      const html = tickers.map(ticker => {
+        const tickerNews = newsData.tickers[ticker];
+        
+        if (!tickerNews.articles || tickerNews.articles.length === 0) {
+          return `
+            <div class="ticker-news-section">
+              <div class="ticker-news-header">
+                <div class="ticker-symbol-large">${ticker}</div>
+              </div>
+              <p style="color: #888; text-align: center; padding: 1rem;">No recent news</p>
+            </div>
+          `;
+        }
+        
+        const sentimentClass = tickerNews.sentiment.label.toLowerCase().includes('bullish') ? 'bullish' :
+                              tickerNews.sentiment.label.toLowerCase().includes('bearish') ? 'bearish' :
+                              'neutral';
+        
+        const articlesHtml = tickerNews.articles.map(article => {
+          const articleSentimentClass = article.sentiment.score > 0.15 ? 'bullish' :
+                                       article.sentiment.score < -0.15 ? 'bearish' :
+                                       'neutral';
+          
+          return `
+            <div class="news-article">
+              <div class="article-header">
+                <h4 class="article-title">
+                  <a href="${article.url}" target="_blank" rel="noopener">${article.title}</a>
+                </h4>
+                <div class="article-sentiment ${articleSentimentClass}">
+                  ${article.sentiment.label}
+                </div>
+              </div>
+              <div class="article-meta">
+                <span class="article-source">${article.source}</span>
+                <span>•</span>
+                <span>${formatTimeAgo(article.timePublished)}</span>
+                <span>•</span>
+                <span>Relevance: ${(article.sentiment.relevance * 100).toFixed(0)}%</span>
+              </div>
+              <p class="article-summary">${article.summary.slice(0, 200)}${article.summary.length > 200 ? '...' : ''}</p>
+            </div>
+          `;
+        }).join('');
+        
+        return `
+          <div class="ticker-news-section">
+            <div class="ticker-news-header">
+              <div class="ticker-symbol-large">${ticker}</div>
+              <div class="news-sentiment-badge ${sentimentClass}">
+                <span>${tickerNews.sentiment.label}</span>
+                <span>${tickerNews.sentiment.score.toFixed(3)}</span>
+              </div>
+            </div>
+            <div class="news-articles">
+              ${articlesHtml}
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      document.getElementById('newsGrid').innerHTML = html;
+    }
+    
+    // Format time ago
+    function formatTimeAgo(timePublished) {
+      const year = timePublished.slice(0, 4);
+      const month = timePublished.slice(4, 6);
+      const day = timePublished.slice(6, 8);
+      const hour = timePublished.slice(9, 11);
+      const minute = timePublished.slice(11, 13);
+      
+      const date = new Date(`${year}-${month}-${day}T${hour}:${minute}:00Z`);
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      
+      if (diffMins < 60) return `${diffMins}m ago`;
+      if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`;
+      return `${Math.floor(diffMins / 1440)}d ago`;
+    }
+    
+    // Load news on page load
+    loadNews();
+  </script>
+</body>
+</html>

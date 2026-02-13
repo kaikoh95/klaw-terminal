@@ -5,7 +5,7 @@ import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { fetchAllTickers } from '../lib/market-data.js';
 import { analyzeMarketData } from '../lib/technicals.js';
 import { exportSignalsSummary, getRecentSignals } from '../lib/signals.js';
@@ -45,6 +45,11 @@ import {
   getSentimentSummary,
   getTrendingStocks
 } from '../lib/stocktwits.js';
+import {
+  fetchTickerNews,
+  batchFetchNews,
+  getNewsSummary
+} from '../lib/news.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -592,6 +597,69 @@ app.post('/api/sentiment/refresh', async (req, res) => {
     res.json({ success: true, data });
   } catch (error) {
     console.error('Error refreshing sentiment:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// News Feed API Endpoints
+
+// Get cached news data
+app.get('/api/news', (req, res) => {
+  try {
+    const newsFile = join(__dirname, '..', 'data', 'news.json');
+    
+    if (!existsSync(newsFile)) {
+      return res.json({ 
+        success: false, 
+        error: 'No news data available. Call /api/news/refresh to fetch news.' 
+      });
+    }
+    
+    const data = JSON.parse(readFileSync(newsFile, 'utf8'));
+    res.json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get news for a specific ticker
+app.get('/api/news/:ticker', async (req, res) => {
+  try {
+    const ticker = req.params.ticker.toUpperCase();
+    const limit = parseInt(req.query.limit) || 10;
+    const news = await fetchTickerNews(ticker, limit);
+    res.json({ success: true, data: news });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Refresh news data for all watchlist tickers
+app.post('/api/news/refresh', async (req, res) => {
+  try {
+    const tickers = req.body.tickers || ['SPY', 'QQQ', 'ONDS', 'USAR', 'HOVR', 'RDDT', 'UUUU'];
+    const limit = parseInt(req.body.limit) || 10;
+    
+    console.log(`Fetching news for: ${tickers.join(', ')}`);
+    
+    const newsData = await batchFetchNews(tickers, limit);
+    const summary = getNewsSummary(newsData);
+    
+    // Save to file
+    const outputPath = join(__dirname, '..', 'data', 'news.json');
+    const data = {
+      timestamp: Date.now(),
+      tickers: newsData,
+      summary
+    };
+    
+    writeFileSync(outputPath, JSON.stringify(data, null, 2));
+    
+    console.log(`✅ News data fetched and saved`);
+    
+    res.json({ success: true, data });
+  } catch (error) {
+    console.error('Error fetching news:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
