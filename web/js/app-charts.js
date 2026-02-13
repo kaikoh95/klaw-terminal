@@ -39,13 +39,19 @@ async function loadChart(ticker) {
     const ma20 = historicalData.map((d, i) => {
       if (i < 19) return null;
       const slice = closes.slice(i - 19, i + 1);
-      return slice.reduce((a, b) => a + b, 0) / 20;
+      return {
+        x: new Date(d.date),
+        y: slice.reduce((a, b) => a + b, 0) / 20
+      };
     });
     
     const ma50 = historicalData.map((d, i) => {
       if (i < 49) return null;
       const slice = closes.slice(i - 49, i + 1);
-      return slice.reduce((a, b) => a + b, 0) / 50;
+      return {
+        x: new Date(d.date),
+        y: slice.reduce((a, b) => a + b, 0) / 50
+      };
     });
     
     // Calculate RSI for each historical point
@@ -102,23 +108,35 @@ async function loadChart(ticker) {
       }
     };
     
-    // 1. Price Chart
+    // Prepare candlestick data
+    const candlestickData = historicalData.map((d, i) => ({
+      x: new Date(d.date),
+      o: d.open,
+      h: d.high,
+      l: d.low,
+      c: d.close
+    }));
+    
+    // 1. Price Chart (Candlestick + Overlays)
     const priceCtx = document.getElementById('priceChart').getContext('2d');
     window.priceChart = new Chart(priceCtx, {
-      type: 'line',
+      type: 'candlestick',
       data: {
-        labels: dates,
         datasets: [
           {
-            label: 'Price',
-            data: closes,
-            borderColor: '#3b82f6',
-            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            label: ticker,
+            data: candlestickData,
+            borderColor: {
+              up: '#22c55e',
+              down: '#ef4444',
+              unchanged: '#6b7280'
+            },
+            backgroundColor: {
+              up: 'rgba(34, 197, 94, 0.3)',
+              down: 'rgba(239, 68, 68, 0.3)',
+              unchanged: 'rgba(107, 114, 128, 0.3)'
+            },
             borderWidth: 2,
-            fill: true,
-            tension: 0.1,
-            pointRadius: 0,
-            pointHoverRadius: 4,
             order: 1
           },
           {
@@ -130,6 +148,7 @@ async function loadChart(ticker) {
             fill: false,
             tension: 0.1,
             pointRadius: 0,
+            type: 'line',
             order: 2
           },
           {
@@ -141,35 +160,48 @@ async function loadChart(ticker) {
             fill: false,
             tension: 0.1,
             pointRadius: 0,
+            type: 'line',
             order: 3
           },
           {
             label: 'BB Upper',
-            data: Array(closes.length).fill(tickerTechData.bollingerBands?.upper),
+            data: dates.map(date => ({
+              x: date,
+              y: tickerTechData.bollingerBands?.upper
+            })),
             borderColor: 'rgba(239, 68, 68, 0.5)',
             borderWidth: 1,
             borderDash: [2, 2],
             fill: false,
             pointRadius: 0,
+            type: 'line',
             order: 4
           },
           {
             label: 'BB Lower',
-            data: Array(closes.length).fill(tickerTechData.bollingerBands?.lower),
+            data: dates.map(date => ({
+              x: date,
+              y: tickerTechData.bollingerBands?.lower
+            })),
             borderColor: 'rgba(239, 68, 68, 0.5)',
             borderWidth: 1,
             borderDash: [2, 2],
             fill: false,
             pointRadius: 0,
+            type: 'line',
             order: 5
           },
           {
             label: 'VWAP',
-            data: Array(closes.length).fill(tickerTechData.vwap),
+            data: dates.map(date => ({
+              x: date,
+              y: tickerTechData.vwap
+            })),
             borderColor: '#eab308',
             borderWidth: 1.5,
             fill: false,
             pointRadius: 0,
+            type: 'line',
             order: 6
           }
         ]
@@ -211,7 +243,21 @@ async function loadChart(ticker) {
                 });
               },
               label: function(context) {
-                let label = context.dataset.label || '';
+                const datasetLabel = context.dataset.label || '';
+                
+                // Candlestick data
+                if (context.raw && context.raw.o !== undefined) {
+                  return [
+                    `${datasetLabel}`,
+                    `O: $${context.raw.o.toFixed(2)}`,
+                    `H: $${context.raw.h.toFixed(2)}`,
+                    `L: $${context.raw.l.toFixed(2)}`,
+                    `C: $${context.raw.c.toFixed(2)}`
+                  ];
+                }
+                
+                // Line data (MA, BB, VWAP)
+                let label = datasetLabel;
                 if (label) {
                   label += ': ';
                 }
@@ -592,7 +638,60 @@ function calculateEMA(data, period, skipNulls = false) {
   return ema;
 }
 
+// Update chart legend with current ticker info
+function updateChartLegend(ticker, marketData, techData) {
+  const legendEl = document.getElementById('chartLegend');
+  if (!legendEl) return;
+  
+  const changeColor = marketData.change >= 0 ? 'positive' : 'negative';
+  const changeSymbol = marketData.change >= 0 ? '+' : '';
+  
+  legendEl.innerHTML = `
+    <div class="legend-item">
+      <strong>${ticker}</strong>
+      <span class="${changeColor}">$${marketData.price.toFixed(2)} (${changeSymbol}${marketData.changePercent.toFixed(2)}%)</span>
+    </div>
+    <div class="legend-item">
+      <span>Vol: ${(marketData.volume / 1000000).toFixed(2)}M (${marketData.volumeRatio.toFixed(2)}x avg)</span>
+    </div>
+    <div class="legend-item">
+      <span>RSI: ${techData.rsi?.toFixed(0) || 'N/A'}</span>
+      <span>MACD: ${techData.macd?.histogram.toFixed(3) || 'N/A'}</span>
+      <span>BB: ${techData.bollingerBands?.bandwidth.toFixed(1) || 'N/A'}%</span>
+    </div>
+  `;
+}
+
+// Populate ticker dropdown for chart selector
+function populateChartTickers() {
+  fetch('/api/market-data')
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success) return;
+      
+      const select = document.getElementById('chartTicker');
+      if (!select) return;
+      
+      Object.keys(data.data).forEach(ticker => {
+        const option = document.createElement('option');
+        option.value = ticker;
+        option.textContent = ticker;
+        select.appendChild(option);
+      });
+      
+      // Auto-select first ticker
+      if (Object.keys(data.data).length > 0) {
+        const firstTicker = Object.keys(data.data)[0];
+        select.value = firstTicker;
+        loadChart(firstTicker);
+      }
+    })
+    .catch(err => console.error('Failed to populate tickers:', err));
+}
+
 // Export for use in main app
 if (typeof window !== 'undefined') {
   window.loadChart = loadChart;
+  window.populateChartTickers = populateChartTickers;
+  window.updateChartLegend = updateChartLegend;
 }
