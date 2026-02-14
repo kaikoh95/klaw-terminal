@@ -1,1 +1,492 @@
-[]
+[
+  {
+    "id": "sig_1771036546855_o2e16w8rk",
+    "ticker": "SPY",
+    "direction": "SHORT",
+    "confidence": 6,
+    "entry": 681.75,
+    "targets": {
+      "t1": 676.9,
+      "t2": 669.02,
+      "t3": 663.95
+    },
+    "stopLoss": 684.31,
+    "riskReward": 2.02,
+    "reasoning": "SPY is showing bearish signals across multiple timeframes, including a bearish Ichimoku cloud, strong bearish Elder-Ray, and moderate selling bias in Volume Delta, presenting a short opportunity near the 61.8% Fibonacci retracement level.",
+    "pattern": "Trend Continuation",
+    "timeframe": "Intraday (hours)",
+    "alerts": [
+      "Action trigger: Enter on break below $681 with volume",
+      "Confirmation: RSI hold below 40",
+      "Risk note: Invalidated above Kijun $686.82"
+    ],
+    "status": "OPEN",
+    "entryTime": 1771036546855,
+    "exitTime": null,
+    "result": null,
+    "pnl": null,
+    "pnlPercent": null,
+    "marketContext": {
+      "entryPrice": 681.75,
+      "volume": 96150400,
+      "volumeRatio": 1.092034625815012,
+      "change": 72.01999999999998,
+      "changePercent": 11.811785544421298
+    }
+  },
+  {
+    "id": "sig_1771036546875_cvj7wm44g",
+    "ticker": "QQQ",
+    "direction": "SHORT",
+    "confidence": 8,
+    "entry": 605.02,
+    "targets": {
+      "t1": 599.95,
+      "t2": 594.88,
+      "t3": 588.95
+    },
+    "stopLoss": 610.09,
+    "riskReward": 2.74,
+    "reasoning": "Double Top bearish reversal pattern confirmed by Ichimoku bearish trend and bearish Elder-Ray, suggesting a high probability short opportunity.",
+    "pattern": "Reversal",
+    "timeframe": "Intraday (hours)",
+    "alerts": [
+      "Action trigger: Enter on break below $605.02 with volume",
+      "Confirmation: RSI hold below 40",
+      "Risk note: Invalidated above $610.09"
+    ],
+    "status": "OPEN",
+    "entryTime": 1771036546875,
+    "exitTime": null,
+    "result": null,
+    "pnl": null,
+    "pnlPercent": null,
+    "marketContext": {
+      "entryPrice": 601.92,
+      "volume": 69152700,
+      "volumeRatio": 1.0810395489481928,
+      "change": 66.01999999999998,
+      "changePercent": 12.319462586303413
+    }
+  },
+  {
+    "id": "sig_1771036546875_29ks7we6x",
+    "ticker": "ONDS",
+    "direction": "LONG",
+    "confidence": 7,
+    "entry": 14.08,
+    "targets": {
+      "t1": 15.81,
+      "t2": 17.54,
+      "t3": 19.56
+    },
+    "stopLoss": 8.38,
+    "riskReward": 0.57,
+    "reasoning": "Double Bottom pattern breakout confirmed at neckline with institutional accumulation indicated by VWMA vs SMA20, suggesting a potential bullish reversal.",
+    "pattern": "Reversal",
+    "timeframe": "Swing (days)",
+    "alerts": [
+      "Action trigger: Enter on break above $14.08 with volume",
+      "Confirmation: RSI hold above 50",
+      "Risk note: Invalidated below $8.38"
+    ],
+    "status": "OPEN",
+    "entryTime": 1771036546875,
+    "exitTime": null,
+    "result": null,
+    "pnl": null,
+    "pnlPercent": null,
+    "marketContext": {
+      "entryPrice": 9.31,
+      "volume": 56517200,
+      "volumeRatio": 0.5820328514709776,
+      "change": 7.390000000000001,
+      "changePercent": 384.89583333333337
+    }
+  },
+  {
+    "id": "sig_1771036546876_a1tzb7jjm",
+    "ticker": "RDDT",
+    "direction": "SHORT",
+    "confidence": 9,
+    "entry": 139.65,
+    "targets": {
+      "t1": 126.12,
+      "t2": 112.59,
+      "t3": 99.06
+    },
+    "stopLoss": 152.44,
+    "riskReward": 2.11,
+    "reasoning": "Strong bearish signal due to price below EMA21, bearish VWMA/SMA relationship with confirmed volume, and Ichimoku cloud confirming downtrend. Oversold momentum indicators warrant caution, but strong trend and institutional distribution suggests further downside.",
+    "pattern": "Trend Continuation",
+    "timeframe": "Swing (days)",
+    "alerts": [
+      "Action trigger: Enter short at market price ($139.65)",
+      "Confirmation: Price continues below $137.21 (POC)",
+      "Risk note: Invalidation above $152.44 (Parabolic SAR)"
+    ],
+    "status": "OPEN",
+    "entryTime": 1771036546876,
+    "exitTime": null,
+    "result": null,
+    "pnl": null,
+    "pnlPercent": null,
+    "marketContext": {
+      "entryPrice": 139.65,
+      "volume": 7454700,
+      "volumeRatio": 1.0690447116725594,
+      "change": -65.29999999999998,
+      "changePercent": -31.86142961697975
+    }
+  },
+  {
+    "id": "sig_1771036546876_40r7gazuj",
+    "ticker": "HOVR",
+    "direction": "SHORT",
+    "confidence": 5,
+    "entry": 1.76,
+    "targets": {
+      "t1": 1.68,
+      "t2": 1.58,
+      "t3": 1.48
+    },
+    "stopLoss": 1.86,
+    "riskReward": 2.2,
+    "reasoning": "HOVR shows strong bearish confluence: price below EMA21, bearish Ichimoku Cloud (TK bearish cross and price below cloud), and distribution signal from Volume Delta, suggesting a short opportunity.",
+    "pattern": "Trend Continuation",
+    "timeframe": "Intraday (hours)",
+    "alerts": [
+      "Action trigger: Enter on break below $1.70 with volume",
+      "Confirmation: RSI hold below 50",
+      "Risk note: Invalidated above $1.86"
+    ],
+    "status": "OPEN",
+    "entryTime": 1771036546876,
+    "exitTime": null,
+    "result": null,
+    "pnl": null,
+    "pnlPercent": null,
+    "marketContext": {
+      "entryPrice": 1.76,
+      "volume": 235400,
+      "volumeRatio": 0.22435179581508607,
+      "change": 1.178,
+      "changePercent": 202.40549828178695
+    }
+  },
+  {
+    "id": "sig_1771036546877_0wzv3rfeg",
+    "ticker": "TSLA",
+    "direction": "SHORT",
+    "confidence": 6,
+    "entry": 417.44,
+    "targets": {
+      "t1": 411.35,
+      "t2": 405,
+      "t3": 398
+    },
+    "stopLoss": 425.34,
+    "riskReward": 2.61,
+    "reasoning": "TSLA presents a short opportunity based on price rejecting multiple MAs (EMA9, EMA21, SMA50), bearish Ichimoku cloud setup, and strong downtrend indicated by ADX.  The price is currently in the cloud with a TK bearish cross.",
+    "pattern": "Trend Continuation",
+    "timeframe": "Intraday (hours)",
+    "alerts": [
+      "Action trigger: Enter short at market price.",
+      "Confirmation: RSI confirms below 50",
+      "Risk note: Invalidated above EMA21"
+    ],
+    "status": "OPEN",
+    "entryTime": 1771036546877,
+    "exitTime": null,
+    "result": null,
+    "pnl": null,
+    "pnlPercent": null,
+    "marketContext": {
+      "entryPrice": 417.44,
+      "volume": 51351200,
+      "volumeRatio": 0.8272704498973387,
+      "change": 61.5,
+      "changePercent": 17.27819295386863
+    }
+  },
+  {
+    "id": "sig_1771036546877_g3r34egow",
+    "ticker": "DBS",
+    "direction": "SHORT",
+    "confidence": 6,
+    "entry": 57.06,
+    "targets": {
+      "t1": 56.39,
+      "t2": 55.72,
+      "t3": 55.05
+    },
+    "stopLoss": 57.73,
+    "riskReward": 2,
+    "reasoning": "Bearish signals dominate: strong OBV distribution, bearish Elder-Ray, and SuperTrend sell signal indicate further downside despite oversold conditions. Price is currently rejecting MAs and below VWMA20, confirming selling pressure.",
+    "pattern": "Trend Continuation",
+    "timeframe": "Intraday (hours)",
+    "alerts": [
+      "Action trigger: Enter on confirmation below $57.00 with volume",
+      "Confirmation: RSI below 40",
+      "Risk note: Invalidated above $57.73"
+    ],
+    "status": "OPEN",
+    "entryTime": 1771036546877,
+    "exitTime": null,
+    "result": null,
+    "pnl": null,
+    "pnlPercent": null,
+    "marketContext": {
+      "entryPrice": 57.06,
+      "volume": 10148400,
+      "volumeRatio": 1.8335084564805157,
+      "change": 12,
+      "changePercent": 26.631158455392807
+    }
+  },
+  {
+    "id": "sig_1771036996594_g4fzvuw2e",
+    "ticker": "SPY",
+    "direction": "SHORT",
+    "confidence": 5,
+    "entry": 681.75,
+    "targets": {
+      "t1": 672.72,
+      "t2": 663.69,
+      "t3": 654.66
+    },
+    "stopLoss": 687.32,
+    "riskReward": 1.58,
+    "reasoning": "Bearish signal based on price below key MAs, bearish Ichimoku cloud, and negative momentum indicators, indicating a potential downward move.",
+    "pattern": "Trend Continuation",
+    "timeframe": "Intraday (hours)",
+    "alerts": [
+      "Action trigger: Enter short at market open.",
+      "Confirmation: RSI below 40.",
+      "Risk note: Invalidation above EMA9."
+    ],
+    "status": "OPEN",
+    "entryTime": 1771036996594,
+    "exitTime": null,
+    "result": null,
+    "pnl": null,
+    "pnlPercent": null,
+    "marketContext": {
+      "entryPrice": 681.75,
+      "volume": 96150400,
+      "volumeRatio": 1.092034625815012,
+      "change": 72.01999999999998,
+      "changePercent": 11.811785544421298
+    }
+  },
+  {
+    "id": "sig_1771036996595_lbp2xodx6",
+    "ticker": "QQQ",
+    "direction": "SHORT",
+    "confidence": 8,
+    "entry": 605.02,
+    "targets": {
+      "t1": 599.84,
+      "t2": 594.66,
+      "t3": 588.95
+    },
+    "stopLoss": 611.2,
+    "riskReward": 2.12,
+    "reasoning": "Short signal based on a bearish Double Top pattern confirmed by Ichimoku bearish trend and negative Elder-Ray power, indicating strong bearish momentum.",
+    "pattern": "Reversal",
+    "timeframe": "Intraday (hours)",
+    "alerts": [
+      "Action trigger: Enter short at $605.02",
+      "Confirmation: Break below $602 with volume",
+      "Risk note: Invalidated above $611.20"
+    ],
+    "status": "OPEN",
+    "entryTime": 1771036996595,
+    "exitTime": null,
+    "result": null,
+    "pnl": null,
+    "pnlPercent": null,
+    "marketContext": {
+      "entryPrice": 601.92,
+      "volume": 69152700,
+      "volumeRatio": 1.0810395489481928,
+      "change": 66.01999999999998,
+      "changePercent": 12.319462586303413
+    }
+  },
+  {
+    "id": "sig_1771036996596_y2ggrkeim",
+    "ticker": "ONDS",
+    "direction": "LONG",
+    "confidence": 6,
+    "entry": 14.08,
+    "targets": {
+      "t1": 15.23,
+      "t2": 16.38,
+      "t3": 19.56
+    },
+    "stopLoss": 8.38,
+    "riskReward": 0.99,
+    "reasoning": "Double bottom pattern confirmed with troughs at $8.46 and $8.48, suggesting a bullish reversal; enter at neckline breakout of $14.08.",
+    "pattern": "Reversal",
+    "timeframe": "Swing (days)",
+    "alerts": [
+      "Action trigger: Enter on break above $14.08 with volume",
+      "Confirmation: RSI hold above 50",
+      "Risk note: Invalidated below $8.38"
+    ],
+    "status": "OPEN",
+    "entryTime": 1771036996596,
+    "exitTime": null,
+    "result": null,
+    "pnl": null,
+    "pnlPercent": null,
+    "marketContext": {
+      "entryPrice": 9.31,
+      "volume": 56517200,
+      "volumeRatio": 0.5820328514709776,
+      "change": 7.390000000000001,
+      "changePercent": 384.89583333333337
+    }
+  },
+  {
+    "id": "sig_1771036996597_qerwqyeo8",
+    "ticker": "RDDT",
+    "direction": "SHORT",
+    "confidence": 9,
+    "entry": 139.65,
+    "targets": {
+      "t1": 126.12,
+      "t2": 112.59,
+      "t3": 99.06
+    },
+    "stopLoss": 152.44,
+    "riskReward": 2.22,
+    "reasoning": "Strong bearish confluence across multiple timeframes, including bearish Ichimoku Cloud, Heikin-Ashi downtrend, and strong institutional distribution confirmed by Volume Delta and VWMA analysis, justifies a short entry at current price.",
+    "pattern": "Trend Continuation",
+    "timeframe": "Swing (days)",
+    "alerts": [
+      "Action trigger: Enter at market open",
+      "Confirmation: Continued negative volume delta",
+      "Risk note: Invalidation above Parabolic SAR at 152.44"
+    ],
+    "status": "OPEN",
+    "entryTime": 1771036996597,
+    "exitTime": null,
+    "result": null,
+    "pnl": null,
+    "pnlPercent": null,
+    "marketContext": {
+      "entryPrice": 139.65,
+      "volume": 7454700,
+      "volumeRatio": 1.0690447116725594,
+      "change": -65.29999999999998,
+      "changePercent": -31.86142961697975
+    }
+  },
+  {
+    "id": "sig_1771036996598_7j2sxt4bf",
+    "ticker": "HOVR",
+    "direction": "SHORT",
+    "confidence": 5,
+    "entry": 1.76,
+    "targets": {
+      "t1": 1.68,
+      "t2": 1.6,
+      "t3": 1.52
+    },
+    "stopLoss": 1.84,
+    "riskReward": 2,
+    "reasoning": "HOVR presents a short opportunity due to the bearish Ichimoku Cloud setup, strong distribution indicated by Volume Delta, and overall bearish trend confirmed by multiple timeframes. The price is below the cloud with a bearish TK cross, signaling continued downward momentum.",
+    "pattern": "Trend Continuation",
+    "timeframe": "Intraday (hours)",
+    "alerts": [
+      "Action trigger: Enter at market price (1.76) with confirmation of continued distribution.",
+      "Confirmation: RSI hold below 50.",
+      "Risk note: Invalidated above EMA9 (1.83)."
+    ],
+    "status": "OPEN",
+    "entryTime": 1771036996598,
+    "exitTime": null,
+    "result": null,
+    "pnl": null,
+    "pnlPercent": null,
+    "marketContext": {
+      "entryPrice": 1.76,
+      "volume": 235400,
+      "volumeRatio": 0.22435179581508607,
+      "change": 1.178,
+      "changePercent": 202.40549828178695
+    }
+  },
+  {
+    "id": "sig_1771036996598_2yba4euo8",
+    "ticker": "TSLA",
+    "direction": "SHORT",
+    "confidence": 6,
+    "entry": 417.44,
+    "targets": {
+      "t1": 411.35,
+      "t2": 405,
+      "t3": 395
+    },
+    "stopLoss": 425.34,
+    "riskReward": 2.12,
+    "reasoning": "TSLA shows bearish confluence with price rejecting below EMA21 and Ichimoku cloud resistance, coupled with a bearish TK cross and negative Elder-Ray Bear Power, suggesting potential downside.",
+    "pattern": "Trend Continuation",
+    "timeframe": "Intraday (hours)",
+    "alerts": [
+      "Action trigger: Enter on confirmation below $416.43 with volume.",
+      "Confirmation: RSI hold below 50",
+      "Risk note: Invalidated above $425.34"
+    ],
+    "status": "OPEN",
+    "entryTime": 1771036996598,
+    "exitTime": null,
+    "result": null,
+    "pnl": null,
+    "pnlPercent": null,
+    "marketContext": {
+      "entryPrice": 417.44,
+      "volume": 51351200,
+      "volumeRatio": 0.8272704498973387,
+      "change": 61.5,
+      "changePercent": 17.27819295386863
+    }
+  },
+  {
+    "id": "sig_1771036996599_zva52sudl",
+    "ticker": "DBS",
+    "direction": "LONG",
+    "confidence": 6,
+    "entry": 60.09,
+    "targets": {
+      "t1": 61.56,
+      "t2": 63.03,
+      "t3": 64.5
+    },
+    "stopLoss": 56.86,
+    "riskReward": 1.42,
+    "reasoning": "Ascending triangle breakout setup with bullish continuation pattern, confirmed by Heikin-Ashi downtrend reversal and oversold oscillators. However, bearish OBV divergence and weak trend strength temper the confidence.",
+    "pattern": "Breakout",
+    "timeframe": "Swing (days)",
+    "alerts": [
+      "Action trigger: Enter on break above $59.79 with volume",
+      "Confirmation: RSI hold above 50",
+      "Risk note: Invalidated below $56.86"
+    ],
+    "status": "OPEN",
+    "entryTime": 1771036996599,
+    "exitTime": null,
+    "result": null,
+    "pnl": null,
+    "pnlPercent": null,
+    "marketContext": {
+      "entryPrice": 57.06,
+      "volume": 10148400,
+      "volumeRatio": 1.8335084564805157,
+      "change": 12,
+      "changePercent": 26.631158455392807
+    }
+  }
+]

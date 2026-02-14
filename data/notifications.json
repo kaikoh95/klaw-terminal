@@ -1,0 +1,107 @@
+[
+  {
+    "id": "signal-1771036546878-QQQ",
+    "type": "signal",
+    "priority": "high",
+    "title": "🎯 SHORT Signal: QQQ",
+    "message": "Double Top bearish reversal pattern confirmed by Ichimoku bearish trend and bearish Elder-Ray, suggesting a high probability short opportunity.",
+    "ticker": "QQQ",
+    "signal": "SHORT",
+    "confidence": 8,
+    "entry": 605.02,
+    "targets": {
+      "t1": 599.95,
+      "t2": 594.88,
+      "t3": 588.95
+    },
+    "stopLoss": 610.09,
+    "pattern": "Reversal",
+    "timeframe": "Intraday (hours)",
+    "timestamp": 1771036546878,
+    "read": false
+  },
+  {
+    "id": "signal-1771036546879-ONDS",
+    "type": "signal",
+    "priority": "medium",
+    "title": "🎯 LONG Signal: ONDS",
+    "message": "Double Bottom pattern breakout confirmed at neckline with institutional accumulation indicated by VWMA vs SMA20, suggesting a potential bullish reversal.",
+    "ticker": "ONDS",
+    "signal": "LONG",
+    "confidence": 7,
+    "entry": 14.08,
+    "targets": {
+      "t1": 15.81,
+      "t2": 17.54,
+      "t3": 19.56
+    },
+    "stopLoss": 8.38,
+    "pattern": "Reversal",
+    "timeframe": "Swing (days)",
+    "timestamp": 1771036546879,
+    "read": false
+  },
+  {
+    "id": "signal-1771036546879-RDDT",
+    "type": "signal",
+    "priority": "critical",
+    "title": "🎯 SHORT Signal: RDDT",
+    "message": "Strong bearish signal due to price below EMA21, bearish VWMA/SMA relationship with confirmed volume, and Ichimoku cloud confirming downtrend. Oversold momentum indicators warrant caution, but strong trend and institutional distribution suggests further downside.",
+    "ticker": "RDDT",
+    "signal": "SHORT",
+    "confidence": 9,
+    "entry": 139.65,
+    "targets": {
+      "t1": 126.12,
+      "t2": 112.59,
+      "t3": 99.06
+    },
+    "stopLoss": 152.44,
+    "pattern": "Trend Continuation",
+    "timeframe": "Swing (days)",
+    "timestamp": 1771036546879,
+    "read": false
+  },
+  {
+    "id": "signal-1771036996600-QQQ",
+    "type": "signal",
+    "priority": "high",
+    "title": "🎯 SHORT Signal: QQQ",
+    "message": "Short signal based on a bearish Double Top pattern confirmed by Ichimoku bearish trend and negative Elder-Ray power, indicating strong bearish momentum.",
+    "ticker": "QQQ",
+    "signal": "SHORT",
+    "confidence": 8,
+    "entry": 605.02,
+    "targets": {
+      "t1": 599.84,
+      "t2": 594.66,
+      "t3": 588.95
+    },
+    "stopLoss": 611.2,
+    "pattern": "Reversal",
+    "timeframe": "Intraday (hours)",
+    "timestamp": 1771036996600,
+    "read": false
+  },
+  {
+    "id": "signal-1771036996601-RDDT",
+    "type": "signal",
+    "priority": "critical",
+    "title": "🎯 SHORT Signal: RDDT",
+    "message": "Strong bearish confluence across multiple timeframes, including bearish Ichimoku Cloud, Heikin-Ashi downtrend, and strong institutional distribution confirmed by Volume Delta and VWMA analysis, justifies a short entry at current price.",
+    "ticker": "RDDT",
+    "signal": "SHORT",
+    "confidence": 9,
+    "entry": 139.65,
+    "targets": {
+      "t1": 126.12,
+      "t2": 112.59,
+      "t3": 99.06
+    },
+    "stopLoss": 152.44,
+    "pattern": "Trend Continuation",
+    "timeframe": "Swing (days)",
+    "timestamp": 1771036996601,
+    "read": false
+  }
+]
